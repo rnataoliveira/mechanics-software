@@ -1,64 +1,152 @@
-# ADR-002: Modular Monolith Layered Architecture
+# ADR-002: Vertical Slice Architecture + DDD Domain
 
 **Status:** Accepted
-**Date:** 2026-03-06
+**Date:** 2026-03-07
 
 ## Context
 
-The challenge requires a monolithic backend with DDD applied. Since this is an MVP, the operational complexity of microservices is unjustified. However, a "big ball of mud" monolith would not demonstrate design maturity.
+The challenge requires a monolithic backend with DDD applied. The initial approach was a classic horizontal layered architecture (Domain / Application / Infrastructure / API). After review, this approach creates unnecessary friction for an MVP: every new feature touches multiple projects and layers, and the repository abstraction adds boilerplate without real benefit at this scale.
 
 ## Decision
 
-Adopt a **Modular Monolith** organized by bounded contexts, with internal layers per module:
+Adopt **Vertical Slice Architecture (VSA)** for the application layer, combined with a **pure DDD Domain project**.
+
+No MediatR. Use cases are plain C# classes.
+
+### Project structure
 
 ```
 src/
-  modules/
-    customers/
-      application/    # use cases, DTOs
-      domain/         # entities, value objects, repository interfaces
-      infrastructure/ # Prisma repositories, mappers
-      presentation/   # controllers, Swagger decorators
-    vehicles/         # same structure
-    service-orders/   # same structure
-    inventory/        # same structure
-  shared/
-    domain/           # base entities, exceptions, shared value objects
-    infrastructure/   # Prisma client, JWT provider
-  main.ts
+  MechanicsSoftware.Domain/         ← Pure domain: entities, value objects, exceptions
+  MechanicsSoftware.Application/    ← Features organized vertically by use case
+  MechanicsSoftware.Infrastructure/ ← EF Core, JWT, BCrypt
+  MechanicsSoftware.API/            ← Controllers, middleware, DI, Swagger
+
+tests/
+  MechanicsSoftware.UnitTests/      ← Domain logic, use cases (no DB)
+  MechanicsSoftware.IntegrationTests/ ← Full HTTP flow with test DB
 ```
 
-## Bounded Contexts
+### Feature folder structure (inside Application)
 
-| Context | Responsibility |
+```
+Application/
+  Features/
+    ServiceOrders/
+      CreateServiceOrder/
+        CreateServiceOrderUseCase.cs
+        CreateServiceOrderRequest.cs
+        CreateServiceOrderResponse.cs
+      StartDiagnosis/
+        StartDiagnosisUseCase.cs
+        StartDiagnosisRequest.cs
+      ApproveServiceOrder/
+        ...
+    Customers/
+      CreateCustomer/
+        CreateCustomerUseCase.cs
+        CreateCustomerRequest.cs
+        CreateCustomerResponse.cs
+      ...
+    Vehicles/  ...
+    Inventory/ ...
+    Auth/      ...
+  Common/
+    Interfaces/
+      IAppDbContext.cs
+    Exceptions/
+      NotFoundException.cs
+```
+
+### Use case pattern (plain class, no MediatR)
+
+```csharp
+public class CreateServiceOrderUseCase(IAppDbContext db)
+{
+    public async Task<CreateServiceOrderResponse> HandleAsync(
+        CreateServiceOrderRequest request,
+        CancellationToken ct = default)
+    {
+        var customer = await db.Customers.FindAsync(request.CustomerId, ct)
+            ?? throw new NotFoundException(nameof(Customer), request.CustomerId);
+
+        var vehicle = await db.Vehicles.FindAsync(request.VehicleId, ct)
+            ?? throw new NotFoundException(nameof(Vehicle), request.VehicleId);
+
+        var order = ServiceOrder.Create(customer, vehicle);
+
+        db.ServiceOrders.Add(order);
+        await db.SaveChangesAsync(ct);
+
+        return new CreateServiceOrderResponse(order.Id, order.Status);
+    }
+}
+```
+
+### Controller (thin — dispatch only)
+
+```csharp
+[ApiController]
+[Route("api/service-orders")]
+public class ServiceOrdersController(CreateServiceOrderUseCase createUseCase) : ControllerBase
+{
+    [HttpPost]
+    public async Task<IActionResult> Create(CreateServiceOrderRequest request)
+    {
+        var result = await createUseCase.HandleAsync(request);
+        return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
+    }
+}
+```
+
+## Layer dependency rule
+
+```mermaid
+flowchart LR
+    API --> Application
+    Application --> Domain
+    Infrastructure --> Domain
+    Application --> Infrastructure
+
+    style Domain fill:#D4AC0D,color:#000
+    style Infrastructure fill:#5D6D7E,color:#fff
+    style Application fill:#1F7EC2,color:#fff
+    style API fill:#239B56,color:#fff
+```
+
+- **Domain** — zero framework dependencies. Pure C# classes with business rules.
+- **Application** — use cases reference `IAppDbContext` (interface). Loads domain aggregates, calls domain methods, persists.
+- **Infrastructure** — implements `IAppDbContext` via EF Core `AppDbContext`. Owns migrations.
+- **API** — registers DI, exposes HTTP, handles middleware (JWT, exceptions, Swagger).
+
+## Why no repository pattern
+
+- `IAppDbContext` gives a testable seam without per-aggregate repository interfaces
+- EF Core `DbSet<T>` is already a repository — abstracting it again adds no value
+- Domain entities enforce their own invariants; handlers just load, call, and save
+- Reduces boilerplate significantly for an MVP
+
+## Why no MediatR
+
+- VSA doesn't require MediatR — it's optional infrastructure
+- Plain use case classes are explicit, simpler to trace, and easier to explain
+- Cross-cutting concerns (logging, validation) handled by ASP.NET middleware and FluentValidation in the use case
+- Fewer dependencies, lower cognitive overhead
+
+## How this satisfies the challenge requirements
+
+| Requirement | How it's met |
 |---|---|
-| **Customers** | Customer registration and identification (CPF/CNPJ) |
-| **Vehicles** | Vehicle registration and customer linking |
-| **Service Orders** | Full OS lifecycle: creation, status, budget, approval |
-| **Inventory** | Parts, supplies, stock control, reservation, movements |
+| DDD | Domain project with entities, value objects, aggregates, domain exceptions |
+| Monolith in layers | 4 projects: Domain → Application → Infrastructure → API |
+| Clear separation | Each use case is self-contained and independently testable |
+| 80% test coverage | Unit tests on domain; integration tests on use cases with test DB |
+| Swagger | Thin controllers with explicit request/response types |
 
-## Layer Dependency Flow
+## Alternatives considered
 
-```
-Presentation → Application → Domain ← Infrastructure
-```
-
-- **Domain** depends on nothing external (no framework, no ORM)
-- **Infrastructure** implements interfaces defined in Domain
-- **Application** orchestrates use cases using Domain + repositories
-- **Presentation** exposes HTTP and converts request/response DTOs
-
-## Rationale
-
-- Demonstrates DDD application even within a monolith
-- Makes future migration to microservices easier (contexts are already isolated)
-- NestJS natively supports modules with this separation
-- Aligned with what the challenge requires: "monolith with layers"
-
-## Alternatives Considered
-
-| Alternative | Reason Not Chosen |
+| Alternative | Reason not chosen |
 |---|---|
-| Organize by type (controllers/, services/, repositories/) | Does not demonstrate DDD; hard to maintain at scale |
-| Strict Clean Architecture | Excessive overhead for MVP within the given deadline |
-| Microservices | Not allowed by the challenge requirements |
+| Classic horizontal layers | Feature changes touch many files across many layers; more boilerplate |
+| MediatR + VSA | MediatR adds a dispatch layer with no benefit for this scale |
+| MediatR + CQRS | Over-engineered for an MVP; same outcome achievable with plain classes |
