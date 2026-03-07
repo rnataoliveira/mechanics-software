@@ -1,425 +1,425 @@
 # Event Storming — Mechanics Software
 
-## Legenda
+## Legend
 
-| Simbolo | Tipo | Descricao |
+| Symbol | Type | Description |
 |---|---|---|
-| `[EVT]` | Evento de Dominio | Algo que aconteceu no sistema (laranja) |
-| `[CMD]` | Comando | Intencao/acao que dispara um evento (azul) |
-| `[AGG]` | Agregado | Entidade que executa o comando (amarelo) |
-| `[POL]` | Politica / Regra | Reacao automatica a um evento (roxo) |
-| `[ACT]` | Ator | Quem dispara o comando (bege) |
-| `[HOT]` | Hot Spot | Duvida ou problema em aberto (vermelho) |
+| `[EVT]` | Domain Event | Something that happened in the system (orange) |
+| `[CMD]` | Command | An intent/action that triggers an event (blue) |
+| `[AGG]` | Aggregate | The entity that handles the command (yellow) |
+| `[POL]` | Policy / Rule | An automatic reaction to an event (purple) |
+| `[ACT]` | Actor | Who triggers the command (beige) |
+| `[HOT]` | Hot Spot | An open question or problem (red) |
 
 ---
 
-## Fluxo 1 — Criacao e Acompanhamento da Ordem de Servico
+## Flow 1 — Service Order Creation and Tracking
 
-### Passo 1 — Identificacao do cliente
-
-```
-[ACT] Cliente
-  |
-  v
-[CMD] Identificar cliente por CPF/CNPJ
-  |
-  v
-[AGG] Cliente
-  |
-  +-- encontrado --> [EVT] Cliente Identificado
-  |
-  +-- nao encontrado --> [CMD] Cadastrar Cliente
-                              |
-                              v
-                         [POL] CPF/CNPJ deve ser valido (algoritmo de digito verificador)
-                         [POL] Email deve ter formato valido
-                              |
-                              v
-                         [EVT] Cliente Cadastrado
-```
-
----
-
-### Passo 2 — Identificacao do veiculo
+### Step 1 — Customer Identification
 
 ```
-[ACT] Atendente
+[ACT] Customer
   |
   v
-[CMD] Localizar Veiculo por placa
+[CMD] Identify customer by CPF/CNPJ
   |
   v
-[AGG] Veiculo
+[AGG] Customer
   |
-  +-- encontrado --> [EVT] Veiculo Localizado
+  +-- found     --> [EVT] Customer Identified
   |
-  +-- nao encontrado --> [CMD] Cadastrar Veiculo
-                              |
-                              v
-                         [POL] Placa deve ser valida (Mercosul ABC1D23 ou antigo ABC-1234)
-                         [POL] Veiculo deve estar vinculado a um cliente existente
-                              |
-                              v
-                         [EVT] Veiculo Cadastrado
+  +-- not found --> [CMD] Register Customer
+                         |
+                         v
+                    [POL] CPF/CNPJ must be valid (check digit algorithm)
+                    [POL] Email must have a valid format
+                         |
+                         v
+                    [EVT] Customer Registered
 ```
 
 ---
 
-### Passo 3 — Abertura da Ordem de Servico
+### Step 2 — Vehicle Identification
 
 ```
-[ACT] Atendente
+[ACT] Attendant
   |
   v
-[CMD] Abrir Ordem de Servico
+[CMD] Locate vehicle by license plate
   |
   v
-[AGG] OrdemDeServico
+[AGG] Vehicle
   |
-  v
-[POL] Status inicial deve ser RECEBIDA
-[POL] OS deve ter cliente e veiculo validos
+  +-- found     --> [EVT] Vehicle Located
   |
-  v
-[EVT] Ordem de Servico Criada (status: RECEBIDA)
+  +-- not found --> [CMD] Register Vehicle
+                         |
+                         v
+                    [POL] License plate must be valid (Mercosul ABC1D23 or legacy ABC-1234)
+                    [POL] Vehicle must be linked to an existing customer
+                         |
+                         v
+                    [EVT] Vehicle Registered
 ```
 
 ---
 
-### Passo 4 — Composicao da OS
+### Step 3 — Service Order Opening
 
 ```
-[ACT] Atendente / Mecanico
+[ACT] Attendant
   |
-  +-- [CMD] Adicionar Servico a OS
+  v
+[CMD] Open Service Order
+  |
+  v
+[AGG] ServiceOrder
+  |
+  v
+[POL] Initial status must be RECEIVED
+[POL] OS must reference a valid customer and vehicle
+  |
+  v
+[EVT] Service Order Created (status: RECEIVED)
+```
+
+---
+
+### Step 4 — Service Order Composition
+
+```
+[ACT] Attendant / Mechanic
+  |
+  +-- [CMD] Add Service to OS
   |         |
   |         v
-  |    [AGG] OrdemDeServico
+  |    [AGG] ServiceOrder
   |         |
   |         v
-  |    [POL] OS deve estar em status RECEBIDA ou EM_DIAGNOSTICO
+  |    [POL] OS must be in RECEIVED or IN_DIAGNOSIS status
   |         |
   |         v
-  |    [EVT] Servico Adicionado a OS
+  |    [EVT] Service Added to OS
   |
-  +-- [CMD] Adicionar Peca a OS
+  +-- [CMD] Add Part to OS
             |
             v
-       [AGG] OrdemDeServico
+       [AGG] ServiceOrder
             |
             v
-       [POL] OS deve estar em status RECEBIDA ou EM_DIAGNOSTICO
-       [POL] Verificar disponibilidade em estoque
+       [POL] OS must be in RECEIVED or IN_DIAGNOSIS status
+       [POL] Check stock availability before adding
             |
-            +-- disponivel --> [EVT] Peca Adicionada a OS
-            |                  [EVT] Peca Reservada no Estoque
+            +-- available     --> [EVT] Part Added to OS
+            |                    [EVT] Part Reserved in Stock
             |
-            +-- indisponivel --> [HOT] Estoque insuficiente
-                                  Como lidar? Avisar atendente? Bloquear adicao?
+            +-- not available --> [HOT] Insufficient stock
+                                   Block the action or warn the attendant?
 ```
 
 ---
 
-### Passo 5 — Geracao e envio do orcamento
+### Step 5 — Budget Generation and Sending
 
 ```
-[ACT] Sistema / Atendente
+[ACT] System / Attendant
   |
   v
-[CMD] Gerar Orcamento
+[CMD] Generate Budget
   |
   v
-[AGG] Orcamento
+[AGG] Budget
   |
   v
-[POL] Valor total = soma(valor * qtd de cada servico) + soma(valor * qtd de cada peca)
-[POL] OS deve ter ao menos um servico
+[POL] Total = sum(service price * qty) + sum(part price * qty)
+[POL] OS must have at least one service
   |
   v
-[EVT] Orcamento Gerado
+[EVT] Budget Generated
 
   |
   v
-[CMD] Enviar Orcamento ao Cliente
+[CMD] Send Budget to Customer
   |
   v
-[AGG] OrdemDeServico
+[AGG] ServiceOrder
   |
   v
-[POL] Status muda para AGUARDANDO_APROVACAO automaticamente
+[POL] Status automatically changes to AWAITING_APPROVAL
   |
   v
-[EVT] Orcamento Enviado ao Cliente
-[EVT] Status da OS atualizado para AGUARDANDO_APROVACAO
+[EVT] Budget Sent to Customer
+[EVT] Service Order Status Updated to AWAITING_APPROVAL
 ```
 
 ---
 
-### Passo 6 — Aprovacao ou rejeicao
+### Step 6 — Approval or Rejection
 
 ```
-[ACT] Cliente
+[ACT] Customer
   |
-  +-- [CMD] Aprovar Orcamento
+  +-- [CMD] Approve Budget
   |         |
   |         v
-  |    [AGG] OrdemDeServico
+  |    [AGG] ServiceOrder
   |         |
   |         v
-  |    [POL] Status muda para EM_EXECUCAO
+  |    [POL] Status changes to IN_EXECUTION
   |         |
   |         v
-  |    [EVT] Orcamento Aprovado
-  |    [EVT] Status da OS atualizado para EM_EXECUCAO
+  |    [EVT] Budget Approved
+  |    [EVT] Service Order Status Updated to IN_EXECUTION
   |
-  +-- [CMD] Rejeitar Orcamento
-            |
-            v
-       [AGG] OrdemDeServico
+  +-- [CMD] Reject Budget
             |
             v
-       [POL] Status muda para CANCELADA
-       [POL] Reservas de estoque devem ser liberadas
+       [AGG] ServiceOrder
             |
             v
-       [EVT] Orcamento Rejeitado
-       [EVT] Status da OS atualizado para CANCELADA
-       [EVT] Reservas de Peca Liberadas
-```
-
----
-
-### Passo 7 — Diagnostico
-
-```
-[ACT] Mecanico
-  |
-  v
-[CMD] Iniciar Diagnostico
-  |
-  v
-[AGG] OrdemDeServico
-  |
-  v
-[POL] Transicao valida: RECEBIDA --> EM_DIAGNOSTICO
-  |
-  v
-[EVT] Diagnostico Iniciado
-[EVT] Status da OS atualizado para EM_DIAGNOSTICO
-
-[HOT] O diagnostico pode descobrir novos servicos/pecas.
-      Isso exige voltar ao Passo 4 antes de gerar o orcamento.
-```
-
----
-
-### Passo 8 — Execucao
-
-```
-[ACT] Mecanico
-  |
-  v
-[CMD] Executar Servicos
-  |
-  v
-[AGG] OrdemDeServico
-  |
-  v
-[POL] OS deve estar em status EM_EXECUCAO
-[POL] Ao usar uma peca, baixar do estoque
-  |
-  v
-[EVT] Servico Executado
-[EVT] Peca Utilizada na OS
-[EVT] Peca Baixada do Estoque
-[EVT] Movimentacao de Estoque Registrada
-```
-
----
-
-### Passo 9 — Finalizacao e entrega
-
-```
-[ACT] Mecanico
-  |
-  v
-[CMD] Finalizar Ordem de Servico
-  |
-  v
-[AGG] OrdemDeServico
-  |
-  v
-[POL] Transicao valida: EM_EXECUCAO --> FINALIZADA
-  |
-  v
-[EVT] Ordem de Servico Finalizada
-[EVT] Status da OS atualizado para FINALIZADA
-
-  |
-  v
-[ACT] Atendente
-  |
-  v
-[CMD] Registrar Entrega do Veiculo
-  |
-  v
-[AGG] OrdemDeServico
-  |
-  v
-[POL] Transicao valida: FINALIZADA --> ENTREGUE
-  |
-  v
-[EVT] Veiculo Entregue ao Cliente
-[EVT] Status da OS atualizado para ENTREGUE
-```
-
----
-
-## Fluxo 2 — Gestao de Pecas e Estoque
-
-### Cadastro de pecas
-
-```
-[ACT] Administrador
-  |
-  v
-[CMD] Cadastrar Peca
-  |
-  v
-[AGG] Peca
-  |
-  v
-[POL] Codigo da peca deve ser unico
-[POL] Preco unitario deve ser positivo
-[POL] Quantidade inicial de estoque >= 0
-  |
-  v
-[EVT] Peca Cadastrada
-
-  |
-  v
-[CMD] Atualizar dados da Peca
-  |
-  v
-[EVT] Peca Atualizada
-```
-
----
-
-### Movimentacao de estoque
-
-```
-[ACT] Administrador / Sistema
-  |
-  +-- [CMD] Repor Estoque
-  |         |
-  |         v
-  |    [AGG] Peca
-  |         |
-  |         v
-  |    [POL] Quantidade deve ser positiva
-  |         |
-  |         v
-  |    [EVT] Estoque Reposto
-  |    [EVT] Movimentacao de Estoque Registrada (tipo: ENTRADA)
-  |
-  +-- [CMD] Reservar Peca para OS
-  |         |
-  |         v
-  |    [AGG] Peca
-  |         |
-  |         v
-  |    [POL] Saldo disponivel deve ser >= quantidade solicitada
-  |         |
-  |         +-- ok --> [EVT] Peca Reservada para OS
-  |         |          [EVT] Movimentacao de Estoque Registrada (tipo: RESERVA)
-  |         |
-  |         +-- insuficiente --> [EVT] Estoque Insuficiente Identificado
-  |                               [HOT] Bloquear adicao a OS ou permitir com aviso?
-  |
-  +-- [CMD] Confirmar Uso de Peca (apos execucao)
-  |         |
-  |         v
-  |    [AGG] Peca
-  |         |
-  |         v
-  |    [POL] Reserva deve existir para a OS
-  |    [POL] Estoque nao pode ficar negativo
-  |         |
-  |         v
-  |    [EVT] Uso de Peca Confirmado
-  |    [EVT] Peca Baixada do Estoque
-  |    [EVT] Movimentacao de Estoque Registrada (tipo: SAIDA)
-  |
-  +-- [CMD] Liberar Reserva de Peca (quando OS e cancelada)
+       [POL] Status changes to CANCELLED
+       [POL] All stock reservations must be released
             |
             v
-       [AGG] Peca
-            |
-            v
-       [POL] Reserva deve existir para a OS
-            |
-            v
-       [EVT] Reserva de Peca Liberada
-       [EVT] Movimentacao de Estoque Registrada (tipo: LIBERACAO)
+       [EVT] Budget Rejected
+       [EVT] Service Order Status Updated to CANCELLED
+       [EVT] Part Reservations Released
 ```
 
 ---
 
-## State Machine — Status da Ordem de Servico
+### Step 7 — Diagnosis
 
 ```
-                  RECEBIDA
-                     |
-                     v
-              EM_DIAGNOSTICO
-                     |
-                     v
-          AGUARDANDO_APROVACAO
-               /           \
-     (aprova) /             \ (rejeita)
-             v               v
-        EM_EXECUCAO       CANCELADA
-             |
-             v
-         FINALIZADA
-             |
-             v
-          ENTREGUE
+[ACT] Mechanic
+  |
+  v
+[CMD] Start Diagnosis
+  |
+  v
+[AGG] ServiceOrder
+  |
+  v
+[POL] Valid transition: RECEIVED --> IN_DIAGNOSIS
+  |
+  v
+[EVT] Diagnosis Started
+[EVT] Service Order Status Updated to IN_DIAGNOSIS
+
+[HOT] Diagnosis may uncover new services or parts.
+      This requires returning to Step 4 before generating the budget.
 ```
 
-### Transicoes validas
+---
 
-| De | Para | Gatilho |
+### Step 8 — Execution
+
+```
+[ACT] Mechanic
+  |
+  v
+[CMD] Execute Services
+  |
+  v
+[AGG] ServiceOrder
+  |
+  v
+[POL] OS must be in IN_EXECUTION status
+[POL] When a part is used, deduct from stock
+  |
+  v
+[EVT] Service Executed
+[EVT] Part Used in OS
+[EVT] Part Deducted from Stock
+[EVT] Stock Movement Recorded
+```
+
+---
+
+### Step 9 — Completion and Delivery
+
+```
+[ACT] Mechanic
+  |
+  v
+[CMD] Complete Service Order
+  |
+  v
+[AGG] ServiceOrder
+  |
+  v
+[POL] Valid transition: IN_EXECUTION --> COMPLETED
+  |
+  v
+[EVT] Service Order Completed
+[EVT] Service Order Status Updated to COMPLETED
+
+  |
+  v
+[ACT] Attendant
+  |
+  v
+[CMD] Register Vehicle Delivery
+  |
+  v
+[AGG] ServiceOrder
+  |
+  v
+[POL] Valid transition: COMPLETED --> DELIVERED
+  |
+  v
+[EVT] Vehicle Delivered to Customer
+[EVT] Service Order Status Updated to DELIVERED
+```
+
+---
+
+## Flow 2 — Parts and Inventory Management
+
+### Part Registration
+
+```
+[ACT] Administrator
+  |
+  v
+[CMD] Register Part
+  |
+  v
+[AGG] Part
+  |
+  v
+[POL] Part code must be unique
+[POL] Unit price must be positive
+[POL] Initial stock quantity >= 0
+  |
+  v
+[EVT] Part Registered
+
+  |
+  v
+[CMD] Update Part
+  |
+  v
+[EVT] Part Updated
+```
+
+---
+
+### Stock Movements
+
+```
+[ACT] Administrator / System
+  |
+  +-- [CMD] Replenish Stock
+  |         |
+  |         v
+  |    [AGG] Part
+  |         |
+  |         v
+  |    [POL] Quantity must be positive
+  |         |
+  |         v
+  |    [EVT] Stock Replenished
+  |    [EVT] Stock Movement Recorded (type: INBOUND)
+  |
+  +-- [CMD] Reserve Part for OS
+  |         |
+  |         v
+  |    [AGG] Part
+  |         |
+  |         v
+  |    [POL] Available quantity must be >= requested quantity
+  |         |
+  |         +-- ok          --> [EVT] Part Reserved for OS
+  |         |                   [EVT] Stock Movement Recorded (type: RESERVATION)
+  |         |
+  |         +-- insufficient --> [EVT] Insufficient Stock Identified
+  |                              [HOT] Block addition to OS or allow with warning?
+  |
+  +-- [CMD] Confirm Part Usage (after execution)
+  |         |
+  |         v
+  |    [AGG] Part
+  |         |
+  |         v
+  |    [POL] Reservation must exist for the OS
+  |    [POL] Stock cannot go negative
+  |         |
+  |         v
+  |    [EVT] Part Usage Confirmed
+  |    [EVT] Part Deducted from Stock
+  |    [EVT] Stock Movement Recorded (type: OUTBOUND)
+  |
+  +-- [CMD] Release Part Reservation (when OS is cancelled)
+            |
+            v
+       [AGG] Part
+            |
+            v
+       [POL] Reservation must exist for the OS
+            |
+            v
+       [EVT] Part Reservation Released
+       [EVT] Stock Movement Recorded (type: RELEASE)
+```
+
+---
+
+## State Machine — Service Order Status
+
+```
+              RECEIVED
+                 |
+                 v
+           IN_DIAGNOSIS
+                 |
+                 v
+        AWAITING_APPROVAL
+             /         \
+  (approve) /           \ (reject)
+           v             v
+      IN_EXECUTION    CANCELLED
+           |
+           v
+        COMPLETED
+           |
+           v
+        DELIVERED
+```
+
+### Valid Transitions
+
+| From | To | Trigger |
 |---|---|---|
-| `RECEBIDA` | `EM_DIAGNOSTICO` | Mecanico inicia diagnostico |
-| `EM_DIAGNOSTICO` | `AGUARDANDO_APROVACAO` | Orcamento enviado ao cliente |
-| `AGUARDANDO_APROVACAO` | `EM_EXECUCAO` | Cliente aprova orcamento |
-| `AGUARDANDO_APROVACAO` | `CANCELADA` | Cliente rejeita orcamento |
-| `EM_EXECUCAO` | `FINALIZADA` | Mecanico finaliza todos os servicos |
-| `FINALIZADA` | `ENTREGUE` | Atendente registra retirada do veiculo |
+| `RECEIVED` | `IN_DIAGNOSIS` | Mechanic starts diagnosis |
+| `IN_DIAGNOSIS` | `AWAITING_APPROVAL` | Budget sent to customer |
+| `AWAITING_APPROVAL` | `IN_EXECUTION` | Customer approves budget |
+| `AWAITING_APPROVAL` | `CANCELLED` | Customer rejects budget |
+| `IN_EXECUTION` | `COMPLETED` | Mechanic completes all services |
+| `COMPLETED` | `DELIVERED` | Attendant registers vehicle pickup |
 
-Qualquer outra transicao deve lancar `InvalidStatusTransitionException`.
-
----
-
-## Hot Spots (pontos em aberto)
-
-| # | Descricao | Impacto |
-|---|---|---|
-| 1 | Diagnostico pode descobrir novos servicos — como reabrir composicao da OS? | Medio |
-| 2 | Estoque insuficiente ao adicionar peca — bloquear ou avisar? | Alto |
-| 3 | Cliente pode consultar status sem autenticacao — como identificar o cliente? | Medio |
-| 4 | Cancelamento parcial de itens da OS antes da aprovacao | Baixo |
+Any other transition must throw `InvalidStatusTransitionException`.
 
 ---
 
-## Atores do sistema
+## Hot Spots (Open Questions)
 
-| Ator | Descricao | Permissoes |
+| # | Description | Impact |
 |---|---|---|
-| **Cliente** | Dono do veiculo | Consultar status da OS (publico), aprovar/rejeitar orcamento |
-| **Atendente** | Funcionario do balcao | Criar OS, registrar itens, enviar orcamento, registrar entrega |
-| **Mecanico** | Tecnico da oficina | Iniciar diagnostico, iniciar execucao, finalizar OS |
-| **Administrador** | Gestor do sistema | Acesso total: CRUDs, relatorios, usuarios |
-| **Sistema** | Automacoes internas | Gerar orcamento, mudar status, registrar movimentacoes |
+| 1 | Diagnosis may uncover new services — how to reopen OS composition? | Medium |
+| 2 | Insufficient stock when adding a part — block or warn? | High |
+| 3 | Customer queries status without authentication — how to identify them? | Medium |
+| 4 | Partial item cancellation on an OS before approval | Low |
+
+---
+
+## System Actors
+
+| Actor | Description | Permissions |
+|---|---|---|
+| **Customer** | Vehicle owner | Query OS status (public), approve/reject budget |
+| **Attendant** | Front-desk staff | Create OS, register items, send budget, register delivery |
+| **Mechanic** | Shop technician | Start diagnosis, start execution, complete OS |
+| **Administrator** | System manager | Full access: CRUDs, reports, users |
+| **System** | Internal automations | Generate budget, update status, record stock movements |
