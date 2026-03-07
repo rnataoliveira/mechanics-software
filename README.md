@@ -139,4 +139,4 @@ dotnet test --collect:"XPlat Code Coverage"
 
 ## Contributing
 
-See [`CLAUDE.md`](./CLAUDE.md) for project conventions, commit message format, and branch naming rules.
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for project conventions, commit message format, and branch naming rules.
