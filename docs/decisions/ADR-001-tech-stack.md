@@ -1,55 +1,55 @@
-# ADR-001: Escolha da Stack Tecnológica
+# ADR-001: Tech Stack
 
-**Status:** Aceito
-**Data:** 2026-03-06
+**Status:** Accepted
+**Date:** 2026-03-06
 
-## Contexto
+## Context
 
-O Tech Challenge Fase 1 exige o desenvolvimento do back-end MVP de um sistema de oficina mecânica. O sistema deve ser entregue com Dockerfile, docker-compose, Swagger e testes automatizados com 80% de cobertura nos domínios críticos.
+The Tech Challenge Phase 1 requires a backend MVP for a mechanic shop management system. It must be delivered with Dockerfile, docker-compose, Swagger, and automated tests with 80% coverage on critical domains.
 
-## Decisão
+## Decision
 
-Stack escolhida:
+Chosen stack:
 
-- **Linguagem:** TypeScript
+- **Language:** TypeScript
 - **Framework:** NestJS
-- **Banco de dados:** PostgreSQL
+- **Database:** PostgreSQL
 - **ORM:** Prisma
-- **Autenticação:** JWT com @nestjs/jwt
-- **Documentação:** Swagger (@nestjs/swagger)
-- **Testes:** Jest + Supertest
-- **Containerização:** Docker + docker-compose
+- **Authentication:** JWT via @nestjs/jwt
+- **Documentation:** Swagger via @nestjs/swagger
+- **Testing:** Jest + Supertest
+- **Containerization:** Docker + docker-compose
 
-## Justificativas
+## Rationale
 
 ### NestJS
-- Arquitetura modular nativa alinhada com DDD e bounded contexts
-- Suporte built-in a injeção de dependência, facilitando inversão de controle
-- Decorators para Swagger e validação de DTOs sem boilerplate excessivo
-- Ecossistema maduro para JWT, Guards e Pipes de validação
+- Native modular architecture aligned with DDD and bounded contexts
+- Built-in dependency injection, enabling easy inversion of control
+- Decorators for Swagger and DTO validation with minimal boilerplate
+- Mature ecosystem for JWT Guards, Pipes, and validation
 
 ### PostgreSQL
-- Banco relacional compatível com a natureza do domínio (entidades fortemente relacionadas)
-- Integridade referencial garante consistência entre OS, cliente e veículo
-- Suporte a transações ACID — essencial para operações de estoque e mudança de status
-- Amplamente usado em sistemas de gestão corporativa
+- Relational database suited to the domain (strongly related entities)
+- Referential integrity ensures consistency between OS, customer, and vehicle
+- Full ACID transactions — essential for stock operations and status transitions
+- Widely used in production management systems
 
 ### Prisma
-- Schema declarativo e migrations versionadas
-- Type-safety end-to-end entre banco e aplicação
-- Menor curva de aprendizado comparado ao TypeORM para este tipo de domínio
+- Declarative schema with versioned migrations
+- End-to-end type safety between database and application
+- Lower learning curve compared to TypeORM for this domain
 
-## Alternativas consideradas
+## Alternatives Considered
 
-| Alternativa | Motivo da não escolha |
+| Alternative | Reason Not Chosen |
 |---|---|
-| Java Spring Boot | Maior verbosidade para MVP; tempo de setup mais longo |
-| Python FastAPI | Menor ecossistema para DDD modular |
-| TypeORM | Mais verboso e com mais edge cases que Prisma |
-| MySQL | PostgreSQL tem melhor suporte a tipos avançados e JSON |
+| Java Spring Boot | Higher verbosity for MVP; longer setup time |
+| Python FastAPI | Smaller ecosystem for modular DDD patterns |
+| TypeORM | More verbose and more edge cases than Prisma |
+| MySQL | PostgreSQL has better support for advanced types and JSON |
 
-## Consequências
+## Consequences
 
-- Toda a equipe deve ter Node.js 20+ instalado
-- O ambiente local roda via docker-compose (PostgreSQL + API)
-- Prisma migrations devem ser versionadas junto ao código
+- All team members must have Node.js 20+ installed
+- Local environment runs via docker-compose (PostgreSQL + API)
+- Prisma migrations must be versioned alongside the code
