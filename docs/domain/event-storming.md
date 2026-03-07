@@ -13,7 +13,57 @@
 
 ---
 
-## Flow 1 — Service Order Creation and Tracking
+## Flow 1 — Service Order Creation and Tracking (Overview)
+
+```mermaid
+flowchart LR
+    classDef event fill:#E8902B,color:#fff,stroke:#E8902B
+    classDef command fill:#1F7EC2,color:#fff,stroke:#1F7EC2
+    classDef aggregate fill:#D4AC0D,color:#000,stroke:#D4AC0D
+    classDef policy fill:#7D3C98,color:#fff,stroke:#7D3C98
+    classDef actor fill:#F0B27A,color:#000,stroke:#E59866
+    classDef hotspot fill:#C0392B,color:#fff,stroke:#C0392B
+
+    A1([Customer]):::actor --> C1[Identify Customer]:::command
+    C1 --> E1{{Customer Identified}}:::event
+    C1 --> C1b[Register Customer]:::command
+    C1b --> E1b{{Customer Registered}}:::event
+
+    E1 --> C2[Locate Vehicle]:::command
+    E1b --> C2
+    C2 --> E2{{Vehicle Located}}:::event
+    C2 --> C2b[Register Vehicle]:::command
+    C2b --> E2b{{Vehicle Registered}}:::event
+
+    A2([Attendant]):::actor --> C3[Open Service Order]:::command
+    E2 --> C3
+    E2b --> C3
+    C3 --> E3{{OS Created\nstatus: RECEIVED}}:::event
+
+    E3 --> C4[Add Services / Parts]:::command
+    C4 --> E4{{Items Added to OS}}:::event
+    C4 --> H1[/Insufficient Stock/]:::hotspot
+
+    E4 --> C5[Generate Budget]:::command
+    C5 --> E5{{Budget Generated}}:::event
+    E5 --> C6[Send Budget]:::command
+    C6 --> E6{{Budget Sent\nstatus: AWAITING_APPROVAL}}:::event
+
+    A3([Customer]):::actor --> C7[Approve Budget]:::command
+    A3 --> C8[Reject Budget]:::command
+    E6 --> C7
+    E6 --> C8
+    C7 --> E7{{Budget Approved\nstatus: IN_EXECUTION}}:::event
+    C8 --> E8{{Budget Rejected\nstatus: CANCELLED}}:::event
+
+    A4([Mechanic]):::actor --> C9[Complete Services]:::command
+    E7 --> C9
+    C9 --> E9{{OS Completed}}:::event
+    E9 --> C10[Register Delivery]:::command
+    C10 --> E10{{Vehicle Delivered\nstatus: DELIVERED}}:::event
+```
+
+## Flow 1 — Service Order Creation and Tracking (Detailed)
 
 ### Step 1 — Customer Identification
 
@@ -275,7 +325,36 @@
 
 ---
 
-## Flow 2 — Parts and Inventory Management
+## Flow 2 — Parts and Inventory Management (Overview)
+
+```mermaid
+flowchart LR
+    classDef event fill:#E8902B,color:#fff,stroke:#E8902B
+    classDef command fill:#1F7EC2,color:#fff,stroke:#1F7EC2
+    classDef aggregate fill:#D4AC0D,color:#000,stroke:#D4AC0D
+    classDef policy fill:#7D3C98,color:#fff,stroke:#7D3C98
+    classDef actor fill:#F0B27A,color:#000,stroke:#E59866
+    classDef hotspot fill:#C0392B,color:#fff,stroke:#C0392B
+
+    A1([Admin]):::actor --> C1[Register Part]:::command
+    C1 --> E1{{Part Registered}}:::event
+
+    A1 --> C2[Replenish Stock]:::command
+    C2 --> E2{{Stock Replenished\nMovement: INBOUND}}:::event
+
+    SYS([System]):::actor --> C3[Reserve Part for OS]:::command
+    C3 --> E3{{Part Reserved}}:::event
+    C3 --> H1[/Insufficient Stock/]:::hotspot
+
+    A2([Mechanic]):::actor --> C4[Confirm Part Usage]:::command
+    E3 --> C4
+    C4 --> E4{{Part Deducted\nMovement: OUTBOUND}}:::event
+
+    SYS --> C5[Release Reservation]:::command
+    C5 --> E5{{Reservation Released\nMovement: RELEASE}}:::event
+```
+
+## Flow 2 — Parts and Inventory Management (Detailed)
 
 ### Part Registration
 
@@ -368,24 +447,18 @@
 
 ## State Machine — Service Order Status
 
-```
-              RECEIVED
-                 |
-                 v
-           IN_DIAGNOSIS
-                 |
-                 v
-        AWAITING_APPROVAL
-             /         \
-  (approve) /           \ (reject)
-           v             v
-      IN_EXECUTION    CANCELLED
-           |
-           v
-        COMPLETED
-           |
-           v
-        DELIVERED
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> RECEIVED : OS Created
+    RECEIVED --> IN_DIAGNOSIS : Start Diagnosis
+    IN_DIAGNOSIS --> AWAITING_APPROVAL : Send Budget
+    AWAITING_APPROVAL --> IN_EXECUTION : Customer Approves
+    AWAITING_APPROVAL --> CANCELLED : Customer Rejects
+    IN_EXECUTION --> COMPLETED : Complete Services
+    COMPLETED --> DELIVERED : Register Delivery
+    DELIVERED --> [*]
+    CANCELLED --> [*]
 ```
 
 ### Valid Transitions

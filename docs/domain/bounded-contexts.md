@@ -2,47 +2,24 @@
 
 ## Context Map
 
-```
-+-------------------+     +----------------------+
-|   Customers       |     |   Vehicles           |
-|                   |     |                      |
-|  - CRUD customer  |<--->|  - CRUD vehicle      |
-|  - Validate       |     |  - Link to customer  |
-|    CPF/CNPJ       |     |  - Validate plate    |
-+-------------------+     +----------------------+
-          |                         |
-          v                         v
-+----------------------------------------------+
-|             Service Orders                   |
-|                                              |
-|  - Create OS                                |
-|  - Add services and parts                   |
-|  - Generate budget                          |
-|  - Send for approval                        |
-|  - Manage lifecycle (status transitions)    |
-|  - Public status query endpoint             |
-+----------------------------------------------+
-                    |
-                    v
-          +-------------------+
-          |    Inventory      |
-          |                   |
-          |  - CRUD parts     |
-          |  - Stock control  |
-          |  - Reservation    |
-          |  - Deduction      |
-          +-------------------+
+```mermaid
+graph TD
+    Auth["**Auth**\nJWT · Guards · Login"]
 
-         +-------------------+
-         |      Auth         |
-         |                   |
-         |  - Login / JWT    |
-         |  - Guards         |
-         +-------------------+
-                 |
-           (protects all
-            admin routes
-            in every context)
+    Customers["**Customers**\nCRUD · CPF/CNPJ validation"]
+    Vehicles["**Vehicles**\nCRUD · Plate validation"]
+    ServiceOrders["**Service Orders**\nOS lifecycle · Budget · Approval\nPublic status endpoint"]
+    Inventory["**Inventory**\nParts · Stock control\nReservation · Movements"]
+
+    Customers -->|customerId| ServiceOrders
+    Vehicles -->|vehicleId| ServiceOrders
+    ServiceOrders -->|reserve / deduct| Inventory
+    Customers <-->|customer must exist| Vehicles
+
+    Auth -. protects .-> Customers
+    Auth -. protects .-> Vehicles
+    Auth -. protects .-> ServiceOrders
+    Auth -. protects .-> Inventory
 ```
 
 ## Context Descriptions
