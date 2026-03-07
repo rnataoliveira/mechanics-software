@@ -105,39 +105,36 @@ tests/
 
 ## Request Flow
 
-```
-HTTP Request
-     |
-     v
-Controller (API)
-  - Validates request DTO (FluentValidation or DataAnnotations)
-  - Checks JWT (if protected route)
-     |
-     v
-Use Case (Application)
-  - Orchestrates the operation
-  - Calls domain entities and repository interfaces
-     |
-     v
-Domain Entity / Service
-  - Executes business rules
-  - Throws DomainException if invariant is violated
-     |
-     v
-Repository Interface (Domain)
-     |
-     v
-EF Core Repository (Infrastructure)
-  - Persists to PostgreSQL
-     |
-     v
-Response DTO (API)
+```mermaid
+flowchart TD
+    HTTP["HTTP Request"]
+    Controller["Controller\n<small>API Layer</small>\nValidates DTO · Checks JWT"]
+    UseCase["Use Case\n<small>Application Layer</small>\nOrchestrates operation"]
+    Domain["Domain Entity\n<small>Domain Layer</small>\nExecutes business rules"]
+    IRepo["Repository Interface\n<small>Domain Layer</small>"]
+    EFRepo["EF Core Repository\n<small>Infrastructure Layer</small>"]
+    DB[("PostgreSQL")]
+
+    HTTP --> Controller
+    Controller --> UseCase
+    UseCase --> Domain
+    Domain --> IRepo
+    IRepo --> EFRepo
+    EFRepo --> DB
 ```
 
 ## Dependency Rule
 
-```
-API → Application → Domain ← Infrastructure
+```mermaid
+flowchart LR
+    API["API\n(Presentation)"] --> Application
+    Application --> Domain
+    Infrastructure --> Domain
+
+    style Domain fill:#D4AC0D,color:#000
+    style Infrastructure fill:#5D6D7E,color:#fff
+    style Application fill:#1F7EC2,color:#fff
+    style API fill:#239B56,color:#fff
 ```
 
 - **Domain** has zero external dependencies (no EF Core, no ASP.NET)
