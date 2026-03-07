@@ -22,6 +22,7 @@ Progress tracker for the FIAP POS Tech 15SOAT challenge.
 - [x] Aggregates, Entities and Value Objects + ER diagram
 - [x] Bounded Contexts + context map diagram
 - [x] Architecture overview + request flow diagram
+- [x] Domain Storytelling — all flows (9 stories with sequence diagrams)
 - [ ] Visual diagrams — aggregate map (classDiagram)
 
 ---
