@@ -1,88 +1,87 @@
 # Bounded Contexts
 
-## Mapa de Contextos
+## Context Map
 
 ```
 +-------------------+     +----------------------+
 |   Customers       |     |   Vehicles           |
 |                   |     |                      |
-|  - CRUD cliente   |<--->|  - CRUD veiculo      |
-|  - Validar        |     |  - Vincular cliente  |
-|    CPF/CNPJ       |     |  - Validar placa     |
+|  - CRUD customer  |<--->|  - CRUD vehicle      |
+|  - Validate       |     |  - Link to customer  |
+|    CPF/CNPJ       |     |  - Validate plate    |
 +-------------------+     +----------------------+
           |                         |
           v                         v
 +----------------------------------------------+
-|           Service Orders                     |
+|             Service Orders                   |
 |                                              |
-|  - Criar OS                                 |
-|  - Adicionar servicos e pecas               |
-|  - Gerar orcamento                          |
-|  - Enviar para aprovacao                    |
-|  - Gerenciar ciclo de vida (status)         |
-|  - Consulta de status pelo cliente          |
+|  - Create OS                                |
+|  - Add services and parts                   |
+|  - Generate budget                          |
+|  - Send for approval                        |
+|  - Manage lifecycle (status transitions)    |
+|  - Public status query endpoint             |
 +----------------------------------------------+
                     |
                     v
           +-------------------+
-          |   Inventory       |
+          |    Inventory      |
           |                   |
-          |  - CRUD pecas     |
-          |  - Controle       |
-          |    estoque        |
-          |  - Reserva        |
-          |  - Baixa          |
+          |  - CRUD parts     |
+          |  - Stock control  |
+          |  - Reservation    |
+          |  - Deduction      |
           +-------------------+
 
          +-------------------+
-         |   Auth            |
+         |      Auth         |
          |                   |
-         |  - Login JWT      |
+         |  - Login / JWT    |
          |  - Guards         |
          +-------------------+
                  |
-           (protege todos
-            os contextos
-            admin)
+           (protects all
+            admin routes
+            in every context)
 ```
 
-## Descricao dos Contextos
+## Context Descriptions
 
 ### Customers
-- **Nucleo:** `Cliente`
-- **Operacoes:** CRUD, busca por CPF/CNPJ
-- **Validacoes:** algoritmo CPF, algoritmo CNPJ
-- **Expoe:** `clienteId` para outros contextos
+- **Core:** `Customer`
+- **Operations:** CRUD, search by CPF/CNPJ
+- **Validations:** CPF algorithm, CNPJ algorithm
+- **Exposes:** `customerId` to other contexts
 
 ### Vehicles
-- **Nucleo:** `Veiculo`
-- **Operacoes:** CRUD, busca por placa
-- **Dependencia upstream:** Customers (cliente deve existir)
-- **Validacoes:** formato de placa Mercosul e antigo
+- **Core:** `Vehicle`
+- **Operations:** CRUD, search by license plate
+- **Upstream dependency:** Customers (customer must exist)
+- **Validations:** Mercosul and legacy plate formats
 
 ### Service Orders
-- **Nucleo:** `OrdemDeServico` + `Orcamento`
-- **Operacoes:** criacao, gerenciamento de itens, state machine, aprovacao
-- **Dependencias upstream:** Customers, Vehicles, Inventory
-- **Expoe:** endpoint publico de consulta de status (sem JWT)
+- **Core:** `ServiceOrder` + `Budget`
+- **Operations:** creation, item management, state machine, approval
+- **Upstream dependencies:** Customers, Vehicles, Inventory
+- **Exposes:** public status endpoint (no JWT required)
 
 ### Inventory
-- **Nucleo:** `Peca` + `MovimentacaoDeEstoque`
-- **Operacoes:** CRUD pecas, controle de estoque, reserva, baixa
-- **Chamado por:** Service Orders (ao adicionar peca a OS e ao confirmar uso)
+- **Core:** `Part` + `StockMovement`
+- **Operations:** CRUD parts, stock control, reservation, deduction
+- **Called by:** Service Orders (when adding a part to OS and confirming usage)
 
 ### Auth
-- **Nucleo:** `Usuario` + JWT
-- **Operacoes:** login, emissao de token
-- **Protege:** todas as rotas administrativas dos demais contextos
-- **Rota publica:** `GET /service-orders/:id/status` (consulta pelo cliente)
+- **Core:** `User` + JWT
+- **Operations:** login, token issuance
+- **Protects:** all admin routes across every other context
+- **Public route:** `GET /service-orders/:id/status` (customer status query)
 
-## Relacoes entre contextos
+## Context Relationships
 
-| Relacao | Tipo | Descricao |
+| Relationship | Type | Description |
 |---|---|---|
-| Vehicles → Customers | Conformista | Vehicle usa clienteId; nao valida regras de Cliente |
-| Service Orders → Customers | Anti-corruption | OS valida existencia do cliente antes de criar |
-| Service Orders → Vehicles | Anti-corruption | OS valida existencia do veiculo antes de criar |
-| Service Orders → Inventory | Customer/Supplier | OS solicita reserva; Inventory e o fornecedor |
-| Auth → todos | Open Host Service | JWT Guard aplicado via decorator nos modulos |
+| Vehicles → Customers | Conformist | Vehicle uses `customerId`; does not enforce Customer rules |
+| Service Orders → Customers | Anti-Corruption Layer | OS validates customer existence before creation |
+| Service Orders → Vehicles | Anti-Corruption Layer | OS validates vehicle existence before creation |
+| Service Orders → Inventory | Customer/Supplier | OS requests stock reservation; Inventory is the supplier |
+| Auth → all | Open Host Service | JWT Guard applied via decorator across all modules |

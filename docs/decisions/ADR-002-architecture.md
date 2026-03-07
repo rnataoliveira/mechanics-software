@@ -1,64 +1,64 @@
-# ADR-002: Arquitetura Monolito Modular em Camadas
+# ADR-002: Modular Monolith Layered Architecture
 
-**Status:** Aceito
-**Data:** 2026-03-06
+**Status:** Accepted
+**Date:** 2026-03-06
 
-## Contexto
+## Context
 
-O enunciado exige um back-end monolítico com aplicação de DDD. Como é um MVP, a complexidade operacional de microsserviços seria injustificada. Porém, uma arquitetura "monolito bagunçado" (big ball of mud) não demonstraria maturidade de design.
+The challenge requires a monolithic backend with DDD applied. Since this is an MVP, the operational complexity of microservices is unjustified. However, a "big ball of mud" monolith would not demonstrate design maturity.
 
-## Decisão
+## Decision
 
-Adotar **Monolito Modular** organizado por bounded contexts, com camadas internas por módulo:
+Adopt a **Modular Monolith** organized by bounded contexts, with internal layers per module:
 
 ```
 src/
   modules/
     customers/
-      application/   # use cases, DTOs
-      domain/        # entities, value objects, repository interfaces
-      infrastructure/# Prisma repositories, mappers
-      presentation/  # controllers, Swagger decorators
-    vehicles/        # mesma estrutura
-    service-orders/  # mesma estrutura
-    inventory/       # mesma estrutura
+      application/    # use cases, DTOs
+      domain/         # entities, value objects, repository interfaces
+      infrastructure/ # Prisma repositories, mappers
+      presentation/   # controllers, Swagger decorators
+    vehicles/         # same structure
+    service-orders/   # same structure
+    inventory/        # same structure
   shared/
-    domain/          # base entities, exceptions, value objects compartilhados
-    infrastructure/  # Prisma client, JWT provider
+    domain/           # base entities, exceptions, shared value objects
+    infrastructure/   # Prisma client, JWT provider
   main.ts
 ```
 
 ## Bounded Contexts
 
-| Contexto | Responsabilidade |
+| Context | Responsibility |
 |---|---|
-| **Customers** | Cadastro e identificação de clientes (CPF/CNPJ) |
-| **Vehicles** | Cadastro de veículos e vínculo com cliente |
-| **Service Orders** | Ciclo completo da OS: criação, status, orçamento, aprovação |
-| **Inventory** | Peças, insumos, estoque, reserva e movimentação |
+| **Customers** | Customer registration and identification (CPF/CNPJ) |
+| **Vehicles** | Vehicle registration and customer linking |
+| **Service Orders** | Full OS lifecycle: creation, status, budget, approval |
+| **Inventory** | Parts, supplies, stock control, reservation, movements |
 
-## Fluxo de dependência entre camadas
+## Layer Dependency Flow
 
 ```
 Presentation → Application → Domain ← Infrastructure
 ```
 
-- **Domain** não depende de nada externo (framework, ORM, banco)
-- **Infrastructure** implementa interfaces definidas no Domain
-- **Application** orquestra use cases chamando domain + repositórios
-- **Presentation** expõe HTTP e converte DTOs
+- **Domain** depends on nothing external (no framework, no ORM)
+- **Infrastructure** implements interfaces defined in Domain
+- **Application** orchestrates use cases using Domain + repositories
+- **Presentation** exposes HTTP and converts request/response DTOs
 
-## Justificativas
+## Rationale
 
-- Demonstra aplicação de DDD mesmo em monolito
-- Facilita escalar para microsserviços no futuro (bounded contexts já isolados)
-- NestJS suporta nativamente módulos com essa separação
-- Alinhado com o que o desafio pede: "monolito em camadas"
+- Demonstrates DDD application even within a monolith
+- Makes future migration to microservices easier (contexts are already isolated)
+- NestJS natively supports modules with this separation
+- Aligned with what the challenge requires: "monolith with layers"
 
-## Alternativas consideradas
+## Alternatives Considered
 
-| Alternativa | Motivo da não escolha |
+| Alternative | Reason Not Chosen |
 |---|---|
-| Organização por tipo (controllers/, services/, repositories/) | Não demonstra DDD; difícil de manter em domínios complexos |
-| Clean Architecture estrita | Overhead excessivo para o MVP no prazo dado |
-| Microsserviços | Não permitido pelo enunciado |
+| Organize by type (controllers/, services/, repositories/) | Does not demonstrate DDD; hard to maintain at scale |
+| Strict Clean Architecture | Excessive overhead for MVP within the given deadline |
+| Microservices | Not allowed by the challenge requirements |

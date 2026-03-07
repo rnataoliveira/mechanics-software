@@ -1,10 +1,10 @@
-# Visao Geral da Arquitetura
+# Architecture Overview
 
-## Estilo arquitetural
+## Style
 
-**Monolito Modular em Camadas** com DDD leve.
+**Modular Monolith with DDD** — organized by bounded context, with internal layering per module.
 
-## Estrutura de pastas
+## Folder Structure
 
 ```
 src/
@@ -32,7 +32,8 @@ src/
           delete-customer.use-case.ts
       domain/
         entities/customer.entity.ts
-        value-objects/cpf-cnpj.vo.ts
+        value-objects/tax-id.vo.ts
+        value-objects/email.vo.ts
         repositories/customer.repository.interface.ts
       infrastructure/
         repositories/prisma-customer.repository.ts
@@ -40,10 +41,11 @@ src/
       presentation/
         controllers/customers.controller.ts
         dto/create-customer.dto.ts
+        dto/update-customer.dto.ts
 
-    vehicles/             # mesma estrutura
-    service-orders/       # mesma estrutura + state machine
-    inventory/            # mesma estrutura + movimentacoes
+    vehicles/             # same structure
+    service-orders/       # same structure + state machine
+    inventory/            # same structure + stock movements
 
   shared/
     domain/
@@ -69,84 +71,118 @@ test/
   e2e/
 ```
 
-## Fluxo de uma requisicao
+## Request Flow
 
 ```
 HTTP Request
      |
      v
 Controller (Presentation)
-  - Valida DTO (class-validator)
-  - Verifica JWT Guard (se rota protegida)
+  - Validates DTO (class-validator)
+  - Checks JWT Guard (if protected route)
      |
      v
 Use Case (Application)
-  - Orquestra operacao
-  - Chama repositorio e servicos de dominio
+  - Orchestrates the operation
+  - Calls repositories and domain services
      |
      v
 Entity / Domain Service
-  - Executa regras de negocio
-  - Lanca DomainException se invariante violada
+  - Executes business rules
+  - Throws DomainException if invariant is violated
      |
      v
 Repository Interface (Domain)
      |
      v
 Prisma Repository (Infrastructure)
-  - Persiste no PostgreSQL
+  - Persists to PostgreSQL
      |
      v
 Mapper (Infrastructure)
-  - Converte entre Prisma model e Domain entity
+  - Converts between Prisma model and Domain entity
      |
      v
 Response DTO (Presentation)
 ```
 
-## Endpoints (resumo)
+## Dependency Rule
 
-### Publicos (sem JWT)
+```
+Presentation → Application → Domain ← Infrastructure
+```
+
+- **Domain** has zero external dependencies (no framework, no ORM)
+- **Infrastructure** implements interfaces defined in Domain
+- **Application** orchestrates use cases using Domain + repositories
+- **Presentation** exposes HTTP and converts DTOs
+
+## API Endpoints
+
+### Public (no JWT)
 ```
 POST /auth/login
 GET  /service-orders/:id/status
 ```
 
-### Protegidos (JWT obrigatorio)
+### Protected (JWT required)
 ```
-POST/GET/PUT/DELETE  /customers
-POST/GET/PUT/DELETE  /vehicles
-POST/GET/PUT/DELETE  /services
-POST/GET/PUT/DELETE  /parts
-PATCH                /parts/:id/stock
-POST/GET             /service-orders
-POST                 /service-orders/:id/services
-POST                 /service-orders/:id/parts
-POST                 /service-orders/:id/budget
-POST                 /service-orders/:id/approve
-POST                 /service-orders/:id/reject
-POST                 /service-orders/:id/start-diagnosis
-POST                 /service-orders/:id/start-execution
-POST                 /service-orders/:id/finalize
-POST                 /service-orders/:id/deliver
-GET                  /service-orders/:id/metrics
+POST   /customers
+GET    /customers
+GET    /customers/:id
+PUT    /customers/:id
+DELETE /customers/:id
+
+POST   /vehicles
+GET    /vehicles
+GET    /vehicles/:id
+PUT    /vehicles/:id
+DELETE /vehicles/:id
+
+POST   /services
+GET    /services
+GET    /services/:id
+PUT    /services/:id
+DELETE /services/:id
+
+POST   /parts
+GET    /parts
+GET    /parts/:id
+PUT    /parts/:id
+DELETE /parts/:id
+PATCH  /parts/:id/stock
+
+POST   /service-orders
+GET    /service-orders
+GET    /service-orders/:id
+POST   /service-orders/:id/services
+POST   /service-orders/:id/parts
+POST   /service-orders/:id/budget
+POST   /service-orders/:id/approve
+POST   /service-orders/:id/reject
+POST   /service-orders/:id/start-diagnosis
+POST   /service-orders/:id/start-execution
+POST   /service-orders/:id/complete
+POST   /service-orders/:id/deliver
+GET    /service-orders/metrics/average-execution-time
 ```
 
-## Infraestrutura (docker-compose)
+## Infrastructure (docker-compose)
 
 ```
 services:
-  api:    NestJS (porta 3000)
-  db:     PostgreSQL 16 (porta 5432)
-  swagger: disponivel em /api/docs
+  api:  NestJS (port 3000)
+  db:   PostgreSQL 16 (port 5432)
+
+Swagger: available at /api/docs
 ```
 
-## Seguranca
+## Security
 
-- JWT com expiracao configuravel via ENV
-- Senhas com bcrypt (salt rounds 12)
-- Validacao de CPF/CNPJ e placa em Value Objects (nao em DTO)
-- DTOs validados com class-validator
-- Prisma previne SQL injection por design
-- Headers de seguranca com Helmet
-- Rate limiting com @nestjs/throttler
+- JWT with configurable expiration via ENV
+- Passwords hashed with bcrypt (salt rounds: 12)
+- CPF/CNPJ and license plate validation in Value Objects (not in DTOs)
+- DTOs validated with class-validator
+- Prisma prevents SQL injection by design
+- Security headers via Helmet
+- Rate limiting via @nestjs/throttler
