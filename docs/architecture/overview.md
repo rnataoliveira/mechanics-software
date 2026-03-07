@@ -2,73 +2,105 @@
 
 ## Style
 
-**Modular Monolith with DDD** — organized by bounded context, with internal layering per module.
+**Modular Monolith with DDD** — organized by bounded context, with internal layering per project.
 
-## Folder Structure
+## Solution Structure
 
 ```
+MechanicsSoftware.sln
+
 src/
-  modules/
-    auth/
-      application/
-        use-cases/
-          login.use-case.ts
-      domain/
-        entities/user.entity.ts
-        value-objects/password.vo.ts
-      infrastructure/
-        repositories/user.repository.ts
-      presentation/
-        controllers/auth.controller.ts
-        dto/login.dto.ts
+  MechanicsSoftware.Domain/
+    Customers/
+      Entities/Customer.cs
+      ValueObjects/TaxId.cs
+      ValueObjects/Email.cs
+      Repositories/ICustomerRepository.cs
+    Vehicles/
+      Entities/Vehicle.cs
+      ValueObjects/LicensePlate.cs
+      Repositories/IVehicleRepository.cs
+    ServiceOrders/
+      Entities/ServiceOrder.cs
+      Entities/ServiceItem.cs
+      Entities/PartItem.cs
+      Entities/Budget.cs
+      ValueObjects/ServiceOrderStatus.cs
+      Repositories/IServiceOrderRepository.cs
+      Exceptions/InvalidStatusTransitionException.cs
+    Inventory/
+      Entities/Part.cs
+      Entities/StockMovement.cs
+      Repositories/IPartRepository.cs
+    Shared/
+      Entity.cs
+      ValueObject.cs
+      DomainException.cs
+      Money.cs
 
-    customers/
-      application/
-        use-cases/
-          create-customer.use-case.ts
-          update-customer.use-case.ts
-          find-customer-by-document.use-case.ts
-          list-customers.use-case.ts
-          delete-customer.use-case.ts
-      domain/
-        entities/customer.entity.ts
-        value-objects/tax-id.vo.ts
-        value-objects/email.vo.ts
-        repositories/customer.repository.interface.ts
-      infrastructure/
-        repositories/prisma-customer.repository.ts
-        mappers/customer.mapper.ts
-      presentation/
-        controllers/customers.controller.ts
-        dto/create-customer.dto.ts
-        dto/update-customer.dto.ts
+  MechanicsSoftware.Application/
+    Customers/
+      UseCases/CreateCustomer/
+        CreateCustomerUseCase.cs
+        CreateCustomerInput.cs
+        CreateCustomerOutput.cs
+      UseCases/GetCustomerByDocument/
+      UseCases/UpdateCustomer/
+      UseCases/DeleteCustomer/
+      UseCases/ListCustomers/
+    Vehicles/        # same structure
+    ServiceOrders/   # same structure + status transitions
+    Inventory/       # same structure + stock operations
+    Auth/
+      UseCases/Login/
 
-    vehicles/             # same structure
-    service-orders/       # same structure + state machine
-    inventory/            # same structure + stock movements
+  MechanicsSoftware.Infrastructure/
+    Persistence/
+      AppDbContext.cs
+      Migrations/
+      Configurations/
+        CustomerConfiguration.cs
+        VehicleConfiguration.cs
+        ServiceOrderConfiguration.cs
+        PartConfiguration.cs
+      Repositories/
+        CustomerRepository.cs
+        VehicleRepository.cs
+        ServiceOrderRepository.cs
+        PartRepository.cs
+    Security/
+      JwtProvider.cs
+      PasswordHasher.cs
 
-  shared/
-    domain/
-      base-entity.ts
-      domain-exception.ts
-      value-object.ts
-    infrastructure/
-      database/prisma.service.ts
-      security/jwt.strategy.ts
-    utils/
-      validators/
+  MechanicsSoftware.API/
+    Controllers/
+      CustomersController.cs
+      VehiclesController.cs
+      ServicesController.cs
+      PartsController.cs
+      ServiceOrdersController.cs
+      AuthController.cs
+    DTOs/
+    Middleware/
+      ExceptionHandlingMiddleware.cs
+    Extensions/
+      SwaggerExtensions.cs
+      AuthExtensions.cs
+    Program.cs
+    appsettings.json
+    appsettings.Development.json
 
-  main.ts
-  app.module.ts
-
-prisma/
-  schema.prisma
-  migrations/
-
-test/
-  unit/
-  integration/
-  e2e/
+tests/
+  MechanicsSoftware.UnitTests/
+    Domain/
+      Customers/
+      ServiceOrders/
+      Inventory/
+    Application/
+  MechanicsSoftware.IntegrationTests/
+    Customers/
+    ServiceOrders/
+    Inventory/
 ```
 
 ## Request Flow
@@ -77,17 +109,17 @@ test/
 HTTP Request
      |
      v
-Controller (Presentation)
-  - Validates DTO (class-validator)
-  - Checks JWT Guard (if protected route)
+Controller (API)
+  - Validates request DTO (FluentValidation or DataAnnotations)
+  - Checks JWT (if protected route)
      |
      v
 Use Case (Application)
   - Orchestrates the operation
-  - Calls repositories and domain services
+  - Calls domain entities and repository interfaces
      |
      v
-Entity / Domain Service
+Domain Entity / Service
   - Executes business rules
   - Throws DomainException if invariant is violated
      |
@@ -95,94 +127,89 @@ Entity / Domain Service
 Repository Interface (Domain)
      |
      v
-Prisma Repository (Infrastructure)
+EF Core Repository (Infrastructure)
   - Persists to PostgreSQL
      |
      v
-Mapper (Infrastructure)
-  - Converts between Prisma model and Domain entity
-     |
-     v
-Response DTO (Presentation)
+Response DTO (API)
 ```
 
 ## Dependency Rule
 
 ```
-Presentation → Application → Domain ← Infrastructure
+API → Application → Domain ← Infrastructure
 ```
 
-- **Domain** has zero external dependencies (no framework, no ORM)
-- **Infrastructure** implements interfaces defined in Domain
-- **Application** orchestrates use cases using Domain + repositories
-- **Presentation** exposes HTTP and converts DTOs
+- **Domain** has zero external dependencies (no EF Core, no ASP.NET)
+- **Infrastructure** implements repository interfaces from Domain
+- **Application** orchestrates use cases using Domain + repository interfaces
+- **API** handles HTTP concerns and depends on Application
 
 ## API Endpoints
 
 ### Public (no JWT)
 ```
-POST /auth/login
-GET  /service-orders/:id/status
+POST /api/auth/login
+GET  /api/service-orders/{id}/status
 ```
 
 ### Protected (JWT required)
 ```
-POST   /customers
-GET    /customers
-GET    /customers/:id
-PUT    /customers/:id
-DELETE /customers/:id
+POST   /api/customers
+GET    /api/customers
+GET    /api/customers/{id}
+PUT    /api/customers/{id}
+DELETE /api/customers/{id}
 
-POST   /vehicles
-GET    /vehicles
-GET    /vehicles/:id
-PUT    /vehicles/:id
-DELETE /vehicles/:id
+POST   /api/vehicles
+GET    /api/vehicles
+GET    /api/vehicles/{id}
+PUT    /api/vehicles/{id}
+DELETE /api/vehicles/{id}
 
-POST   /services
-GET    /services
-GET    /services/:id
-PUT    /services/:id
-DELETE /services/:id
+POST   /api/services
+GET    /api/services
+GET    /api/services/{id}
+PUT    /api/services/{id}
+DELETE /api/services/{id}
 
-POST   /parts
-GET    /parts
-GET    /parts/:id
-PUT    /parts/:id
-DELETE /parts/:id
-PATCH  /parts/:id/stock
+POST   /api/parts
+GET    /api/parts
+GET    /api/parts/{id}
+PUT    /api/parts/{id}
+DELETE /api/parts/{id}
+PATCH  /api/parts/{id}/stock
 
-POST   /service-orders
-GET    /service-orders
-GET    /service-orders/:id
-POST   /service-orders/:id/services
-POST   /service-orders/:id/parts
-POST   /service-orders/:id/budget
-POST   /service-orders/:id/approve
-POST   /service-orders/:id/reject
-POST   /service-orders/:id/start-diagnosis
-POST   /service-orders/:id/start-execution
-POST   /service-orders/:id/complete
-POST   /service-orders/:id/deliver
-GET    /service-orders/metrics/average-execution-time
+POST   /api/service-orders
+GET    /api/service-orders
+GET    /api/service-orders/{id}
+POST   /api/service-orders/{id}/services
+POST   /api/service-orders/{id}/parts
+POST   /api/service-orders/{id}/budget
+POST   /api/service-orders/{id}/approve
+POST   /api/service-orders/{id}/reject
+POST   /api/service-orders/{id}/start-diagnosis
+POST   /api/service-orders/{id}/start-execution
+POST   /api/service-orders/{id}/complete
+POST   /api/service-orders/{id}/deliver
+GET    /api/service-orders/metrics/average-execution-time
 ```
 
 ## Infrastructure (docker-compose)
 
 ```
 services:
-  api:  NestJS (port 3000)
+  api:  ASP.NET Core 8 (port 8080)
   db:   PostgreSQL 16 (port 5432)
 
-Swagger: available at /api/docs
+Swagger: available at /swagger
 ```
 
 ## Security
 
-- JWT with configurable expiration via ENV
-- Passwords hashed with bcrypt (salt rounds: 12)
+- JWT with configurable expiration via environment variables
+- Passwords hashed with BCrypt
 - CPF/CNPJ and license plate validation in Value Objects (not in DTOs)
-- DTOs validated with class-validator
-- Prisma prevents SQL injection by design
-- Security headers via Helmet
-- Rate limiting via @nestjs/throttler
+- EF Core prevents SQL injection by design (parameterized queries)
+- Global exception handling middleware
+- Rate limiting via ASP.NET Core built-in rate limiter
