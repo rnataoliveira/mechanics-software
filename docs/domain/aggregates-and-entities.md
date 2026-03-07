@@ -1,181 +1,181 @@
-# Aggregates, Entidades e Value Objects
+# Aggregates, Entities and Value Objects
 
 ## Aggregate Roots
 
-### OrdemDeServico (Aggregate Root principal)
+### ServiceOrder (Main Aggregate Root)
 
-O agregado mais complexo do sistema. Encapsula todas as regras de negocio do ciclo de vida da OS.
+The most complex aggregate in the system. Encapsulates all business rules for the OS lifecycle.
 
-**Responsabilidades:**
-- Gerenciar adicao de servicos e pecas
-- Calcular e gerar orcamento
-- Controlar transicoes de status (state machine)
-- Garantir invariantes de negocio
+**Responsibilities:**
+- Manage addition of services and parts
+- Calculate and generate the budget
+- Control status transitions (state machine)
+- Enforce business invariants
 
-**Entidades filhas:**
-- `ItemServico` — servico adicionado a OS
-- `ItemPeca` — peca adicionada a OS
-- `Orcamento` — valor calculado para aprovacao
+**Child entities:**
+- `ServiceItem` — a service added to the OS
+- `PartItem` — a part added to the OS
+- `Budget` — the calculated value sent for approval
 
-**Regras de invariante:**
-- Nao e possivel adicionar itens a uma OS com status diferente de `RECEBIDA` ou `EM_DIAGNOSTICO`
-- Nao e possivel iniciar execucao sem orcamento aprovado
-- O status so pode avancar conforme a state machine definida
+**Invariant rules:**
+- Cannot add items to an OS with status other than `RECEIVED` or `IN_DIAGNOSIS`
+- Cannot start execution without an approved budget
+- Status can only advance according to the defined state machine
 
 ---
 
-### Cliente (Aggregate Root)
+### Customer (Aggregate Root)
 
-**Atributos:**
+**Attributes:**
 - `id` — UUID
-- `tipoPessoa` — `PF` | `PJ`
-- `documento` — Value Object `CpfCnpj`
-- `nome` — string
+- `personType` — `INDIVIDUAL` | `COMPANY`
+- `document` — Value Object `TaxId` (CPF or CNPJ)
+- `name` — string
 - `email` — Value Object `Email`
-- `telefone` — string
+- `phone` — string
 
-**Regras:**
-- `documento` e unico por cliente
-- `tipoPessoa` determina o formato de validacao do documento
-
----
-
-### Veiculo (Aggregate Root)
-
-**Atributos:**
-- `id` — UUID
-- `placa` — Value Object `PlacaVeiculo`
-- `marca` — string
-- `modelo` — string
-- `ano` — number
-- `clienteId` — referencia ao Cliente
-
-**Regras:**
-- `placa` e unica no sistema
-- `ano` nao pode ser maior que ano atual + 1
+**Rules:**
+- `document` must be unique per customer
+- `personType` determines the document validation format
 
 ---
 
-### Peca (Aggregate Root — contexto Inventory)
+### Vehicle (Aggregate Root)
 
-**Atributos:**
+**Attributes:**
 - `id` — UUID
-- `codigo` — string unico
-- `nome` — string
-- `descricao` — string
-- `precoUnitario` — Value Object `Dinheiro`
-- `quantidadeEstoque` — number
+- `licensePlate` — Value Object `LicensePlate`
+- `make` — string
+- `model` — string
+- `year` — number
+- `customerId` — reference to Customer
 
-**Entidades filhas:**
-- `MovimentacaoDeEstoque`
-
-**Regras:**
-- Estoque nao pode ficar negativo
-- Toda alteracao de quantidade gera `MovimentacaoDeEstoque`
+**Rules:**
+- `licensePlate` must be unique in the system
+- `year` cannot be greater than current year + 1
 
 ---
 
-### Servico (Aggregate Root — catalogo)
+### Part (Aggregate Root — Inventory context)
 
-**Atributos:**
+**Attributes:**
 - `id` — UUID
-- `nome` — string
-- `descricao` — string
-- `precoBase` — Value Object `Dinheiro`
-- `tempoPrevistoMinutos` — number
+- `code` — unique string
+- `name` — string
+- `description` — string
+- `unitPrice` — Value Object `Money`
+- `stockQuantity` — number
+
+**Child entities:**
+- `StockMovement`
+
+**Rules:**
+- Stock cannot go negative
+- Every quantity change generates a `StockMovement`
+
+---
+
+### Service (Aggregate Root — catalog)
+
+**Attributes:**
+- `id` — UUID
+- `name` — string
+- `description` — string
+- `basePrice` — Value Object `Money`
+- `estimatedMinutes` — number
 
 ---
 
 ## Value Objects
 
-### CpfCnpj
+### TaxId
 
 ```
-tipo: 'CPF' | 'CNPJ'
-valor: string (apenas digitos)
+type: 'CPF' | 'CNPJ'
+value: string (digits only)
 
-Validacoes:
-- CPF: 11 digitos, algoritmo de digito verificador
-- CNPJ: 14 digitos, algoritmo de digito verificador
+Validations:
+- CPF:  11 digits, check digit algorithm
+- CNPJ: 14 digits, check digit algorithm
 ```
 
-### PlacaVeiculo
+### LicensePlate
 
 ```
-valor: string
+value: string
 
-Formatos aceitos:
-- Mercosul: ABC1D23 (3 letras, 1 digito, 1 letra, 2 digitos)
-- Antigo:   ABC1234 (3 letras, 4 digitos)
+Accepted formats:
+- Mercosul: ABC1D23  (3 letters, 1 digit, 1 letter, 2 digits)
+- Legacy:   ABC1234  (3 letters, 4 digits)
 ```
 
-### Dinheiro
+### Money
 
 ```
-valor: number (em centavos — inteiro)
-moeda: 'BRL'
+amount: number (in cents — integer)
+currency: 'BRL'
 
-Operacoes:
-- somar(outro: Dinheiro): Dinheiro
-- multiplicar(fator: number): Dinheiro
-- toReal(): string  ("R$ 150,00")
+Operations:
+- add(other: Money): Money
+- multiply(factor: number): Money
+- toFormatted(): string   ("R$ 150,00")
 ```
 
-Usar centavos evita erros de ponto flutuante.
+Using cents avoids floating point errors.
 
 ### Email
 
 ```
-valor: string
-Validacao: formato RFC 5322 simplificado
+value: string
+Validation: simplified RFC 5322 format
 ```
 
-### StatusOrdemServico
+### ServiceOrderStatus
 
 ```
-Enum com transicoes validas encapsuladas.
-Lanca DomainException para transicoes invalidas.
+Enum with valid transitions encapsulated.
+Throws DomainException for invalid transitions.
 ```
 
 ---
 
-## Entidades (sem ser Aggregate Root)
+## Entities (non-Aggregate Root)
 
-### ItemServico
+### ServiceItem
 ```
 id
-ordemServicoId
-servicoId
-quantidade
-valorUnitario (snapshot do preco no momento da adicao)
+serviceOrderId
+serviceId
+quantity
+unitPrice  (price snapshot at the time of addition)
 ```
 
-### ItemPeca
+### PartItem
 ```
 id
-ordemServicoId
-pecaId
-quantidade
-valorUnitario (snapshot do preco no momento da adicao)
+serviceOrderId
+partId
+quantity
+unitPrice  (price snapshot at the time of addition)
 ```
 
-### Orcamento
+### Budget
 ```
 id
-ordemServicoId
-valorServicos: Dinheiro
-valorPecas: Dinheiro
-total: Dinheiro
-status: 'PENDENTE' | 'APROVADO' | 'REJEITADO'
-geradoEm: Date
+serviceOrderId
+servicesTotal: Money
+partsTotal:    Money
+total:         Money
+status:        'PENDING' | 'APPROVED' | 'REJECTED'
+generatedAt:   Date
 ```
 
-### MovimentacaoDeEstoque
+### StockMovement
 ```
 id
-pecaId
-tipo: 'ENTRADA' | 'SAIDA' | 'RESERVA' | 'LIBERACAO'
-quantidade: number
-referencia: string (ex: numero da OS)
-criadoEm: Date
+partId
+type:      'INBOUND' | 'OUTBOUND' | 'RESERVATION' | 'RELEASE'
+quantity:  number
+reference: string  (e.g. service order number)
+createdAt: Date
 ```

@@ -1,55 +1,68 @@
-# ADR-001: Escolha da Stack Tecnológica
+# ADR-001: Tech Stack
 
-**Status:** Aceito
-**Data:** 2026-03-06
+**Status:** Accepted
+**Date:** 2026-03-06
 
-## Contexto
+## Context
 
-O Tech Challenge Fase 1 exige o desenvolvimento do back-end MVP de um sistema de oficina mecânica. O sistema deve ser entregue com Dockerfile, docker-compose, Swagger e testes automatizados com 80% de cobertura nos domínios críticos.
+The Tech Challenge Phase 1 requires a backend MVP for a mechanic shop management system. It must be delivered with Dockerfile, docker-compose, Swagger, and automated tests with 80% coverage on critical domains. The team's primary stack is C#/.NET.
 
-## Decisão
+## Decision
 
-Stack escolhida:
+Chosen stack:
 
-- **Linguagem:** TypeScript
-- **Framework:** NestJS
-- **Banco de dados:** PostgreSQL
-- **ORM:** Prisma
-- **Autenticação:** JWT com @nestjs/jwt
-- **Documentação:** Swagger (@nestjs/swagger)
-- **Testes:** Jest + Supertest
-- **Containerização:** Docker + docker-compose
+- **Language:** C# 12
+- **Framework:** ASP.NET Core 8 (LTS)
+- **Database:** PostgreSQL 16
+- **ORM:** Entity Framework Core 8 + Npgsql
+- **Authentication:** JWT via `Microsoft.AspNetCore.Authentication.JwtBearer`
+- **Documentation:** Swagger via `Swashbuckle.AspNetCore`
+- **Testing:** xUnit + Moq + FluentAssertions
+- **Containerization:** Docker + docker-compose
 
-## Justificativas
+## Project Structure
 
-### NestJS
-- Arquitetura modular nativa alinhada com DDD e bounded contexts
-- Suporte built-in a injeção de dependência, facilitando inversão de controle
-- Decorators para Swagger e validação de DTOs sem boilerplate excessivo
-- Ecossistema maduro para JWT, Guards e Pipes de validação
+```
+src/
+  MechanicsSoftware.API/             # Presentation: controllers, DTOs, Swagger, middleware
+  MechanicsSoftware.Application/     # Application: use cases, interfaces, DTOs
+  MechanicsSoftware.Domain/          # Domain: entities, value objects, repository interfaces
+  MechanicsSoftware.Infrastructure/  # Infrastructure: EF Core, repositories, JWT
+
+tests/
+  MechanicsSoftware.UnitTests/
+  MechanicsSoftware.IntegrationTests/
+```
+
+## Rationale
+
+### ASP.NET Core 8
+- Primary stack of the team — faster delivery, easier code reviews
+- Native support for Swagger, JWT, dependency injection, middleware
+- .NET 8 is LTS — stable for production
+- Excellent DDD support with clean layering
 
 ### PostgreSQL
-- Banco relacional compatível com a natureza do domínio (entidades fortemente relacionadas)
-- Integridade referencial garante consistência entre OS, cliente e veículo
-- Suporte a transações ACID — essencial para operações de estoque e mudança de status
-- Amplamente usado em sistemas de gestão corporativa
+- Relational database suited to the domain (strongly related entities)
+- Full ACID transactions — essential for stock operations and status transitions
+- Native support via Npgsql and EF Core
 
-### Prisma
-- Schema declarativo e migrations versionadas
-- Type-safety end-to-end entre banco e aplicação
-- Menor curva de aprendizado comparado ao TypeORM para este tipo de domínio
+### Entity Framework Core
+- Code-first migrations keep schema versioned alongside code
+- Strong typing and LINQ integration
+- Npgsql provider is mature and actively maintained
 
-## Alternativas consideradas
+## Alternatives Considered
 
-| Alternativa | Motivo da não escolha |
+| Alternative | Reason Not Chosen |
 |---|---|
-| Java Spring Boot | Maior verbosidade para MVP; tempo de setup mais longo |
-| Python FastAPI | Menor ecossistema para DDD modular |
-| TypeORM | Mais verboso e com mais edge cases que Prisma |
-| MySQL | PostgreSQL tem melhor suporte a tipos avançados e JSON |
+| NestJS / TypeScript | Team unfamiliar; slower delivery for the group |
+| Java Spring Boot | Not considered by the team |
+| Dapper (instead of EF Core) | More boilerplate for CRUD-heavy MVP; EF Core is sufficient |
+| MySQL | PostgreSQL has better advanced type support and EF Core integration |
 
-## Consequências
+## Consequences
 
-- Toda a equipe deve ter Node.js 20+ instalado
-- O ambiente local roda via docker-compose (PostgreSQL + API)
-- Prisma migrations devem ser versionadas junto ao código
+- All team members must have .NET 8 SDK installed
+- Local environment runs via docker-compose (PostgreSQL + API)
+- EF Core migrations must be versioned and applied before running the app

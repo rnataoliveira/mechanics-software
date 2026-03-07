@@ -1,56 +1,56 @@
-# Linguagem Ubiqua — Mechanics Software
+# Ubiquitous Language — Mechanics Software
 
-## Termos do dominio
+## Domain Terms
 
-| Termo | Definicao |
+| Term | Definition |
 |---|---|
-| **Ordem de Servico (OS)** | Documento central que registra todo o atendimento: cliente, veiculo, servicos, pecas, orcamento e status |
-| **Cliente** | Pessoa fisica (CPF) ou juridica (CNPJ) que traz o veiculo para atendimento |
-| **Veiculo** | Automovel identificado por placa, marca, modelo e ano; sempre vinculado a um cliente |
-| **Servico** | Trabalho tecnico a ser executado (ex: troca de oleo, alinhamento, balanceamento) |
-| **Peca** | Item fisico utilizado na execucao de um servico, com controle de estoque |
-| **Insumo** | Material consumivel utilizado durante os servicos (ex: oleo, fluidos) |
-| **Orcamento** | Valor total calculado automaticamente com base nos servicos e pecas da OS; enviado ao cliente para aprovacao |
-| **Aprovacao** | Autorizacao formal do cliente para que os servicos sejam executados |
-| **Diagnostico** | Avaliacao tecnica do veiculo realizada antes da execucao dos servicos |
-| **Execucao** | Fase de realizacao dos servicos aprovados pelo cliente |
-| **Entrega** | Devolucao do veiculo ao cliente apos conclusao de todos os servicos |
-| **Estoque** | Controle de quantidade disponivel de pecas e insumos |
-| **Reserva** | Bloqueio temporario de quantidade em estoque para uma OS especifica |
-| **Movimentacao de Estoque** | Registro de toda alteracao (entrada ou saida) no estoque de uma peca |
-| **Item de OS** | Servico ou peca associado a uma Ordem de Servico |
-| **Atendente** | Funcionario responsavel por criar a OS, registrar servicos e comunicar com o cliente |
-| **Mecanico** | Funcionario responsavel por executar o diagnostico e os servicos |
-| **Administrador** | Usuario com acesso completo ao sistema, incluindo CRUDs e relatorios |
+| **Service Order (OS)** | The central document that records an entire service visit: customer, vehicle, services, parts, budget, and status |
+| **Customer** | An individual (CPF) or business (CNPJ) that brings a vehicle for service |
+| **Vehicle** | A car identified by license plate, make, model, and year; always linked to a customer |
+| **Service** | A technical job to be performed (e.g. oil change, wheel alignment, balancing) |
+| **Part** | A physical item used during service execution, subject to inventory control |
+| **Supply** | A consumable material used during service (e.g. oil, fluids, lubricants) |
+| **Budget** | The total cost automatically calculated from services and parts; sent to the customer for approval |
+| **Approval** | The customer's formal authorization to proceed with the services |
+| **Diagnosis** | The technical evaluation of the vehicle before execution begins |
+| **Execution** | The phase where approved services are carried out |
+| **Delivery** | The return of the vehicle to the customer after all services are completed |
+| **Stock** | The available quantity control for parts and supplies |
+| **Reservation** | A temporary hold on stock quantity for a specific Service Order |
+| **Stock Movement** | A record of every stock change (in or out) for a given part |
+| **OS Item** | A service or part associated with a Service Order |
+| **Attendant** | A staff member responsible for creating the OS, registering services, and communicating with the customer |
+| **Mechanic** | A technician responsible for performing diagnosis and services |
+| **Administrator** | A user with full system access, including CRUDs and reports |
 
-## Status da Ordem de Servico
+## Service Order Status
 
-| Status | Descricao | Quem aciona |
+| Status | Description | Triggered by |
 |---|---|---|
-| `RECEBIDA` | OS criada, veiculo na oficina | Sistema (ao criar OS) |
-| `EM_DIAGNOSTICO` | Mecanico avaliando o veiculo | Mecanico |
-| `AGUARDANDO_APROVACAO` | Orcamento gerado e enviado ao cliente | Sistema (ao enviar orcamento) |
-| `EM_EXECUCAO` | Cliente aprovou; servicos em andamento | Sistema (apos aprovacao) |
-| `FINALIZADA` | Todos os servicos concluidos | Mecanico |
-| `ENTREGUE` | Veiculo devolvido ao cliente | Atendente |
-| `CANCELADA` | Cliente rejeitou orcamento | Sistema (apos rejeicao) |
+| `RECEIVED` | OS created, vehicle is at the shop | System (on OS creation) |
+| `IN_DIAGNOSIS` | Mechanic is evaluating the vehicle | Mechanic |
+| `AWAITING_APPROVAL` | Budget generated and sent to customer | System (on budget send) |
+| `IN_EXECUTION` | Customer approved; services in progress | System (on approval) |
+| `COMPLETED` | All services finished | Mechanic |
+| `DELIVERED` | Vehicle returned to the customer | Attendant |
+| `CANCELLED` | Customer rejected the budget | System (on rejection) |
 
-## Transicoes validas de status
+## Valid Status Transitions
 
 ```
-RECEBIDA --> EM_DIAGNOSTICO
-EM_DIAGNOSTICO --> AGUARDANDO_APROVACAO
-AGUARDANDO_APROVACAO --> EM_EXECUCAO     (aprovacao)
-AGUARDANDO_APROVACAO --> CANCELADA       (rejeicao)
-EM_EXECUCAO --> FINALIZADA
-FINALIZADA --> ENTREGUE
+RECEIVED --> IN_DIAGNOSIS
+IN_DIAGNOSIS --> AWAITING_APPROVAL
+AWAITING_APPROVAL --> IN_EXECUTION     (approval)
+AWAITING_APPROVAL --> CANCELLED        (rejection)
+IN_EXECUTION --> COMPLETED
+COMPLETED --> DELIVERED
 ```
 
-Qualquer outra transicao e invalida e deve lancar excecao de dominio.
+Any other transition must throw an `InvalidStatusTransitionException`.
 
-## Regras de nomenclatura no codigo
+## Naming Rules in Code
 
-- Classes de dominio usam os termos exatos desta linguagem ubiqua
-- Nomes de tabelas no banco refletem os termos (em snake_case)
-- Endpoints REST usam os termos em ingles para padronizacao de API publica
-- Comentarios e documentacao interna usam os termos em portugues
+- Domain classes use the exact terms from this ubiquitous language
+- Database table names reflect the terms in `snake_case`
+- REST endpoints use the English terms
+- Comments and internal docs use the English terms
