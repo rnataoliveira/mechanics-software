@@ -10,11 +10,13 @@ FIAP POS Tech · 15SOAT · Fase 1
 
 ## Participants
 
-| Name | Discord Username |
-|---|---|
-| <!-- name --> | <!-- @username --> |
-| <!-- name --> | <!-- @username --> |
-| <!-- name --> | <!-- @username --> |
+| Name | RM | Discord Username |
+|---|---|---|
+| Diogo | RM371224 | <!-- @username --> |
+| Lucas | RM371615 | <!-- @username --> |
+| Renata | RM371593 | <!-- @username --> |
+| Allan | RM373714 | <!-- @username --> |
+| Daniel | RM pending | <!-- @username --> |
 
 ---
 
