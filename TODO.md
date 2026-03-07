@@ -8,7 +8,7 @@ Progress tracker for the FIAP POS Tech 15SOAT challenge.
 
 - [x] Git repository created
 - [x] Branch protection (1 PR approval required on `main`)
-- [x] `CLAUDE.md` — project conventions defined
+- [x] `CONTRIBUTING.md` — project conventions defined
 - [ ] Install .NET 8 SDK on all machines
 - [ ] Scaffold .NET solution (`MechanicsSoftware.sln` + 4 projects + 2 test projects)
 
