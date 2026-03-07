@@ -10,111 +10,166 @@ Progress tracker for the FIAP POS Tech 15SOAT challenge.
 - [x] Branch protection (1 PR approval required on `main`)
 - [x] `CLAUDE.md` — project conventions defined
 - [ ] Install .NET 8 SDK on all machines
-- [ ] Scaffold .NET solution (`MechanicsSoftware.sln`)
+- [ ] Scaffold .NET solution (`MechanicsSoftware.sln` + 4 projects + 2 test projects)
 
 ---
 
 ## DDD Documentation (`docs/`)
 
 - [x] Ubiquitous Language
-- [x] Event Storming — Service Order flow
-- [x] Event Storming — Inventory flow
-- [x] Aggregates, Entities and Value Objects
-- [x] Bounded Contexts
-- [ ] Visual diagrams (aggregate map, entity relationships)
-- [ ] Miro board or equivalent with visual Event Storming
+- [x] Event Storming — Service Order flow (text + Mermaid)
+- [x] Event Storming — Inventory flow (text + Mermaid)
+- [x] Aggregates, Entities and Value Objects + ER diagram
+- [x] Bounded Contexts + context map diagram
+- [x] Architecture overview + request flow diagram
+- [ ] Visual diagrams — aggregate map (classDiagram)
 
 ---
 
 ## Architecture Decisions (`docs/decisions/`)
 
 - [x] ADR-001 — Tech stack (C# / ASP.NET Core 8)
-- [x] ADR-002 — Modular monolith architecture
+- [x] ADR-002 — Vertical Slice Architecture + DDD domain (no MediatR, no repository pattern)
 - [x] ADR-003 — PostgreSQL
 
 ---
 
-## Domain Layer (`MechanicsSoftware.Domain`)
+## Domain (`MechanicsSoftware.Domain`)
 
-- [ ] Base classes: `Entity`, `ValueObject`, `DomainException`
-- [ ] Value Objects: `TaxId` (CPF/CNPJ), `LicensePlate`, `Money`, `Email`
+- [ ] Shared: `Entity`, `ValueObject`, `DomainException`, `Money`
+- [ ] Value Objects: `TaxId` (CPF/CNPJ), `LicensePlate`, `Email`
 - [ ] `Customer` entity
 - [ ] `Vehicle` entity
 - [ ] `Service` entity
-- [ ] `Part` entity + `StockMovement`
-- [ ] `ServiceOrder` aggregate root + state machine
+- [ ] `Part` entity + `StockMovement` entity
+- [ ] `ServiceOrder` aggregate root + state machine (`ServiceOrderStatus`)
 - [ ] `ServiceItem` and `PartItem` entities
 - [ ] `Budget` entity
-- [ ] Repository interfaces
 
 ---
 
-## Application Layer (`MechanicsSoftware.Application`)
+## Application (`MechanicsSoftware.Application`)
 
-- [ ] Auth: `LoginUseCase`
-- [ ] Customers: `CreateCustomer`, `UpdateCustomer`, `DeleteCustomer`, `GetCustomer`, `ListCustomers`
-- [ ] Vehicles: `CreateVehicle`, `UpdateVehicle`, `DeleteVehicle`, `GetVehicle`, `ListVehicles`
-- [ ] Services: `CreateService`, `UpdateService`, `DeleteService`, `GetService`, `ListServices`
-- [ ] Parts: `CreatePart`, `UpdatePart`, `DeletePart`, `GetPart`, `ListParts`, `UpdateStock`
-- [ ] Service Orders: `CreateServiceOrder`, `AddService`, `AddPart`, `GenerateBudget`, `SendBudget`
-- [ ] Service Orders: `Approve`, `Reject`, `StartDiagnosis`, `StartExecution`, `Complete`, `Deliver`
-- [ ] Service Orders: `GetStatus` (public), `GetServiceOrder`, `ListServiceOrders`
-- [ ] Metrics: `GetAverageExecutionTime`
+### Common
+- [ ] `IAppDbContext` interface
+- [ ] `NotFoundException`
+
+### Features — Auth
+- [ ] `LoginUseCase`
+
+### Features — Customers
+- [ ] `CreateCustomerUseCase`
+- [ ] `UpdateCustomerUseCase`
+- [ ] `DeleteCustomerUseCase`
+- [ ] `GetCustomerUseCase`
+- [ ] `ListCustomersUseCase`
+
+### Features — Vehicles
+- [ ] `CreateVehicleUseCase`
+- [ ] `UpdateVehicleUseCase`
+- [ ] `DeleteVehicleUseCase`
+- [ ] `GetVehicleUseCase`
+- [ ] `ListVehiclesUseCase`
+
+### Features — Services
+- [ ] `CreateServiceUseCase`
+- [ ] `UpdateServiceUseCase`
+- [ ] `DeleteServiceUseCase`
+- [ ] `GetServiceUseCase`
+- [ ] `ListServicesUseCase`
+
+### Features — Inventory
+- [ ] `CreatePartUseCase`
+- [ ] `UpdatePartUseCase`
+- [ ] `DeletePartUseCase`
+- [ ] `GetPartUseCase`
+- [ ] `ListPartsUseCase`
+- [ ] `UpdateStockUseCase`
+
+### Features — Service Orders
+- [ ] `CreateServiceOrderUseCase`
+- [ ] `AddServiceItemUseCase`
+- [ ] `AddPartItemUseCase`
+- [ ] `GenerateBudgetUseCase`
+- [ ] `SendBudgetUseCase`
+- [ ] `StartDiagnosisUseCase`
+- [ ] `ApproveServiceOrderUseCase`
+- [ ] `RejectServiceOrderUseCase`
+- [ ] `StartExecutionUseCase`
+- [ ] `CompleteServiceOrderUseCase`
+- [ ] `DeliverServiceOrderUseCase`
+- [ ] `GetServiceOrderStatusUseCase` ← public (no JWT)
+- [ ] `GetServiceOrderUseCase`
+- [ ] `ListServiceOrdersUseCase`
+- [ ] `GetAverageExecutionTimeUseCase`
 
 ---
 
-## Infrastructure Layer (`MechanicsSoftware.Infrastructure`)
+## Infrastructure (`MechanicsSoftware.Infrastructure`)
 
-- [ ] `AppDbContext` with EF Core configuration
-- [ ] EF Core entity configurations (Fluent API, snake_case)
-- [ ] Migrations (initial schema)
-- [ ] Repository implementations
-- [ ] JWT provider
-- [ ] Password hasher (BCrypt)
+- [ ] `AppDbContext` implementing `IAppDbContext`
+- [ ] EF Core Fluent API configurations (snake_case table/column names)
+- [ ] Initial migration
+- [ ] `JwtProvider`
+- [ ] `PasswordHasher` (BCrypt)
 
 ---
 
-## API Layer (`MechanicsSoftware.API`)
+## API (`MechanicsSoftware.API`)
 
-- [ ] `AuthController` — `POST /api/auth/login`
-- [ ] `CustomersController` — full CRUD
-- [ ] `VehiclesController` — full CRUD
-- [ ] `ServicesController` — full CRUD
-- [ ] `PartsController` — full CRUD + stock update
-- [ ] `ServiceOrdersController` — full flow + public status endpoint
+- [ ] `AuthController`
+- [ ] `CustomersController`
+- [ ] `VehiclesController`
+- [ ] `ServicesController`
+- [ ] `PartsController`
+- [ ] `ServiceOrdersController`
 - [ ] Swagger configured and documented
-- [ ] JWT authentication middleware
+- [ ] JWT middleware + `[Authorize]` on protected routes
 - [ ] Global exception handling middleware
-- [ ] `appsettings.json` / environment variable configuration
+- [ ] `appsettings.json` with environment variable support
+- [ ] DI registration for all use cases
 
 ---
 
 ## Tests
 
-- [ ] Unit tests — `TaxId` value object (CPF/CNPJ validation)
-- [ ] Unit tests — `LicensePlate` value object
-- [ ] Unit tests — `Money` value object
-- [ ] Unit tests — `ServiceOrder` state machine
-- [ ] Unit tests — budget generation
-- [ ] Unit tests — stock reservation and deduction
-- [ ] Integration tests — customer CRUD endpoints
-- [ ] Integration tests — service order full flow
-- [ ] Integration tests — inventory flow
-- [ ] 80%+ coverage on Domain and Application layers verified
+### Unit — Domain
+- [ ] `TaxIdTests` — CPF and CNPJ validation
+- [ ] `LicensePlateTests` — Mercosul and legacy formats
+- [ ] `MoneyTests` — arithmetic operations
+- [ ] `ServiceOrderStatusTests` — valid and invalid transitions
+- [ ] `ServiceOrderTests` — business rules (add items, generate budget, state machine)
+- [ ] `BudgetTests` — total calculation
+- [ ] `PartTests` — stock rules (no negative stock)
+
+### Unit — Application
+- [ ] `CreateServiceOrderUseCaseTests`
+- [ ] `ApproveServiceOrderUseCaseTests`
+- [ ] `RejectServiceOrderUseCaseTests`
+- [ ] `GenerateBudgetUseCaseTests`
+- [ ] `UpdateStockUseCaseTests`
+
+### Integration
+- [ ] Customers CRUD endpoints
+- [ ] Service order full flow (create → approve → complete → deliver)
+- [ ] Inventory flow (stock reservation and deduction)
+
+### Coverage
+- [ ] 80%+ on Domain and Application layers verified
 
 ---
 
-## Infrastructure / DevOps
+## DevOps
 
 - [ ] `Dockerfile`
 - [ ] `docker-compose.yml` (API + PostgreSQL)
-- [ ] `README.md` — setup instructions, how to run, endpoints overview
+- [ ] `README.md` — setup, how to run, env vars, endpoints
 
 ---
 
 ## Security
 
-- [ ] Vulnerability scan (Snyk or `dotnet` security tooling)
+- [ ] Vulnerability scan (Snyk or `dotnet list package --vulnerable`)
 - [ ] Vulnerability analysis report written
 
 ---
@@ -122,9 +177,9 @@ Progress tracker for the FIAP POS Tech 15SOAT challenge.
 ## Final Deliverables
 
 - [ ] Add `soat-architecture` as repository collaborator
-- [ ] DDD documentation link (Miro or docs/)
-- [ ] Repository link shared
-- [ ] Vulnerability report included
+- [ ] DDD documentation link confirmed
+- [ ] Repository link confirmed
+- [ ] Vulnerability report complete
 - [ ] Delivery PDF:
   - [ ] Group name
   - [ ] Participants and Discord usernames
