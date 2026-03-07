@@ -1,5 +1,91 @@
 # Aggregates, Entities and Value Objects
 
+## Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    Customer {
+        uuid id
+        string person_type
+        string document
+        string name
+        string email
+        string phone
+    }
+    Vehicle {
+        uuid id
+        string license_plate
+        string make
+        string model
+        int year
+        uuid customer_id
+    }
+    ServiceOrder {
+        uuid id
+        uuid customer_id
+        uuid vehicle_id
+        string status
+        decimal total
+        datetime created_at
+        datetime completed_at
+    }
+    Service {
+        uuid id
+        string name
+        string description
+        decimal base_price
+        int estimated_minutes
+    }
+    Part {
+        uuid id
+        string code
+        string name
+        decimal unit_price
+        int stock_quantity
+    }
+    Budget {
+        uuid id
+        uuid service_order_id
+        decimal services_total
+        decimal parts_total
+        decimal total
+        string status
+        datetime generated_at
+    }
+    ServiceItem {
+        uuid id
+        uuid service_order_id
+        uuid service_id
+        int quantity
+        decimal unit_price
+    }
+    PartItem {
+        uuid id
+        uuid service_order_id
+        uuid part_id
+        int quantity
+        decimal unit_price
+    }
+    StockMovement {
+        uuid id
+        uuid part_id
+        string type
+        int quantity
+        string reference
+        datetime created_at
+    }
+
+    Customer ||--o{ Vehicle : owns
+    Customer ||--o{ ServiceOrder : requests
+    Vehicle ||--o{ ServiceOrder : subject-of
+    ServiceOrder ||--o{ ServiceItem : contains
+    ServiceOrder ||--o{ PartItem : contains
+    ServiceOrder ||--|| Budget : has
+    ServiceItem }o--|| Service : references
+    PartItem }o--|| Part : references
+    Part ||--o{ StockMovement : tracks
+```
+
 ## Aggregate Roots
 
 ### ServiceOrder (Main Aggregate Root)
