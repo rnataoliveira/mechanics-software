@@ -42,6 +42,7 @@ Hosted in the repository under `docs/`:
 | Event Storming — Inventory | `docs/domain/event-storming.md` |
 | Aggregates and Entities | `docs/domain/aggregates-and-entities.md` |
 | Bounded Contexts | `docs/domain/bounded-contexts.md` |
+| Domain Storytelling | `docs/domain/domain-storytelling.md` |
 | Architecture Overview | `docs/architecture/overview.md` |
 
 ---
