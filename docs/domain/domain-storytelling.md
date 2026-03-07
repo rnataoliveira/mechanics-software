@@ -6,25 +6,26 @@ Domain Storytelling captures how the business works through stories told by doma
 [Actor] → [verb] → [work object] → (to/at/in) [actor or system]
 ```
 
+**Rules applied here:**
+- Each story is a single, linear flow — one scenario, no branching
+- If a condition creates a different outcome, it becomes a separate story
+- Loops (repetition) are allowed; conditionals are not
+
 Stories are numbered step-by-step and accompanied by a sequence diagram.
 
 ---
 
-## Story 1 — Customer Identification
+## Story 1 — Existing Customer Identification
 
-**Scenario:** A customer arrives at the shop. The attendant needs to identify them before opening a service order.
+**Scenario:** A customer arrives at the shop. The attendant searches and finds the customer already registered.
 
 ### Steps
 
 ```
-1. Customer      → arrives at          → Shop (with Vehicle)   → at Attendant
-2. Attendant     → searches for        → Customer (by CPF/CNPJ) → in System
-3. System        → returns             → Customer record        → to Attendant
-   [if not found]
-4. Attendant     → registers           → Customer data          → in System
-5. System        → validates           → CPF / CNPJ             → (check digit algorithm)
-6. System        → saves               → Customer               → in Database
-7. System        → confirms            → Customer registration  → to Attendant
+1. Customer      → arrives at          → Shop (with Vehicle)     → at Attendant
+2. Attendant     → searches for        → Customer (by CPF/CNPJ)  → in System
+3. System        → returns             → Customer record          → to Attendant
+4. Attendant     → confirms            → Customer identity        → with Customer
 ```
 
 ### Sequence Diagram
@@ -37,31 +38,57 @@ sequenceDiagram
 
     Customer->>Attendant: arrives with vehicle
     Attendant->>System: search customer by CPF/CNPJ
-    alt customer found
-        System-->>Attendant: returns customer record
-    else customer not found
-        Attendant->>System: register new customer
-        System->>System: validate CPF/CNPJ (check digit)
-        System-->>Attendant: customer registered
-    end
+    System-->>Attendant: returns customer record
+    Attendant->>Customer: confirms identity
 ```
 
 ---
 
-## Story 2 — Vehicle Identification
+## Story 2 — New Customer Registration
 
-**Scenario:** After identifying the customer, the attendant locates or registers the vehicle.
+**Scenario:** A customer arrives at the shop. The attendant searches and does not find the customer — registers a new one.
+
+### Steps
+
+```
+1. Customer      → arrives at          → Shop (with Vehicle)     → at Attendant
+2. Attendant     → searches for        → Customer (by CPF/CNPJ)  → in System
+3. System        → returns             → not found               → to Attendant
+4. Attendant     → registers           → Customer data           → in System
+5. System        → validates           → CPF / CNPJ              → (check digit algorithm)
+6. System        → saves               → Customer                → in Database
+7. System        → confirms            → Customer registration   → to Attendant
+```
+
+### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    actor Customer
+    actor Attendant
+    participant System
+
+    Customer->>Attendant: arrives with vehicle
+    Attendant->>System: search customer by CPF/CNPJ
+    System-->>Attendant: customer not found
+    Attendant->>System: register new customer (name, CPF/CNPJ, email)
+    System->>System: validate CPF/CNPJ (check digit)
+    System->>System: save customer to database
+    System-->>Attendant: customer registered
+```
+
+---
+
+## Story 3 — Existing Vehicle Identification
+
+**Scenario:** After identifying the customer, the attendant searches and finds the vehicle already registered.
 
 ### Steps
 
 ```
 1. Attendant     → searches for        → Vehicle (by license plate) → in System
 2. System        → returns             → Vehicle record              → to Attendant
-   [if not found]
-3. Attendant     → registers           → Vehicle data                → in System
-4. System        → validates           → License plate format        → (Mercosul / legacy)
-5. System        → links               → Vehicle                     → to Customer
-6. System        → confirms            → Vehicle registration        → to Attendant
+3. Attendant     → confirms            → Vehicle details             → with Customer
 ```
 
 ### Sequence Diagram
@@ -72,21 +99,49 @@ sequenceDiagram
     participant System
 
     Attendant->>System: search vehicle by license plate
-    alt vehicle found
-        System-->>Attendant: returns vehicle record
-    else vehicle not found
-        Attendant->>System: register new vehicle (plate, make, model, year)
-        System->>System: validate license plate format
-        System->>System: link vehicle to customer
-        System-->>Attendant: vehicle registered
-    end
+    System-->>Attendant: returns vehicle record
+    Attendant->>Attendant: confirms vehicle details
 ```
 
 ---
 
-## Story 3 — Service Order Creation
+## Story 4 — New Vehicle Registration
 
-**Scenario:** With customer and vehicle identified, the attendant opens a service order and adds services and parts.
+**Scenario:** The attendant searches for the vehicle and does not find it — registers a new one linked to the customer.
+
+### Steps
+
+```
+1. Attendant     → searches for        → Vehicle (by license plate) → in System
+2. System        → returns             → not found                   → to Attendant
+3. Attendant     → registers           → Vehicle data                → in System
+4. System        → validates           → License plate format        → (Mercosul / legacy)
+5. System        → links               → Vehicle                     → to Customer
+6. System        → saves               → Vehicle                     → in Database
+7. System        → confirms            → Vehicle registration        → to Attendant
+```
+
+### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    actor Attendant
+    participant System
+
+    Attendant->>System: search vehicle by license plate
+    System-->>Attendant: vehicle not found
+    Attendant->>System: register new vehicle (plate, make, model, year, customerId)
+    System->>System: validate license plate format
+    System->>System: link vehicle to customer
+    System->>System: save vehicle to database
+    System-->>Attendant: vehicle registered
+```
+
+---
+
+## Story 5 — Service Order Creation
+
+**Scenario:** With customer and vehicle identified, the attendant opens a service order and adds services and parts. All parts have sufficient stock.
 
 ### Steps
 
@@ -94,11 +149,14 @@ sequenceDiagram
 1. Attendant     → opens               → Service Order              → in System
 2. System        → creates             → Service Order              → with status RECEIVED
 3. System        → links               → Customer + Vehicle         → to Service Order
-4. Attendant     → adds                → Services (requested)       → to Service Order
-5. Attendant     → adds                → Parts / Supplies needed    → to Service Order
-6. System        → checks              → Stock availability          → for each Part
-7. System        → reserves            → Parts                      → in Stock
-8. System        → records             → Stock Movement (RESERVATION) → in Database
+4. System        → confirms            → Service Order created      → to Attendant
+5. Attendant     → adds                → Service                    → to Service Order
+6. System        → records             → Service item               → in Service Order
+7. Attendant     → adds                → Part                       → to Service Order
+8. System        → checks              → Stock availability          → for Part
+9. System        → reserves            → Part quantity              → in Stock
+10. System       → records             → Stock Movement (RESERVATION) → in Database
+11. System       → confirms            → Part added                 → to Attendant
 ```
 
 ### Sequence Diagram
@@ -113,42 +171,61 @@ sequenceDiagram
     System->>System: create ServiceOrder (status: RECEIVED)
     System-->>Attendant: service order created
 
-    loop for each service
-        Attendant->>System: add service to order
-        System-->>Attendant: service added
-    end
+    Attendant->>System: add service to order
+    System-->>Attendant: service added
 
-    loop for each part
-        Attendant->>System: add part to order
-        System->>Stock: check availability
-        alt stock available
-            Stock-->>System: available
-            System->>Stock: reserve quantity
-            Stock->>Stock: record movement (RESERVATION)
-            System-->>Attendant: part added
-        else insufficient stock
-            Stock-->>System: insufficient
-            System-->>Attendant: warning: insufficient stock
-        end
-    end
+    Attendant->>System: add part to order
+    System->>Stock: check availability
+    Stock-->>System: available
+    System->>Stock: reserve quantity
+    Stock->>Stock: record movement (RESERVATION)
+    System-->>Attendant: part added
 ```
 
 ---
 
-## Story 4 — Diagnosis
+## Story 6 — Part Added with Insufficient Stock
 
-**Scenario:** A mechanic receives the vehicle and begins the technical evaluation.
+**Scenario:** The attendant tries to add a part to a service order but the stock is insufficient. The attendant receives a warning and the part is not added.
 
 ### Steps
 
 ```
-1. Mechanic      → receives            → Vehicle                    → from Attendant
+1. Attendant     → adds                → Part                       → to Service Order
+2. System        → checks              → Stock availability          → for Part
+3. System        → returns             → insufficient stock warning  → to Attendant
+4. Attendant     → notifies            → Customer                   → about missing part
+```
+
+### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    actor Attendant
+    participant System
+    participant Stock
+
+    Attendant->>System: add part to order
+    System->>Stock: check availability
+    Stock-->>System: insufficient stock
+    System-->>Attendant: warning: insufficient stock
+    Attendant->>Attendant: notifies customer about missing part
+```
+
+---
+
+## Story 7 — Diagnosis
+
+**Scenario:** A mechanic receives the vehicle and begins the technical evaluation. No new items are discovered during diagnosis.
+
+### Steps
+
+```
+1. Attendant     → hands over          → Vehicle                    → to Mechanic
 2. Mechanic      → starts              → Diagnosis                  → in System
-3. System        → transitions         → Service Order status        → to IN_DIAGNOSIS
-4. Mechanic      → evaluates           → Vehicle                    → physically
-5. Mechanic      → adds                → additional Services/Parts   → to Service Order
-   (if new issues found during diagnosis)
-6. System        → updates             → Service Order items         → in Database
+3. System        → validates           → Transition RECEIVED → IN_DIAGNOSIS
+4. System        → transitions         → Service Order status        → to IN_DIAGNOSIS
+5. System        → confirms            → Status updated             → to Mechanic
 ```
 
 ### Sequence Diagram
@@ -162,37 +239,67 @@ sequenceDiagram
     Attendant->>Mechanic: hands over vehicle
     Mechanic->>System: start diagnosis (serviceOrderId)
     System->>System: validate transition RECEIVED → IN_DIAGNOSIS
+    System->>System: status → IN_DIAGNOSIS
     System-->>Mechanic: status updated to IN_DIAGNOSIS
-
-    opt new issues found
-        Mechanic->>System: add more services / parts
-        System-->>Mechanic: items updated
-    end
 ```
 
 ---
 
-## Story 5 — Budget Generation and Approval
+## Story 8 — Diagnosis with Additional Items Discovered
 
-**Scenario:** After diagnosis, the system calculates the budget and sends it to the customer for approval.
+**Scenario:** During diagnosis, the mechanic discovers new issues and adds extra services and parts to the service order.
+
+### Steps
+
+```
+1. Attendant     → hands over          → Vehicle                    → to Mechanic
+2. Mechanic      → starts              → Diagnosis                  → in System
+3. System        → transitions         → Service Order status        → to IN_DIAGNOSIS
+4. Mechanic      → evaluates           → Vehicle                    → physically
+5. Mechanic      → adds                → additional Service          → to Service Order
+6. System        → records             → Service item               → in Service Order
+7. Mechanic      → adds                → additional Part             → to Service Order
+8. System        → reserves            → Part quantity              → in Stock
+9. System        → records             → Stock Movement (RESERVATION) → in Database
+```
+
+### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    actor Mechanic
+    actor Attendant
+    participant System
+
+    Attendant->>Mechanic: hands over vehicle
+    Mechanic->>System: start diagnosis (serviceOrderId)
+    System->>System: status → IN_DIAGNOSIS
+    System-->>Mechanic: status updated
+
+    Mechanic->>System: add extra service discovered during diagnosis
+    System-->>Mechanic: service added
+
+    Mechanic->>System: add extra part needed
+    System->>System: reserve part in stock
+    System-->>Mechanic: part added
+```
+
+---
+
+## Story 9 — Budget Generation and Sending
+
+**Scenario:** After diagnosis, the attendant requests the budget. The system calculates and sends it to the customer.
 
 ### Steps
 
 ```
 1. Attendant     → requests            → Budget generation          → from System
-2. System        → calculates          → Budget                     → from services + parts prices
+2. System        → calculates          → Budget total               → from services + parts prices
 3. System        → creates             → Budget record              → in Database
-4. Attendant     → sends               → Budget                     → to Customer (via API)
-5. System        → transitions         → Service Order status        → to AWAITING_APPROVAL
-6. Customer      → reviews             → Budget                     → via API
-   [if approved]
-7. Customer      → approves            → Budget                     → via API
-8. System        → transitions         → Service Order status        → to IN_EXECUTION
-   [if rejected]
-7. Customer      → rejects             → Budget                     → via API
-8. System        → transitions         → Service Order status        → to CANCELLED
-9. System        → releases            → Part reservations          → in Stock
-10. System       → records             → Stock Movement (RELEASE)   → in Database
+4. System        → confirms            → Budget generated           → to Attendant
+5. Attendant     → sends               → Budget                     → to Customer (via API)
+6. System        → transitions         → Service Order status        → to AWAITING_APPROVAL
+7. System        → notifies            → Customer                   → about Budget
 ```
 
 ### Sequence Diagram
@@ -202,7 +309,6 @@ sequenceDiagram
     actor Attendant
     actor Customer
     participant System
-    participant Stock
 
     Attendant->>System: generate budget (serviceOrderId)
     System->>System: calculate total (services + parts)
@@ -212,36 +318,92 @@ sequenceDiagram
     Attendant->>System: send budget to customer
     System->>System: status → AWAITING_APPROVAL
     System-->>Customer: budget notification
-
-    alt customer approves
-        Customer->>System: approve budget (serviceOrderId)
-        System->>System: status → IN_EXECUTION
-        System-->>Customer: approval confirmed
-    else customer rejects
-        Customer->>System: reject budget (serviceOrderId)
-        System->>System: status → CANCELLED
-        System->>Stock: release all part reservations
-        Stock->>Stock: record movements (RELEASE)
-        System-->>Customer: cancellation confirmed
-    end
 ```
 
 ---
 
-## Story 6 — Service Execution
+## Story 10 — Budget Approval
 
-**Scenario:** With the budget approved, the mechanic executes the services and confirms part usage.
+**Scenario:** The customer reviews the budget and approves it. Services proceed to execution.
 
 ### Steps
 
 ```
-1. Mechanic      → receives            → Service Order (approved)   → from System
-2. Mechanic      → executes            → Services                   → on Vehicle
-3. Mechanic      → uses                → Parts                      → during execution
-4. System        → deducts             → Parts                      → from Stock
-5. System        → records             → Stock Movement (OUTBOUND)  → in Database
-6. Mechanic      → completes           → Service Order              → in System
-7. System        → transitions         → Service Order status        → to COMPLETED
+1. Customer      → reviews             → Budget                     → via API
+2. Customer      → approves            → Budget                     → via API
+3. System        → validates           → Transition AWAITING_APPROVAL → IN_EXECUTION
+4. System        → transitions         → Service Order status        → to IN_EXECUTION
+5. System        → confirms            → Approval registered        → to Customer
+```
+
+### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    actor Customer
+    participant System
+
+    Customer->>System: GET /api/service-orders/{id}/status
+    System-->>Customer: budget details + total amount
+
+    Customer->>System: POST /api/service-orders/{id}/approve
+    System->>System: validate transition AWAITING_APPROVAL → IN_EXECUTION
+    System->>System: status → IN_EXECUTION
+    System-->>Customer: approval confirmed
+```
+
+---
+
+## Story 11 — Budget Rejection and Cancellation
+
+**Scenario:** The customer reviews the budget and rejects it. The service order is cancelled and stock reservations are released.
+
+### Steps
+
+```
+1. Customer      → reviews             → Budget                     → via API
+2. Customer      → rejects             → Budget                     → via API
+3. System        → validates           → Transition AWAITING_APPROVAL → CANCELLED
+4. System        → transitions         → Service Order status        → to CANCELLED
+5. System        → releases            → all Part reservations      → in Stock
+6. System        → records             → Stock Movements (RELEASE)  → in Database
+7. System        → confirms            → Cancellation               → to Customer
+```
+
+### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    actor Customer
+    participant System
+    participant Stock
+
+    Customer->>System: POST /api/service-orders/{id}/reject
+    System->>System: validate transition AWAITING_APPROVAL → CANCELLED
+    System->>System: status → CANCELLED
+    System->>Stock: release all part reservations
+    Stock->>Stock: record movements (RELEASE)
+    System-->>Customer: cancellation confirmed
+```
+
+---
+
+## Story 12 — Service Execution
+
+**Scenario:** With the budget approved, the mechanic executes the services and confirms part usage. The service order is completed.
+
+### Steps
+
+```
+1. Mechanic      → starts              → Execution                  → in System
+2. System        → confirms            → Status is IN_EXECUTION      → to Mechanic
+3. Mechanic      → executes            → Service                    → on Vehicle
+4. System        → marks               → Service item as done       → in Service Order
+5. Mechanic      → confirms            → Part usage                 → in System
+6. System        → deducts             → Part quantity              → from Stock
+7. System        → records             → Stock Movement (OUTBOUND)  → in Database
+8. Mechanic      → completes           → Service Order              → in System
+9. System        → transitions         → Service Order status        → to COMPLETED
 ```
 
 ### Sequence Diagram
@@ -253,19 +415,15 @@ sequenceDiagram
     participant Stock
 
     Mechanic->>System: start execution (serviceOrderId)
-    System->>System: confirm status is IN_EXECUTION
+    System-->>Mechanic: status confirmed as IN_EXECUTION
 
-    loop for each service
-        Mechanic->>System: execute service
-        System-->>Mechanic: service marked as done
-    end
+    Mechanic->>System: execute service
+    System-->>Mechanic: service marked as done
 
-    loop for each part used
-        Mechanic->>System: confirm part usage
-        System->>Stock: deduct quantity from stock
-        Stock->>Stock: record movement (OUTBOUND)
-        System-->>Mechanic: part usage confirmed
-    end
+    Mechanic->>System: confirm part usage
+    System->>Stock: deduct quantity from stock
+    Stock->>Stock: record movement (OUTBOUND)
+    System-->>Mechanic: part usage confirmed
 
     Mechanic->>System: complete service order
     System->>System: status → COMPLETED
@@ -274,19 +432,21 @@ sequenceDiagram
 
 ---
 
-## Story 7 — Vehicle Delivery
+## Story 13 — Vehicle Delivery
 
 **Scenario:** The service is complete. The attendant registers the vehicle delivery to the customer.
 
 ### Steps
 
 ```
-1. Customer      → comes to            → Shop                       → to pick up Vehicle
-2. Attendant     → verifies            → Service Order              → in System
-3. Attendant     → registers           → Vehicle delivery           → in System
-4. System        → transitions         → Service Order status        → to DELIVERED
-5. System        → records             → Delivery timestamp          → in Database
-6. Attendant     → returns             → Vehicle                    → to Customer
+1. Customer      → arrives at          → Shop                       → to pick up Vehicle
+2. Attendant     → retrieves           → Service Order details      → from System
+3. System        → returns             → Service Order (COMPLETED)  → to Attendant
+4. Attendant     → registers           → Vehicle delivery           → in System
+5. System        → validates           → Transition COMPLETED → DELIVERED
+6. System        → records             → Delivery timestamp          → in Database
+7. System        → transitions         → Service Order status        → to DELIVERED
+8. Attendant     → returns             → Vehicle                    → to Customer
 ```
 
 ### Sequence Diagram
@@ -303,13 +463,14 @@ sequenceDiagram
     Attendant->>System: register delivery (serviceOrderId)
     System->>System: validate transition COMPLETED → DELIVERED
     System->>System: record delivery timestamp
+    System->>System: status → DELIVERED
     System-->>Attendant: delivery registered
     Attendant->>Customer: returns vehicle
 ```
 
 ---
 
-## Story 8 — Customer Status Query (Public)
+## Story 14 — Customer Status Query (Public)
 
 **Scenario:** A customer wants to check the progress of their vehicle repair without logging in.
 
@@ -338,9 +499,9 @@ sequenceDiagram
 
 ---
 
-## Story 9 — Inventory Management
+## Story 15 — Part Registration
 
-**Scenario:** An administrator manages the parts catalog and replenishes stock.
+**Scenario:** An administrator registers a new part in the catalog.
 
 ### Steps
 
@@ -348,9 +509,7 @@ sequenceDiagram
 1. Admin         → registers           → Part (code, name, price)   → in System
 2. System        → validates           → Part data                  → (unique code, positive price)
 3. System        → saves               → Part                       → in Database
-4. Admin         → replenishes         → Stock                      → for Part
-5. System        → updates             → Stock quantity              → for Part
-6. System        → records             → Stock Movement (INBOUND)   → in Database
+4. System        → confirms            → Part registered            → to Admin
 ```
 
 ### Sequence Diagram
@@ -361,8 +520,32 @@ sequenceDiagram
     participant System
 
     Admin->>System: register part (code, name, price, initial stock)
-    System->>System: validate part data
+    System->>System: validate part data (unique code, positive price)
+    System->>System: save part to database
     System-->>Admin: part registered
+```
+
+---
+
+## Story 16 — Stock Replenishment
+
+**Scenario:** An administrator replenishes the stock for an existing part.
+
+### Steps
+
+```
+1. Admin         → replenishes         → Stock                      → for Part
+2. System        → updates             → Stock quantity              → for Part
+3. System        → records             → Stock Movement (INBOUND)   → in Database
+4. System        → confirms            → Stock updated              → to Admin
+```
+
+### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    actor Admin
+    participant System
 
     Admin->>System: replenish stock (partId, quantity)
     System->>System: update stock quantity
@@ -377,9 +560,9 @@ sequenceDiagram
 | Actor | Role | Key Interactions |
 |---|---|---|
 | **Customer** | Vehicle owner | Arrives, approves/rejects budget, queries status, picks up vehicle |
-| **Attendant** | Front-desk staff | Identifies customer/vehicle, creates OS, adds items, sends budget, registers delivery |
-| **Mechanic** | Shop technician | Starts diagnosis, executes services, confirms part usage, completes OS |
-| **Administrator** | System manager | Manages parts catalog, replenishes stock, manages users |
+| **Attendant** | Front-desk staff | Identifies customer/vehicle, creates service order, adds items, sends budget, registers delivery |
+| **Mechanic** | Shop technician | Starts diagnosis, adds discovered items, executes services, confirms part usage, completes order |
+| **Administrator** | System manager | Manages parts catalog, replenishes stock |
 | **System** | Internal automations | Validates data, transitions status, calculates budget, manages stock movements |
 
 ---
@@ -395,3 +578,26 @@ sequenceDiagram
 | **Part / Supply** | Physical item with stock control |
 | **Budget** | Calculated cost sent for customer approval |
 | **Stock Movement** | Record of every stock change (inbound, outbound, reservation, release) |
+
+---
+
+## Story Map
+
+| Story | Actor | Scenario |
+|---|---|---|
+| 1 | Attendant | Existing customer identified |
+| 2 | Attendant | New customer registered |
+| 3 | Attendant | Existing vehicle identified |
+| 4 | Attendant | New vehicle registered |
+| 5 | Attendant | Service order created — parts in stock |
+| 6 | Attendant | Part added — insufficient stock warning |
+| 7 | Mechanic | Diagnosis started — no new items |
+| 8 | Mechanic | Diagnosis — new items discovered |
+| 9 | Attendant | Budget generated and sent |
+| 10 | Customer | Budget approved |
+| 11 | Customer | Budget rejected — order cancelled |
+| 12 | Mechanic | Services executed — order completed |
+| 13 | Attendant | Vehicle delivered to customer |
+| 14 | Customer | Status queried without login |
+| 15 | Admin | Part registered in catalog |
+| 16 | Admin | Stock replenished |
