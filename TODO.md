@@ -9,7 +9,6 @@ Progress tracker for the FIAP POS Tech 15SOAT challenge.
 - [x] Git repository created
 - [x] Branch protection (1 PR approval required on `main`)
 - [x] `CLAUDE.md` — project conventions defined
-- [ ] Add `soat-architecture` as repository collaborator
 - [ ] Install .NET 8 SDK on all machines
 - [ ] Scaffold .NET solution (`MechanicsSoftware.sln`)
 
@@ -122,6 +121,7 @@ Progress tracker for the FIAP POS Tech 15SOAT challenge.
 
 ## Final Deliverables
 
+- [ ] Add `soat-architecture` as repository collaborator
 - [ ] DDD documentation link (Miro or docs/)
 - [ ] Repository link shared
 - [ ] Vulnerability report included
