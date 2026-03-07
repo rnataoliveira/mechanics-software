@@ -58,18 +58,27 @@
 - Controllers in API call use cases only; no business logic in controllers
 - Throw `DomainException` (or a subclass) for business rule violations
 
-## Project Structure
+## Architecture
+Vertical Slice Architecture + DDD Domain. See `docs/architecture/overview.md` and `docs/decisions/ADR-002-architecture.md`.
+
+- **Domain** — pure C#, zero framework dependencies. Entities, value objects, domain exceptions.
+- **Application** — features organized by use case (`Features/<Context>/<UseCase>/`). Plain use case classes, no MediatR.
+- **Infrastructure** — EF Core, JWT, BCrypt. Implements `IAppDbContext`.
+- **API** — thin controllers, middleware, Swagger, DI wiring.
+
 ```
 src/
   MechanicsSoftware.Domain/
   MechanicsSoftware.Application/
+    Features/
+      Customers/ Vehicles/ Services/ Inventory/ ServiceOrders/ Auth/
+    Common/
   MechanicsSoftware.Infrastructure/
   MechanicsSoftware.API/
 tests/
   MechanicsSoftware.UnitTests/
   MechanicsSoftware.IntegrationTests/
 ```
-See `docs/architecture/overview.md` for full details.
 
 ## Testing
 - Unit tests: pure domain and application logic, no infrastructure
