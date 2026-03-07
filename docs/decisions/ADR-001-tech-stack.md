@@ -5,51 +5,64 @@
 
 ## Context
 
-The Tech Challenge Phase 1 requires a backend MVP for a mechanic shop management system. It must be delivered with Dockerfile, docker-compose, Swagger, and automated tests with 80% coverage on critical domains.
+The Tech Challenge Phase 1 requires a backend MVP for a mechanic shop management system. It must be delivered with Dockerfile, docker-compose, Swagger, and automated tests with 80% coverage on critical domains. The team's primary stack is C#/.NET.
 
 ## Decision
 
 Chosen stack:
 
-- **Language:** TypeScript
-- **Framework:** NestJS
-- **Database:** PostgreSQL
-- **ORM:** Prisma
-- **Authentication:** JWT via @nestjs/jwt
-- **Documentation:** Swagger via @nestjs/swagger
-- **Testing:** Jest + Supertest
+- **Language:** C# 12
+- **Framework:** ASP.NET Core 8 (LTS)
+- **Database:** PostgreSQL 16
+- **ORM:** Entity Framework Core 8 + Npgsql
+- **Authentication:** JWT via `Microsoft.AspNetCore.Authentication.JwtBearer`
+- **Documentation:** Swagger via `Swashbuckle.AspNetCore`
+- **Testing:** xUnit + Moq + FluentAssertions
 - **Containerization:** Docker + docker-compose
+
+## Project Structure
+
+```
+src/
+  MechanicsSoftware.API/             # Presentation: controllers, DTOs, Swagger, middleware
+  MechanicsSoftware.Application/     # Application: use cases, interfaces, DTOs
+  MechanicsSoftware.Domain/          # Domain: entities, value objects, repository interfaces
+  MechanicsSoftware.Infrastructure/  # Infrastructure: EF Core, repositories, JWT
+
+tests/
+  MechanicsSoftware.UnitTests/
+  MechanicsSoftware.IntegrationTests/
+```
 
 ## Rationale
 
-### NestJS
-- Native modular architecture aligned with DDD and bounded contexts
-- Built-in dependency injection, enabling easy inversion of control
-- Decorators for Swagger and DTO validation with minimal boilerplate
-- Mature ecosystem for JWT Guards, Pipes, and validation
+### ASP.NET Core 8
+- Primary stack of the team — faster delivery, easier code reviews
+- Native support for Swagger, JWT, dependency injection, middleware
+- .NET 8 is LTS — stable for production
+- Excellent DDD support with clean layering
 
 ### PostgreSQL
 - Relational database suited to the domain (strongly related entities)
-- Referential integrity ensures consistency between OS, customer, and vehicle
 - Full ACID transactions — essential for stock operations and status transitions
-- Widely used in production management systems
+- Native support via Npgsql and EF Core
 
-### Prisma
-- Declarative schema with versioned migrations
-- End-to-end type safety between database and application
-- Lower learning curve compared to TypeORM for this domain
+### Entity Framework Core
+- Code-first migrations keep schema versioned alongside code
+- Strong typing and LINQ integration
+- Npgsql provider is mature and actively maintained
 
 ## Alternatives Considered
 
 | Alternative | Reason Not Chosen |
 |---|---|
-| Java Spring Boot | Higher verbosity for MVP; longer setup time |
-| Python FastAPI | Smaller ecosystem for modular DDD patterns |
-| TypeORM | More verbose and more edge cases than Prisma |
-| MySQL | PostgreSQL has better support for advanced types and JSON |
+| NestJS / TypeScript | Team unfamiliar; slower delivery for the group |
+| Java Spring Boot | Not considered by the team |
+| Dapper (instead of EF Core) | More boilerplate for CRUD-heavy MVP; EF Core is sufficient |
+| MySQL | PostgreSQL has better advanced type support and EF Core integration |
 
 ## Consequences
 
-- All team members must have Node.js 20+ installed
+- All team members must have .NET 8 SDK installed
 - Local environment runs via docker-compose (PostgreSQL + API)
-- Prisma migrations must be versioned alongside the code
+- EF Core migrations must be versioned and applied before running the app
