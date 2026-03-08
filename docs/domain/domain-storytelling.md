@@ -286,6 +286,44 @@ sequenceDiagram
 
 ---
 
+## Story 8b — Diagnosis Closed, Budget Requested
+
+**Scenario:** The mechanic finishes the diagnosis and notifies the attendant. The attendant generates and sends the budget, transitioning the order to AWAITING_APPROVAL.
+
+### Steps
+
+```
+1. Mechanic      → notifies            → Attendant                  → that diagnosis is complete
+2. Attendant     → requests            → Budget generation          → from System
+3. System        → validates           → OS has at least one service → (business rule)
+4. System        → calculates          → Budget total               → from services + parts prices
+5. System        → creates             → Budget                     → as child of Service Order
+6. Attendant     → sends               → Budget                     → to Customer (via API)
+7. System        → transitions         → Service Order status        → to AWAITING_APPROVAL
+```
+
+### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    actor Mechanic
+    actor Attendant
+    participant System
+
+    Mechanic->>Attendant: notifies diagnosis is complete
+    Attendant->>System: generate budget (serviceOrderId)
+    System->>System: validate OS has at least one service
+    System->>System: calculate total (services + parts)
+    System->>System: create Budget record (child of ServiceOrder)
+    System-->>Attendant: budget generated
+
+    Attendant->>System: send budget to customer
+    System->>System: status → AWAITING_APPROVAL
+    System-->>Attendant: budget sent
+```
+
+---
+
 ## Story 9 — Budget Generation and Sending
 
 **Scenario:** After diagnosis, the attendant requests the budget. The system calculates and sends it to the customer.
@@ -384,6 +422,35 @@ sequenceDiagram
     System->>Stock: release all part reservations
     Stock->>Stock: record movements (RELEASE)
     System-->>Customer: cancellation confirmed
+```
+
+---
+
+## Story 11b — Mechanic Starts Execution
+
+**Scenario:** The mechanic is notified that the budget was approved and explicitly starts execution. The system confirms the order is in IN_EXECUTION status.
+
+### Steps
+
+```
+1. Attendant     → notifies            → Mechanic                   → that budget was approved
+2. Mechanic      → starts              → Execution                  → in System
+3. System        → confirms            → Service Order is IN_EXECUTION → to Mechanic
+4. Mechanic      → receives            → Service Order details       → from System
+```
+
+### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    actor Attendant
+    actor Mechanic
+    participant System
+
+    Attendant->>Mechanic: notifies budget was approved
+    Mechanic->>System: POST /api/service-orders/{id}/start-execution
+    System->>System: confirm status is IN_EXECUTION
+    System-->>Mechanic: service order details (services and parts list)
 ```
 
 ---
@@ -575,7 +642,7 @@ sequenceDiagram
 | **Vehicle** | Car identified by license plate |
 | **Service Order** | Central document linking customer, vehicle, services, parts, and budget |
 | **Service** | Technical job to be performed |
-| **Part / Supply** | Physical item with stock control |
+| **Part** | Physical item or consumable with stock control |
 | **Budget** | Calculated cost sent for customer approval |
 | **Stock Movement** | Record of every stock change (inbound, outbound, reservation, release) |
 
@@ -593,9 +660,11 @@ sequenceDiagram
 | 6 | Attendant | Part added — insufficient stock warning |
 | 7 | Mechanic | Diagnosis started — no new items |
 | 8 | Mechanic | Diagnosis — new items discovered |
-| 9 | Attendant | Budget generated and sent |
+| 8b | Mechanic + Attendant | Diagnosis closed — budget requested and sent |
+| 9 | Attendant | Budget generated and sent (standalone) |
 | 10 | Customer | Budget approved |
 | 11 | Customer | Budget rejected — order cancelled |
+| 11b | Mechanic | Mechanic starts execution after approval |
 | 12 | Mechanic | Services executed — order completed |
 | 13 | Attendant | Vehicle delivered to customer |
 | 14 | Customer | Status queried without login |

@@ -138,7 +138,7 @@ The most complex aggregate in the system. Encapsulates all business rules for th
 
 **Rules:**
 - `licensePlate` must be unique in the system
-- `year` cannot be greater than current year + 1
+- `1886 <= year <= currentYear + 1` (1886: year of the first automobile)
 
 ---
 
@@ -169,6 +169,12 @@ The most complex aggregate in the system. Encapsulates all business rules for th
 - `description` — string
 - `basePrice` — Value Object `Money`
 - `estimatedMinutes` — number
+
+**Rules:**
+- `name` must be unique in the catalogue
+- `basePrice` cannot be negative
+- `estimatedMinutes` must be positive
+- Price changes do not retroactively affect existing `ServiceItem` records (price is snapshotted at OS composition time)
 
 ---
 
@@ -220,6 +226,19 @@ Validation: simplified RFC 5322 format
 
 ```
 Enum with valid transitions encapsulated.
+Throws InvalidStatusTransitionException for invalid transitions.
+```
+
+### BudgetStatus
+
+```
+Enum: PENDING | APPROVED | REJECTED
+
+Valid transitions:
+  PENDING → APPROVED  (customer approves)
+  PENDING → REJECTED  (customer rejects)
+
+APPROVED and REJECTED are terminal — no further transitions allowed.
 Throws DomainException for invalid transitions.
 ```
 
@@ -252,9 +271,11 @@ serviceOrderId
 servicesTotal: Money
 partsTotal:    Money
 total:         Money
-status:        'PENDING' | 'APPROVED' | 'REJECTED'
+status:        BudgetStatus (Value Object — see Value Objects section)
 generatedAt:   Date
 ```
+Budget is a child entity of ServiceOrder — it has no independent lifecycle.
+The Generate Budget command is handled by ServiceOrder, which creates the Budget internally.
 
 ### StockMovement
 ```

@@ -179,11 +179,12 @@ flowchart LR
 [CMD] Generate Budget
   |
   v
-[AGG] Budget
+[AGG] ServiceOrder
   |
   v
-[POL] Total = sum(service price * qty) + sum(part price * qty)
 [POL] OS must have at least one service
+[POL] Total = sum(service price * qty) + sum(part price * qty)
+[POL] Budget is created as a child of the OS — not a separate aggregate
   |
   v
 [EVT] Budget Generated

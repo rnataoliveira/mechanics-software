@@ -8,17 +8,17 @@
 | **Customer** | An individual (CPF) or business (CNPJ) that brings a vehicle for service |
 | **Vehicle** | A car identified by license plate, make, model, and year; always linked to a customer |
 | **Service** | A technical job to be performed (e.g. oil change, wheel alignment, balancing) |
-| **Part** | A physical item used during service execution, subject to inventory control |
-| **Supply** | A consumable material used during service (e.g. oil, fluids, lubricants) |
-| **Budget** | The total cost automatically calculated from services and parts; sent to the customer for approval |
+| **Part** | A physical item or consumable material used during service execution (e.g. filters, oil, brake pads, fluids), subject to inventory control. Consumables are modelled as Parts with a `category` attribute — there is no separate Supply entity. |
+| **Budget** | The total cost automatically calculated from services and parts; sent to the customer for approval. Child entity of Service Order — has no independent lifecycle. |
 | **Approval** | The customer's formal authorization to proceed with the services |
 | **Diagnosis** | The technical evaluation of the vehicle before execution begins |
 | **Execution** | The phase where approved services are carried out |
 | **Delivery** | The return of the vehicle to the customer after all services are completed |
-| **Stock** | The available quantity control for parts and supplies |
+| **Stock** | The available quantity control for parts |
 | **Reservation** | A temporary hold on stock quantity for a specific Service Order |
 | **Stock Movement** | A record of every stock change (in or out) for a given part |
-| **OS Item** | A service or part associated with a Service Order |
+| **Service Item** | A service added to a Service Order, with quantity and a price snapshot taken at composition time |
+| **Part Item** | A part added to a Service Order, with quantity and a price snapshot taken at composition time |
 | **Attendant** | A staff member responsible for creating the OS, registering services, and communicating with the customer |
 | **Mechanic** | A technician responsible for performing diagnosis and services |
 | **Administrator** | A user with full system access, including CRUDs and reports |
