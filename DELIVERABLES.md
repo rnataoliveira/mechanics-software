@@ -16,7 +16,7 @@ FIAP POS Tech · 15SOAT · Fase 1
 | Lucas | RM371615 | <!-- @username --> |
 | Renata | RM371593 | <!-- @username --> |
 | Allan | RM373714 | <!-- @username --> |
-| Daniel | RM pending | <!-- @username --> |
+| Daniel | RM370852 | <!-- @username --> |
 
 ---
 

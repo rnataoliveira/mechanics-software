@@ -106,7 +106,7 @@ flowchart LR
     API --> Application
     Application --> Domain
     Infrastructure --> Domain
-    Application --> Infrastructure
+    Infrastructure -.->|implements| Application
 
     style Domain fill:#D4AC0D,color:#000
     style Infrastructure fill:#5D6D7E,color:#fff
@@ -115,9 +115,9 @@ flowchart LR
 ```
 
 - **Domain** — zero framework dependencies. Pure C# classes with business rules.
-- **Application** — use cases reference `IAppDbContext` (interface). Loads domain aggregates, calls domain methods, persists.
-- **Infrastructure** — implements `IAppDbContext` via EF Core `AppDbContext`. Owns migrations.
-- **API** — registers DI, exposes HTTP, handles middleware (JWT, exceptions, Swagger).
+- **Application** — use cases define and reference `IAppDbContext` (interface). Loads domain aggregates, calls domain methods, persists. Does NOT depend on Infrastructure.
+- **Infrastructure** — implements `IAppDbContext` via EF Core `AppDbContext` (dependency inversion). Infrastructure depends on Application, not vice versa. Owns migrations.
+- **API** — registers DI (wires `IAppDbContext` → `AppDbContext`), exposes HTTP, handles middleware (JWT, exceptions, Swagger).
 
 ## Why no repository pattern
 
@@ -142,6 +142,12 @@ flowchart LR
 | Clear separation | Each use case is self-contained and independently testable |
 | 80% test coverage | Unit tests on domain; integration tests on use cases with test DB |
 | Swagger | Thin controllers with explicit request/response types |
+
+## Consequences
+
+### IAppDbContext trade-off
+
+`IAppDbContext` exposes the full database surface to all use cases — a `CreateCustomerUseCase` has nothing technically preventing it from touching `db.ServiceOrders`. This is an acceptable trade-off for Phase 1 (MVP scope, small team, clear discipline). If the codebase grows, consider splitting into context-scoped interfaces (`ICustomersDbContext`, `IInventoryDbContext`, etc.) to enforce slice boundaries.
 
 ## Alternatives considered
 
