@@ -19,7 +19,7 @@ Use **PostgreSQL 16** as the primary database.
 | Transactions | Full ACID — essential for stock deductions and status transitions |
 | Constraints | CHECK constraints for document and status validation |
 | Concurrency | MVCC avoids unnecessary locks on concurrent reads |
-| Ecosystem | Excellent support via Prisma; widely used in production |
+| Ecosystem | Excellent support via Entity Framework Core + Npgsql; mature provider actively maintained |
 | JSON | Native JSONB for semi-structured data if needed |
 
 ## Data Model (summary)

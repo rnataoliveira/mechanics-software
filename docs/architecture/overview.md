@@ -162,7 +162,7 @@ flowchart LR
     API --> Application
     Application --> Domain
     Infrastructure --> Domain
-    Application --> Infrastructure
+    Infrastructure -.->|implements| Application
 
     style Domain fill:#D4AC0D,color:#000
     style Infrastructure fill:#5D6D7E,color:#fff
@@ -171,8 +171,8 @@ flowchart LR
 ```
 
 - **Domain** — zero external dependencies. Business rules live here.
-- **Application** — use cases. Loads aggregates via `IAppDbContext`, calls domain methods, persists.
-- **Infrastructure** — implements `IAppDbContext` with EF Core. Owns migrations and security utilities.
+- **Application** — use cases. Loads aggregates via `IAppDbContext` (interface defined here), calls domain methods, persists.
+- **Infrastructure** — implements `IAppDbContext` with EF Core (dependency inversion). Owns migrations and security utilities. Depends on Application, not the other way around.
 - **API** — thin controllers. Dispatches to use cases. Owns DI wiring, middleware, Swagger.
 
 ## Request Flow
