@@ -1,5 +1,7 @@
 # Event Storming — Mechanics Software
 
+> **Miro Board:** [View interactive Event Storming board](https://miro.com/app/board/uXjVGyCZXBU=/?share_link_id=603303836436)
+
 ## Legend
 
 | Symbol | Type | Description |
