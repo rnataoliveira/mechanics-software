@@ -65,6 +65,7 @@ erDiagram
         uuid part_id
         int quantity
         decimal unit_price
+        string availability
     }
     StockMovement {
         uuid id
@@ -104,9 +105,10 @@ The most complex aggregate in the system. Encapsulates all business rules for th
 - `Budget` — the calculated value sent for approval
 
 **Invariant rules:**
-- Cannot add items to an OS with status other than `RECEIVED` or `IN_DIAGNOSIS`
+- Cannot add items to an OS with status other than `IN_DIAGNOSIS`
 - Cannot start execution without an approved budget
 - Status can only advance according to the defined state machine
+- Budget total includes only `AVAILABLE` items
 
 ---
 
@@ -261,7 +263,10 @@ id
 serviceOrderId
 partId
 quantity
-unitPrice  (price snapshot at the time of addition)
+unitPrice     (price snapshot at the time of addition)
+availability  AVAILABLE | UNAVAILABLE
+              AVAILABLE:   stock was sufficient at addition time; reserved in inventory
+              UNAVAILABLE: insufficient stock; attendant alerted; excluded from budget total
 ```
 
 ### Budget

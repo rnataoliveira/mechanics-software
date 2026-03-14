@@ -42,11 +42,16 @@ flowchart LR
     E2b --> C3
     C3 --> E3{{OS Created\nstatus: RECEIVED}}:::event
 
-    E3 --> C4[Add Services / Parts]:::command
-    C4 --> E4{{Items Added to OS}}:::event
-    C4 --> H1[/Insufficient Stock/]:::hotspot
+    E3 --> C7[Start Diagnosis]:::command
+    C7 --> E7{{Diagnosis Started\nstatus: IN_DIAGNOSIS}}:::event
+
+    E7 --> C4[Add Services / Parts]:::command
+    C4 --> E4{{Items Added to OS\navailability: AVAILABLE}}:::event
+    C4 --> H1[/Insufficient Stock:\nAdd as UNAVAILABLE + alert attendant/]:::hotspot
+    H1 --> E4b{{Part Added as UNAVAILABLE}}:::event
 
     E4 --> C5[Generate Budget]:::command
+    E4b --> C5
     C5 --> E5{{Budget Generated}}:::event
     E5 --> C6[Send Budget]:::command
     C6 --> E6{{Budget Sent\nstatus: AWAITING_APPROVAL}}:::event
@@ -138,7 +143,30 @@ flowchart LR
 
 ---
 
-### Step 4 — Service Order Composition
+### Step 4 — Diagnosis
+
+```
+[ACT] Mechanic
+  |
+  v
+[CMD] Start Diagnosis
+  |
+  v
+[AGG] ServiceOrder
+  |
+  v
+[POL] Valid transition: RECEIVED --> IN_DIAGNOSIS
+  |
+  v
+[EVT] Diagnosis Started
+[EVT] Service Order Status Updated to IN_DIAGNOSIS
+```
+
+> Diagnosis may uncover services and parts needed — composition (Step 5) follows.
+
+---
+
+### Step 5 — Service Order Composition
 
 ```
 [ACT] Attendant / Mechanic
@@ -149,10 +177,10 @@ flowchart LR
   |    [AGG] ServiceOrder
   |         |
   |         v
-  |    [POL] OS must be in RECEIVED or IN_DIAGNOSIS status
+  |    [POL] OS must be in IN_DIAGNOSIS status
   |         |
   |         v
-  |    [EVT] Service Added to OS
+  |    [EVT] Service Added to OS (availability: AVAILABLE)
   |
   +-- [CMD] Add Part to OS
             |
@@ -160,19 +188,25 @@ flowchart LR
        [AGG] ServiceOrder
             |
             v
-       [POL] OS must be in RECEIVED or IN_DIAGNOSIS status
-       [POL] Check stock availability before adding
+       [POL] OS must be in IN_DIAGNOSIS status
+       [POL] Check stock availability
             |
-            +-- available     --> [EVT] Part Added to OS
+            +-- available     --> [EVT] Part Added to OS (availability: AVAILABLE)
             |                    [EVT] Part Reserved in Stock
             |
-            +-- not available --> [HOT] Insufficient stock
-                                   Block the action or warn the attendant?
+            +-- not available --> [POL] Add part as UNAVAILABLE, alert attendant
+                                  [EVT] Part Added to OS (availability: UNAVAILABLE)
+                                  [NOTE] No stock reservation for unavailable parts
+                                  [NOTE] Attendant notified — customer decides at budget approval
 ```
+
+> **Resolved HOT SPOT #2:** Insufficient stock does NOT block the OS. The part is added
+> with `availability: UNAVAILABLE` and excluded from the budget total. The customer
+> can approve the budget knowing some parts are missing, and decide whether to proceed.
 
 ---
 
-### Step 5 — Budget Generation and Sending
+### Step 6 — Budget Generation and Sending
 
 ```
 [ACT] System / Attendant
@@ -184,8 +218,10 @@ flowchart LR
 [AGG] ServiceOrder
   |
   v
-[POL] OS must have at least one service
-[POL] Total = sum(service price * qty) + sum(part price * qty)
+[POL] OS must have at least one AVAILABLE service or part
+[POL] Total = sum(service price * qty | AVAILABLE only)
+            + sum(part price * qty    | AVAILABLE only)
+[POL] UNAVAILABLE items are listed in the budget but excluded from the total
 [POL] Budget is created as a child of the OS — not a separate aggregate
   |
   v
@@ -208,7 +244,7 @@ flowchart LR
 
 ---
 
-### Step 6 — Approval or Rejection
+### Step 7 — Approval or Rejection
 
 ```
 [ACT] Customer
@@ -242,30 +278,6 @@ flowchart LR
 
 ---
 
-### Step 7 — Diagnosis
-
-```
-[ACT] Mechanic
-  |
-  v
-[CMD] Start Diagnosis
-  |
-  v
-[AGG] ServiceOrder
-  |
-  v
-[POL] Valid transition: RECEIVED --> IN_DIAGNOSIS
-  |
-  v
-[EVT] Diagnosis Started
-[EVT] Service Order Status Updated to IN_DIAGNOSIS
-
-[HOT] Diagnosis may uncover new services or parts.
-      This requires returning to Step 4 before generating the budget.
-```
-
----
-
 ### Step 8 — Execution
 
 ```
@@ -291,6 +303,7 @@ flowchart LR
 ---
 
 ### Step 9 — Completion and Delivery
+
 
 ```
 [ACT] Mechanic
@@ -479,14 +492,14 @@ Any other transition must throw `InvalidStatusTransitionException`.
 
 ---
 
-## Hot Spots (Open Questions)
+## Hot Spots
 
-| # | Description | Impact |
-|---|---|---|
-| 1 | Diagnosis may uncover new services — how to reopen OS composition? | Medium |
-| 2 | Insufficient stock when adding a part — block or warn? | High |
-| 3 | Customer queries status without authentication — how to identify them? | Medium |
-| 4 | Partial item cancellation on an OS before approval | Low |
+| # | Description | Status | Resolution |
+|---|---|---|---|
+| 1 | Diagnosis may uncover new services — how to reopen OS composition? | ✅ Resolved | Diagnosis (Step 4) now precedes composition (Step 5). Items can be added while status is IN_DIAGNOSIS. |
+| 2 | Insufficient stock when adding a part — block or warn? | ✅ Resolved | Add part as `UNAVAILABLE`, alert attendant. No stock reservation. Excluded from budget total. Customer decides at approval. |
+| 3 | Customer queries status without authentication — how to identify them? | Open | Public endpoint `GET /service-orders/{id}/status` — no auth required |
+| 4 | Partial item cancellation on an OS before approval | Open | Low priority for Phase 1 |
 
 ---
 
@@ -499,3 +512,29 @@ Any other transition must throw `InvalidStatusTransitionException`.
 | **Mechanic** | Shop technician | Start diagnosis, start execution, complete OS |
 | **Administrator** | System manager | Full access: CRUDs, reports, users |
 | **System** | Internal automations | Generate budget, update status, record stock movements |
+
+---
+
+## Changelog
+
+### 2026-03-14 — Domain review by team
+
+**1. Step ordering fix — Diagnosis before Composition**
+- Previous flow: OS Created → Add Items → Diagnosis
+- Corrected flow: OS Created → Diagnosis (IN_DIAGNOSIS) → Add Items → Generate Budget
+- Rationale: the mechanic must evaluate the vehicle first before knowing which services and parts are needed. Composition only makes sense after diagnosis.
+
+**2. PartItem availability — AVAILABLE / UNAVAILABLE**
+- Previous behaviour: insufficient stock was an open hot spot (block or warn?)
+- New behaviour: when stock is insufficient, the part is added to the OS with `availability: UNAVAILABLE`. The attendant is alerted. No stock reservation is made for unavailable parts.
+- Unavailable parts are listed in the budget but **excluded from the total**.
+- The customer sees the full picture at approval time and decides whether to proceed knowing some parts are missing.
+
+**3. Budget calculation policy updated**
+- Previous: `Total = sum(service price * qty) + sum(part price * qty)`
+- Updated: `Total = sum(AVAILABLE service price * qty) + sum(AVAILABLE part price * qty)`
+- UNAVAILABLE items appear in the budget document for transparency but do not affect the total.
+
+**4. OS composition restriction tightened**
+- Previous: items could be added while status is `RECEIVED` or `IN_DIAGNOSIS`
+- Updated: items can only be added while status is `IN_DIAGNOSIS` (diagnosis must happen first)
