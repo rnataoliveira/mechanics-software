@@ -139,9 +139,9 @@ sequenceDiagram
 
 ---
 
-## Story 5 — Service Order Creation
+## Story 5 — Service Order Creation and Diagnosis
 
-**Scenario:** With customer and vehicle identified, the attendant opens a service order and adds services and parts. All parts have sufficient stock.
+**Scenario:** With customer and vehicle identified, the attendant opens a service order. The mechanic starts diagnosis and then adds services and parts. All parts have sufficient stock.
 
 ### Steps
 
@@ -150,13 +150,16 @@ sequenceDiagram
 2. System        → creates             → Service Order              → with status RECEIVED
 3. System        → links               → Customer + Vehicle         → to Service Order
 4. System        → confirms            → Service Order created      → to Attendant
-5. Attendant     → adds                → Service                    → to Service Order
-6. System        → records             → Service item               → in Service Order
-7. Attendant     → adds                → Part                       → to Service Order
-8. System        → checks              → Stock availability          → for Part
-9. System        → reserves            → Part quantity              → in Stock
-10. System       → records             → Stock Movement (RESERVATION) → in Database
-11. System       → confirms            → Part added                 → to Attendant
+5. Attendant     → hands over          → Vehicle                    → to Mechanic
+6. Mechanic      → starts              → Diagnosis                  → in System
+7. System        → transitions         → Service Order status        → to IN_DIAGNOSIS
+8. Mechanic      → adds                → Service                    → to Service Order
+9. System        → records             → Service item               → in Service Order
+10. Mechanic     → adds                → Part                       → to Service Order
+11. System       → checks              → Stock availability          → for Part
+12. System       → reserves            → Part quantity              → in Stock
+13. System       → records             → Stock Movement (RESERVATION) → in Database
+14. System       → confirms            → Part added (AVAILABLE)     → to Mechanic
 ```
 
 ### Sequence Diagram
@@ -164,6 +167,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor Attendant
+    actor Mechanic
     participant System
     participant Stock
 
@@ -171,45 +175,57 @@ sequenceDiagram
     System->>System: create ServiceOrder (status: RECEIVED)
     System-->>Attendant: service order created
 
-    Attendant->>System: add service to order
-    System-->>Attendant: service added
+    Attendant->>Mechanic: hands over vehicle
+    Mechanic->>System: start diagnosis (serviceOrderId)
+    System->>System: status → IN_DIAGNOSIS
+    System-->>Mechanic: status updated
 
-    Attendant->>System: add part to order
+    Mechanic->>System: add service to order
+    System-->>Mechanic: service added
+
+    Mechanic->>System: add part to order
     System->>Stock: check availability
     Stock-->>System: available
     System->>Stock: reserve quantity
     Stock->>Stock: record movement (RESERVATION)
-    System-->>Attendant: part added
+    System-->>Mechanic: part added (AVAILABLE)
 ```
 
 ---
 
 ## Story 6 — Part Added with Insufficient Stock
 
-**Scenario:** The attendant tries to add a part to a service order but the stock is insufficient. The attendant receives a warning and the part is not added.
+**Scenario:** The mechanic tries to add a part to a service order but the stock is insufficient. The part is added as UNAVAILABLE — it is recorded on the order but excluded from the budget total. The attendant is alerted.
 
 ### Steps
 
 ```
-1. Attendant     → adds                → Part                       → to Service Order
+1. Mechanic      → adds                → Part                       → to Service Order
 2. System        → checks              → Stock availability          → for Part
-3. System        → returns             → insufficient stock warning  → to Attendant
-4. Attendant     → notifies            → Customer                   → about missing part
+3. System        → adds                → Part (UNAVAILABLE)         → to Service Order
+4. System        → alerts              → Attendant                  → about missing stock
+5. System        → confirms            → Part added as UNAVAILABLE  → to Mechanic
 ```
+
+> **Note:** No stock reservation is made for UNAVAILABLE parts. The part appears on the
+> budget for transparency but is excluded from the total. The customer decides at
+> approval time whether to proceed without the unavailable part.
 
 ### Sequence Diagram
 
 ```mermaid
 sequenceDiagram
+    actor Mechanic
     actor Attendant
     participant System
     participant Stock
 
-    Attendant->>System: add part to order
+    Mechanic->>System: add part to order
     System->>Stock: check availability
     Stock-->>System: insufficient stock
-    System-->>Attendant: warning: insufficient stock
-    Attendant->>Attendant: notifies customer about missing part
+    System->>System: add PartItem (availability: UNAVAILABLE)
+    System-->>Attendant: alert: part X has insufficient stock
+    System-->>Mechanic: part added as UNAVAILABLE (excluded from budget total)
 ```
 
 ---
