@@ -11,6 +11,7 @@ obj/
 *.user
 *.suo
 .vs/
+.idea/
 TestResults/
 coverage/
 *.coverage
