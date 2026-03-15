@@ -4,3 +4,15 @@ __pycache__/
 *.pyc
 .DS_Store
 node_modules/
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.idea/
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
