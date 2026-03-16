@@ -53,6 +53,7 @@ graph TD
 - **Operations:** creation, item management, state machine, approval
 - **Upstream dependencies:** Customers, Vehicles, Inventory
 - **Exposes:** public status endpoint (no JWT required)
+- **Metrics endpoint:** `GET /api/metrics/average-execution-time` (JWT required) — returns average time between `created_at` and `completed_at` for all COMPLETED/DELIVERED orders (FR-29)
 
 ### Inventory
 - **Core:** `Part` + `StockMovement`

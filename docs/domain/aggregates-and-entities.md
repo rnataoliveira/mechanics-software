@@ -65,6 +65,7 @@ erDiagram
         uuid part_id
         int quantity
         decimal unit_price
+        string status
     }
     StockMovement {
         uuid id
@@ -262,7 +263,11 @@ serviceOrderId
 partId
 quantity
 unitPrice  (price snapshot at the time of addition)
+status     'AVAILABLE' | 'UNAVAILABLE'
+           UNAVAILABLE = added to OS but not reserved — stock was insufficient at the time
 ```
+
+**Rule:** only `AVAILABLE` PartItems are included in the budget total (BR-03).
 
 ### Budget
 ```

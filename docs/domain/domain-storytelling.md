@@ -286,7 +286,7 @@ sequenceDiagram
 
 ---
 
-## Story 8b — Diagnosis Closed, Budget Requested
+## Story 9 — Diagnosis Closed, Budget Generated and Sent
 
 **Scenario:** The mechanic finishes the diagnosis and notifies the attendant. The attendant generates and sends the budget, transitioning the order to AWAITING_APPROVAL.
 
@@ -320,42 +320,6 @@ sequenceDiagram
     Attendant->>System: send budget to customer
     System->>System: status → AWAITING_APPROVAL
     System-->>Attendant: budget sent
-```
-
----
-
-## Story 9 — Budget Generation and Sending
-
-**Scenario:** After diagnosis, the attendant requests the budget. The system calculates and sends it to the customer.
-
-### Steps
-
-```
-1. Attendant     → requests            → Budget generation          → from System
-2. System        → calculates          → Budget total               → from services + parts prices
-3. System        → creates             → Budget record              → in Database
-4. System        → confirms            → Budget generated           → to Attendant
-5. Attendant     → sends               → Budget                     → to Customer (via API)
-6. System        → transitions         → Service Order status        → to AWAITING_APPROVAL
-7. System        → notifies            → Customer                   → about Budget
-```
-
-### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    actor Attendant
-    actor Customer
-    participant System
-
-    Attendant->>System: generate budget (serviceOrderId)
-    System->>System: calculate total (services + parts)
-    System->>System: create Budget record
-    System-->>Attendant: budget generated
-
-    Attendant->>System: send budget to customer
-    System->>System: status → AWAITING_APPROVAL
-    System-->>Customer: budget notification
 ```
 
 ---
@@ -622,6 +586,64 @@ sequenceDiagram
 
 ---
 
+## Story 17 — Service Registration in Catalogue
+
+**Scenario:** An administrator registers a new service in the services catalogue.
+
+### Steps
+
+```
+1. Admin         → registers           → Service (name, description, price, duration) → in System
+2. System        → validates           → Service data                → (unique name, positive price)
+3. System        → saves               → Service                    → in Database
+4. System        → confirms            → Service registered         → to Admin
+```
+
+### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    actor Admin
+    participant System
+
+    Admin->>System: register service (name, description, basePrice, estimatedMinutes)
+    System->>System: validate service data (unique name, positive price, positive duration)
+    System->>System: save service to database
+    System-->>Admin: service registered
+```
+
+---
+
+## Story 18 — User Login
+
+**Scenario:** An attendant logs in to the system using their credentials and receives a JWT token.
+
+### Steps
+
+```
+1. User          → submits             → credentials (email + password) → to System
+2. System        → looks up            → User by email                  → in Database
+3. System        → validates           → password against BCrypt hash   → internally
+4. System        → issues              → JWT Token                      → to User
+```
+
+### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant API
+    participant System
+
+    User->>API: POST /api/auth/login (email, password)
+    API->>System: look up user by email
+    System-->>API: user record
+    API->>API: verify password against BCrypt hash
+    API-->>User: JWT token (on success) or 401 Unauthorized (on failure)
+```
+
+---
+
 ## Actor Summary
 
 | Actor | Role | Key Interactions |
@@ -629,7 +651,7 @@ sequenceDiagram
 | **Customer** | Vehicle owner | Arrives, approves/rejects budget, queries status, picks up vehicle |
 | **Attendant** | Front-desk staff | Identifies customer/vehicle, creates service order, adds items, sends budget, registers delivery |
 | **Mechanic** | Shop technician | Starts diagnosis, adds discovered items, executes services, confirms part usage, completes order |
-| **Administrator** | System manager | Manages parts catalog, replenishes stock |
+| **Administrator** | System manager | Manages parts catalog, replenishes stock, manages services catalogue, creates users |
 | **System** | Internal automations | Validates data, transitions status, calculates budget, manages stock movements |
 
 ---
@@ -660,8 +682,7 @@ sequenceDiagram
 | 6 | Attendant | Part added — insufficient stock warning |
 | 7 | Mechanic | Diagnosis started — no new items |
 | 8 | Mechanic | Diagnosis — new items discovered |
-| 8b | Mechanic + Attendant | Diagnosis closed — budget requested and sent |
-| 9 | Attendant | Budget generated and sent (standalone) |
+| 9 | Mechanic + Attendant | Diagnosis closed — budget generated and sent |
 | 10 | Customer | Budget approved |
 | 11 | Customer | Budget rejected — order cancelled |
 | 11b | Mechanic | Mechanic starts execution after approval |
@@ -670,3 +691,5 @@ sequenceDiagram
 | 14 | Customer | Status queried without login |
 | 15 | Admin | Part registered in catalog |
 | 16 | Admin | Stock replenished |
+| 17 | Admin | Service registered in catalogue |
+| 18 | User | Login and JWT token issued |
