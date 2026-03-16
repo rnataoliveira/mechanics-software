@@ -558,7 +558,7 @@ flowchart LR
 
 | # | Description | Status |
 |---|---|---|
-| 1 | Diagnosis may uncover new services — how to reopen OS composition? | Open |
+| 1 | Diagnosis may uncover new services — how to reopen OS composition? | **Resolved:** Diagnosis (Step 4) precedes composition (Step 5) — items discovered during diagnosis are added in Step 5 |
 | 2 | Insufficient stock when adding a part — block or warn? | **Resolved:** add as UNAVAILABLE, exclude from budget |
 | 3 | Customer queries status without authentication — how to identify them? | **Resolved:** by service order ID (public endpoint) |
 | 4 | Partial item cancellation on an OS before approval | Open |
@@ -570,7 +570,7 @@ flowchart LR
 | Actor | Description | Permissions |
 |---|---|---|
 | **Customer** | Vehicle owner | Query OS status (public), approve/reject budget |
-| **Attendant** | Front-desk staff | Create OS, register items, send budget, register delivery |
-| **Mechanic** | Shop technician | Start diagnosis, start execution, complete OS |
+| **Attendant** | Front-desk staff | Create OS, send budget, register delivery |
+| **Mechanic** | Shop technician | Start diagnosis, add services/parts, execute services, complete OS |
 | **Administrator** | System manager | Full access: CRUDs, reports, users |
 | **System** | Internal automations | Generate budget, update status, record stock movements |
