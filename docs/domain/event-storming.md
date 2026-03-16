@@ -347,8 +347,8 @@ flowchart LR
     C2 --> E2{{Stock Replenished\nMovement: INBOUND}}:::event
 
     SYS([System]):::actor --> C3[Reserve Part for OS]:::command
-    C3 --> E3{{Part Reserved}}:::event
-    C3 --> H1[/Insufficient Stock/]:::hotspot
+    C3 --> E3{{Part Reserved\navailability: AVAILABLE}}:::event
+    C3 --> E3b{{Part Added\nUNAVAILABLE\nno reservation}}:::event
 
     A2([Mechanic]):::actor --> C4[Confirm Part Usage]:::command
     E3 --> C4
@@ -417,8 +417,10 @@ flowchart LR
   |         +-- ok          --> [EVT] Part Reserved for OS
   |         |                   [EVT] Stock Movement Recorded (type: RESERVATION)
   |         |
-  |         +-- insufficient --> [EVT] Insufficient Stock Identified
-  |                              [HOT] Block addition to OS or allow with warning?
+  |         +-- insufficient --> [POL] Add part as UNAVAILABLE, alert attendant
+  |                              [EVT] Part Added to OS (availability: UNAVAILABLE)
+  |                              [NOTE] No stock reservation for unavailable parts
+  |                              [NOTE] Excluded from budget total
   |
   +-- [CMD] Confirm Part Usage (after execution)
   |         |
