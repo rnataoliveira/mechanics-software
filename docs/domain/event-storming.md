@@ -41,11 +41,12 @@ flowchart LR
     C3 --> E3{{OS Created\nstatus: RECEIVED}}:::event
 
     E3 --> C4[Add Services / Parts]:::command
-    C4 --> E4{{Items Added to OS}}:::event
-    C4 --> H1[/Insufficient Stock/]:::hotspot
+    C4 --> E4a{{Part Added\nAVAILABLE}}:::event
+    C4 --> E4b{{Part Added\nUNAVAILABLE}}:::event
 
-    E4 --> C5[Generate Budget]:::command
-    C5 --> E5{{Budget Generated}}:::event
+    E4a --> C5[Generate Budget]:::command
+    E4b --> C5
+    C5 --> E5{{Budget Generated\nonly AVAILABLE items}}:::event
     E5 --> C6[Send Budget]:::command
     C6 --> E6{{Budget Sent\nstatus: AWAITING_APPROVAL}}:::event
 
@@ -147,7 +148,7 @@ flowchart LR
   |    [AGG] ServiceOrder
   |         |
   |         v
-  |    [POL] OS must be in RECEIVED or IN_DIAGNOSIS status
+  |    [POL] OS must be in IN_DIAGNOSIS status
   |         |
   |         v
   |    [EVT] Service Added to OS
@@ -158,14 +159,16 @@ flowchart LR
        [AGG] ServiceOrder
             |
             v
-       [POL] OS must be in RECEIVED or IN_DIAGNOSIS status
+       [POL] OS must be in IN_DIAGNOSIS status
        [POL] Check stock availability before adding
             |
-            +-- available     --> [EVT] Part Added to OS
+            +-- available     --> [EVT] Part Added to OS (status: AVAILABLE)
             |                    [EVT] Part Reserved in Stock
             |
-            +-- not available --> [HOT] Insufficient stock
-                                   Block the action or warn the attendant?
+            +-- not available --> [EVT] Part Added to OS (status: UNAVAILABLE)
+                                  [POL] UNAVAILABLE parts are NOT reserved in stock
+                                  [POL] UNAVAILABLE parts are excluded from budget total
+                                  [POL] Attendant is alerted about insufficient stock
 ```
 
 ---
@@ -477,14 +480,83 @@ Any other transition must throw `InvalidStatusTransitionException`.
 
 ---
 
+## Flow 3 — Authentication
+
+```mermaid
+flowchart LR
+    classDef event fill:#E8902B,color:#fff,stroke:#E8902B
+    classDef command fill:#1F7EC2,color:#fff,stroke:#1F7EC2
+    classDef aggregate fill:#D4AC0D,color:#000,stroke:#D4AC0D
+    classDef policy fill:#7D3C98,color:#fff,stroke:#7D3C98
+    classDef actor fill:#F0B27A,color:#000,stroke:#E59866
+
+    A1([Admin]):::actor --> C1[Create User]:::command
+    C1 --> AGG1[User]:::aggregate
+    AGG1 --> P1[Password hashed with BCrypt]:::policy
+    P1 --> E1{{User Created}}:::event
+
+    A2([User]):::actor --> C2[Login]:::command
+    C2 --> AGG2[User]:::aggregate
+    AGG2 --> P2[Validate email + password]:::policy
+    P2 --> E2{{JWT Token Issued}}:::event
+    P2 --> E3{{Login Failed}}:::event
+```
+
+### Login Flow (Detailed)
+
+```
+[ACT] User (Attendant / Mechanic / Admin)
+  |
+  v
+[CMD] Login with email + password
+  |
+  v
+[AGG] User
+  |
+  v
+[POL] Email must exist in the system
+[POL] Password must match the BCrypt hash
+  |
+  +-- valid   --> [EVT] JWT Token Issued
+  |
+  +-- invalid --> [EVT] Login Failed (401 Unauthorized)
+```
+
+---
+
+## Flow 4 — Average Execution Time Metric (FR-29)
+
+```
+[ACT] Administrator / System
+  |
+  v
+[CMD] Query Average Execution Time
+  |
+  v
+[AGG] ServiceOrder (query projection)
+  |
+  v
+[POL] Consider only orders with status COMPLETED or DELIVERED
+[POL] Execution time = completed_at - created_at
+[POL] Average = sum(execution_times) / count(orders)
+  |
+  v
+[EVT] Average Execution Time Returned
+```
+
+> This is a read-only query — no state changes. Implemented as a dedicated endpoint
+> `GET /api/metrics/average-execution-time` (JWT required).
+
+---
+
 ## Hot Spots (Open Questions)
 
-| # | Description | Impact |
+| # | Description | Status |
 |---|---|---|
-| 1 | Diagnosis may uncover new services — how to reopen OS composition? | Medium |
-| 2 | Insufficient stock when adding a part — block or warn? | High |
-| 3 | Customer queries status without authentication — how to identify them? | Medium |
-| 4 | Partial item cancellation on an OS before approval | Low |
+| 1 | Diagnosis may uncover new services — how to reopen OS composition? | Open |
+| 2 | Insufficient stock when adding a part — block or warn? | **Resolved:** add as UNAVAILABLE, exclude from budget |
+| 3 | Customer queries status without authentication — how to identify them? | **Resolved:** by service order ID (public endpoint) |
+| 4 | Partial item cancellation on an OS before approval | Open |
 
 ---
 
