@@ -296,7 +296,7 @@ sequenceDiagram
 1. Mechanic      → notifies            → Attendant                  → that diagnosis is complete
 2. Attendant     → requests            → Budget generation          → from System
 3. System        → validates           → OS has at least one service → (business rule)
-4. System        → calculates          → Budget total               → from services + parts prices
+4. System        → calculates          → Budget total               → from AVAILABLE items only
 5. System        → creates             → Budget                     → as child of Service Order
 6. Attendant     → sends               → Budget                     → to Customer (via API)
 7. System        → transitions         → Service Order status        → to AWAITING_APPROVAL
@@ -313,7 +313,7 @@ sequenceDiagram
     Mechanic->>Attendant: notifies diagnosis is complete
     Attendant->>System: generate budget (serviceOrderId)
     System->>System: validate OS has at least one service
-    System->>System: calculate total (services + parts)
+    System->>System: calculate total (AVAILABLE items only)
     System->>System: create Budget record (child of ServiceOrder)
     System-->>Attendant: budget generated
 
