@@ -15,7 +15,7 @@ namespace MechanicsSoftware.Domain.ServiceOrders {
         public BudgetStatus TransitionTo(Status newStatus)
         {
             if (Value == newStatus)
-                throw new DomainException($"Cannot transition from '{Value} 'to '{newStatus}': already in that state.");
+                throw new DomainException($"Cannot transition from '{this}' to '{new BudgetStatus(newStatus)}': already in that state.");
 
             return (Value, newStatus) switch
             {
@@ -23,7 +23,7 @@ namespace MechanicsSoftware.Domain.ServiceOrders {
                 (Status.Pending, Status.Rejected) => new BudgetStatus(Status.Rejected),
                 (Status.Approved, _) => throw new DomainException("Cannot transition from 'APPROVED' state: it is terminal."),
                 (Status.Rejected, _) => throw new DomainException("Cannot transition from 'REJECTED' state: it is terminal."),
-                _ => throw new DomainException($"Invalid transition from {Value} to {newStatus}.")
+                _ => throw new DomainException($"Invalid transition from '{this}' to '{new BudgetStatus(newStatus)}'.")
             };
         }
 
