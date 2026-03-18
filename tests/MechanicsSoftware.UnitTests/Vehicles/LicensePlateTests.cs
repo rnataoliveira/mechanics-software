@@ -27,7 +27,7 @@ public class LicensePlateTests
     [Theory]
     [InlineData("abc1234")]
     [InlineData("Abc1D23")]
-    public void Constructor_LowercaseInput_NormalisedToUppercase(string plate)
+    public void Constructor_LowercaseInput_NormalizedToUppercase(string plate)
     {
         var lp = new LicensePlate(plate);
         lp.Value.Should().Be(plate.ToUpperInvariant());
