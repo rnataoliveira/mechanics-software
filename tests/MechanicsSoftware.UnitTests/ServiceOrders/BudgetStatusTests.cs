@@ -45,7 +45,7 @@ public class BudgetStatusTests
         var act = () => approved.TransitionTo(BudgetStatus.Status.Rejected);
 
         act.Should().Throw<DomainException>()
-            .WithMessage("*Cannot transition from 'APPROVED' state: it is terminal.");
+            .WithMessage("*Cannot transition from 'APPROVED' state: it is terminal*");
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public class BudgetStatusTests
         var act = () => approved.TransitionTo(BudgetStatus.Status.Pending);
 
         act.Should().Throw<DomainException>()
-            .WithMessage("*Cannot transition from 'APPROVED' state: it is terminal.");
+            .WithMessage("*Cannot transition from 'APPROVED' state: it is terminal*");
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public class BudgetStatusTests
         var act = () => rejected.TransitionTo(BudgetStatus.Status.Approved);
 
         act.Should().Throw<DomainException>()
-            .WithMessage("*Cannot transition from 'REJECTED' state: it is terminal.");
+            .WithMessage("*Cannot transition from 'REJECTED' state: it is terminal*");
     }
 
     [Fact]
@@ -75,7 +75,7 @@ public class BudgetStatusTests
         var act = () => rejected.TransitionTo(BudgetStatus.Status.Pending);
 
         act.Should().Throw<DomainException>()
-            .WithMessage("*Cannot transition from 'REJECTED' state: it is terminal.");
+            .WithMessage("*Cannot transition from 'REJECTED' state: it is terminal*");
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class BudgetStatusTests
         var act = () => pending.TransitionTo(BudgetStatus.Status.Pending);
 
         act.Should().Throw<DomainException>()
-            .WithMessage("*already in that state*");
+            .WithMessage("*Cannot transition from 'PENDING' to 'PENDING': already in that state.*");
     }
 
     [Fact]
