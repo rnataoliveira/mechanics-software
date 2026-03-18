@@ -18,12 +18,14 @@ public sealed partial class LicensePlate : ValueObject
         if (string.IsNullOrWhiteSpace(value))
             throw new DomainException("License plate cannot be empty.");
 
-        var normalised = value.ToUpperInvariant().Replace("-", "");
+        var normalized = value.ToUpperInvariant();
+        if (normalized.Contains('-'))
+            normalized = normalized.Replace("-", "");
 
-        if (!MercosulFormat().IsMatch(normalised) && !LegacyFormat().IsMatch(normalised))
+        if (!MercosulFormat().IsMatch(normalized) && !LegacyFormat().IsMatch(normalized))
             throw new DomainException($"'{value}' is not a valid Brazilian license plate.");
 
-        Value = normalised;
+        Value = normalized;
     }
 
     protected override IEnumerable<object?> GetEqualityComponents()
