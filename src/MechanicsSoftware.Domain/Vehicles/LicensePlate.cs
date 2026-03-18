@@ -3,10 +3,13 @@ using MechanicsSoftware.Domain.Shared;
 
 namespace MechanicsSoftware.Domain.Vehicles;
 
-public sealed class LicensePlate : ValueObject
+public sealed partial class LicensePlate : ValueObject
 {
-    private static readonly Regex MercosulFormat = new(@"^[A-Z]{3}[0-9][A-Z][0-9]{2}$", RegexOptions.Compiled);
-    private static readonly Regex LegacyFormat   = new(@"^[A-Z]{3}[0-9]{4}$",           RegexOptions.Compiled);
+    [GeneratedRegex(@"^[A-Z]{3}[0-9][A-Z][0-9]{2}$")]
+    private static partial Regex MercosulFormat();
+
+    [GeneratedRegex(@"^[A-Z]{3}[0-9]{4}$")]
+    private static partial Regex LegacyFormat();
 
     public string Value { get; }
 
@@ -17,7 +20,7 @@ public sealed class LicensePlate : ValueObject
 
         var normalised = value.ToUpperInvariant().Replace("-", "");
 
-        if (!MercosulFormat.IsMatch(normalised) && !LegacyFormat.IsMatch(normalised))
+        if (!MercosulFormat().IsMatch(normalised) && !LegacyFormat().IsMatch(normalised))
             throw new DomainException($"'{value}' is not a valid Brazilian license plate.");
 
         Value = normalised;
