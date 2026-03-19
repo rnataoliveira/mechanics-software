@@ -21,7 +21,6 @@ public sealed class Money : ValueObject
         return new(Cents * factor);
     }
 
-    /// <summary>Returns a BRL-formatted string, e.g. "R$ 150,00".</summary>
     public string ToFormatted()
     {
         var reais = Cents / 100;
@@ -32,7 +31,6 @@ public sealed class Money : ValueObject
     protected override IEnumerable<object?> GetEqualityComponents()
     {
         yield return Cents;
-        yield return Currency;
     }
 
     public override string ToString() => ToFormatted();
