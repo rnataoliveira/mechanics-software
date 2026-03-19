@@ -5,6 +5,9 @@ __pycache__/
 .DS_Store
 node_modules/
 
+# Claude Code (local config)
+.claude/
+
 # .NET
 bin/
 obj/
