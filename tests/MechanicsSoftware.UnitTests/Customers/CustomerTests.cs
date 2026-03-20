@@ -1,3 +1,4 @@
+using FluentAssertions;
 using MechanicsSoftware.Domain.Customers;
 using MechanicsSoftware.Domain.Shared;
 
@@ -5,8 +6,6 @@ namespace MechanicsSoftware.UnitTests.Domain.Customers;
 
 public class CustomerTests
 {
-    // ── fixtures ─────────────────────────────────────────────────────────────
-
     private const string ValidName  = "João Silva";
     private const string ValidCpf   = "529.982.247-25";
     private const string ValidCnpj  = "11.222.333/0001-81";
@@ -14,24 +13,25 @@ public class CustomerTests
     private const string ValidPhone = "(31) 98765-4321";
 
     private static Customer Build(
+        Guid id           = default,
         string name       = ValidName,
         string taxId      = ValidCpf,
         PersonType type   = PersonType.INDIVIDUAL,
         string email      = ValidEmail,
         string phone      = ValidPhone) =>
-        Customer.Create(name, taxId, type, email, phone);
-
-    // ── creation — happy path ────────────────────────────────────────────────
+        Customer.Create(
+            id == default ? Guid.NewGuid() : id,
+            name, taxId, type, email, phone);
 
     [Fact]
     public void Create_ValidData_ReturnsCreatedCustomer()
     {
         var customer = Build();
 
-        Assert.Equal("João Silva", customer.Name);
-        Assert.Equal("52998224725", customer.Document.Value);
-        Assert.Equal("joao@email.com", customer.Email.Value);
-        Assert.NotEqual(Guid.Empty, customer.Id);
+        customer.Name.Should().Be("João Silva");
+        customer.Document.Value.Should().Be("52998224725");
+        customer.Email.Value.Should().Be("joao@email.com");
+        customer.Id.Should().NotBe(Guid.Empty);
     }
 
     [Fact]
@@ -39,7 +39,7 @@ public class CustomerTests
     {
         var customer = Build(taxId: ValidCnpj, type: PersonType.COMPANY);
 
-        Assert.Equal(PersonType.COMPANY, customer.Document.PersonType);
+        customer.Document.PersonType.Should().Be(PersonType.COMPANY);
     }
 
     [Fact]
@@ -47,10 +47,8 @@ public class CustomerTests
     {
         var customer = Build(name: "  Maria  ", phone: "  31987654321  ");
 
-        Assert.Equal("Maria", customer.Name);
+        customer.Name.Should().Be("Maria");
     }
-
-    // ── creation — sad path ──────────────────────────────────────────────────
 
     [Theory]
     [InlineData("")]
@@ -58,36 +56,44 @@ public class CustomerTests
     [InlineData("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")]
     public void Create_InvalidName_ThrowsDomainException(string name)
     {
-        Assert.Throws<DomainException>(() => Build(name: name));
+        var act = () => Build(name: name);
+
+        act.Should().Throw<DomainException>();
     }
 
     [Fact]
     public void Create_NameTooLong_ThrowsDomainException()
     {
         var longName = new string('A', 101);
-        Assert.Throws<DomainException>(() => Build(name: longName));
+        var act = () => Build(name: longName);
+
+        act.Should().Throw<DomainException>();
     }
 
     [Theory]
-    [InlineData("1234567890121423")] // 16 digits — too long
+    [InlineData("1234567890121423")]
     public void Create_InvalidPhone_ThrowsDomainException(string phone)
     {
-        Assert.Throws<DomainException>(() => Build(phone: phone));
+        var act = () => Build(phone: phone);
+
+        act.Should().Throw<DomainException>();
     }
 
     [Fact]
     public void Create_InvalidTaxId_ThrowsDomainException()
     {
-        Assert.Throws<DomainException>(() => Build(taxId: "000.000.000-00"));
+        var act = () => Build(taxId: "000.000.000-00");
+
+        act.Should().Throw<DomainException>();
     }
 
     [Fact]
     public void Create_InvalidEmail_ThrowsDomainException()
     {
-        Assert.Throws<DomainException>(() => Build(email: "not-an-email"));
-    }
+        var act = () => Build(email: "not-an-email");
 
-    // ── update ───────────────────────────────────────────────────────────────
+        act.Should().Throw<DomainException>();
+    }
 
     [Fact]
     public void Update_ValidData_ChangesNameEmailPhone()
@@ -96,8 +102,8 @@ public class CustomerTests
 
         customer.Update("Maria Souza", "maria@email.com", "31912345678");
 
-        Assert.Equal("Maria Souza", customer.Name);
-        Assert.Equal("maria@email.com", customer.Email.Value);
+        customer.Name.Should().Be("Maria Souza");
+        customer.Email.Value.Should().Be("maria@email.com");
     }
 
     [Fact]
@@ -108,7 +114,7 @@ public class CustomerTests
 
         customer.Update("Outro Nome", "outro@email.com", "31912345678");
 
-        Assert.Equal(originalTaxId, customer.Document.Value);
+        customer.Document.Value.Should().Be(originalTaxId);
     }
 
     [Theory]
@@ -116,17 +122,26 @@ public class CustomerTests
     public void Update_InvalidName_ThrowsDomainException(string name)
     {
         var customer = Build();
-        Assert.Throws<DomainException>(() => customer.Update(name, ValidEmail, ValidPhone));
-    }
+        var act = () => customer.Update(name, ValidEmail, ValidPhone);
 
-    // ── identity ─────────────────────────────────────────────────────────────
+        act.Should().Throw<DomainException>();
+    }
 
     [Fact]
     public void TwoCustomers_SameData_HaveDifferentIds()
     {
-        var a = Build();
-        var b = Build();
+        var a = Build(id: Guid.NewGuid());
+        var b = Build(id: Guid.NewGuid());
 
-        Assert.NotEqual(a.Id, b.Id);
+        a.Id.Should().NotBe(b.Id);
+    }
+
+    [Fact]
+    public void Create_WithExplicitId_PreservesId()
+    {
+        var id = Guid.NewGuid();
+        var customer = Build(id: id);
+
+        customer.Id.Should().Be(id);
     }
 }
