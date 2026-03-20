@@ -11,21 +11,22 @@ public sealed class Customer : Entity<Guid>
 
     private Customer() { }
 
-    private Customer(string name, TaxId taxId, Email email, string phone)
+    private Customer(Guid id, string name, TaxId taxId, Email email, string phone)
     {
-        Id = Guid.NewGuid();
+        Id = id;
         Name = name;
         Document = taxId;
         Email = email;
         Phone = phone;
     }
 
-    public static Customer Create(string name, string taxId, PersonType personType, string email, string phone)
+    public static Customer Create(Guid id, string name, string taxId, PersonType personType, string email, string phone)
     {
         ValidateName(name);
         ValidatePhone(phone);
 
         return new Customer(
+            id,
             name.Trim(),
             new TaxId(taxId, personType),
             new Email(email),
@@ -43,8 +44,6 @@ public sealed class Customer : Entity<Guid>
         Phone = phone.Trim();
     }
 
-    // ── validation ───────────────────────────────────────────────────────────
-
     private static void ValidateName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -61,7 +60,7 @@ public sealed class Customer : Entity<Guid>
 
         var digits = new string(phone.Where(char.IsDigit).ToArray());
 
-        if (digits.Length is > 15)
-            throw new DomainException("Phone must not exceed 15 digits (with area code).");
+        if (digits.Length < 8 || digits.Length > 15)
+            throw new DomainException("Phone must have between 8 and 15 digits (with area code).");
     }
 }
