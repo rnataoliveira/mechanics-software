@@ -10,25 +10,19 @@ public sealed class Service : Entity<Guid>
     public int EstimatedMinutes { get; private set; }
 
     private Service() { }
-    
+
     public static Service Create(
         Guid id,
         string name,
         string? description,
         Money basePrice,
-        int estimatedMinutes,
-        IEnumerable<string>? existingNames = null)
+        int estimatedMinutes = 0)
     {
         if (id == Guid.Empty)
             throw new DomainException("Id is required.");
 
         if (string.IsNullOrWhiteSpace(name))
             throw new DomainException("Name is required.");
-
-        name = name.Trim();
-
-        if (existingNames != null && existingNames.Any(n => string.Equals(n?.Trim(), name, StringComparison.OrdinalIgnoreCase)))
-            throw new DomainException("Service name must be unique in the catalogue.");
 
         if (basePrice is null)
             throw new DomainException("Base price is required.");
@@ -39,8 +33,8 @@ public sealed class Service : Entity<Guid>
         return new Service
         {
             Id = id,
-            Name = name,
-            Description = string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
+            Name = name.Trim(),
+            Description = description?.Trim(),
             BasePrice = basePrice,
             EstimatedMinutes = estimatedMinutes
         };
