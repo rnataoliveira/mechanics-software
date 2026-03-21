@@ -1,6 +1,6 @@
 using MechanicsSoftware.Domain.Shared;
 
-namespace  MechanicsSoftware.Domain.ServiceOrders.Exceptions;
+namespace MechanicsSoftware.Domain.ServiceOrders.Exceptions;
 
 public class InvalidStatusTransitionException: DomainException
 {
