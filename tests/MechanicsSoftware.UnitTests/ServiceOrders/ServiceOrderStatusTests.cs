@@ -1,6 +1,5 @@
 using FluentAssertions;
 using MechanicsSoftware.Domain.ServiceOrders;
-using MechanicsSoftware.Domain.ServiceOrders.Exceptions;
 
 namespace MechanicsSoftware.UnitTests.ServiceOrders;
 
