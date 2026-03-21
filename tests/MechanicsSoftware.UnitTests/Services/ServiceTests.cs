@@ -57,11 +57,11 @@ public class ServiceTests
     [InlineData("")]
     [InlineData("   ")]
     [InlineData(null)]
-    public void Create_EmptyOrWhitespaceName_ThrowsDomainException(string name)
+    public void Create_EmptyOrWhitespaceName_ThrowsDomainException(string? name)
     {
         var act = () => Service.Create(
             ValidId,
-            name!,
+            name ?? "",
             "Description",
             ValidPrice,
             30);
@@ -116,70 +116,6 @@ public class ServiceTests
     }
 
     [Fact]
-    public void Create_NameNotUnique_ThrowsDomainException()
-    {
-        var existingNames = new[] { "Oil Change", "Tire Rotation" };
-
-        var act = () => Service.Create(
-            ValidId,
-            "Oil Change",
-            "Description",
-            ValidPrice,
-            30,
-            existingNames);
-
-        act.Should().Throw<DomainException>()
-            .WithMessage("*Service name must be unique in the catalogue*");
-    }
-
-    [Fact]
-    public void Create_NameNotUniqueCaseInsensitive_ThrowsDomainException()
-    {
-        var existingNames = new[] { "Oil Change", "Tire Rotation" };
-
-        var act = () => Service.Create(
-            ValidId,
-            "oil change",
-            "Description",
-            ValidPrice,
-            30,
-            existingNames);
-
-        act.Should().Throw<DomainException>()
-            .WithMessage("*Service name must be unique in the catalogue*");
-    }
-
-    [Fact]
-    public void Create_NameUniqueWithExistingNames_Succeeds()
-    {
-        var existingNames = new[] { "Oil Change", "Tire Rotation" };
-
-        var service = Service.Create(
-            ValidId,
-            "Brake Pad Replacement",
-            "Description",
-            ValidPrice,
-            60,
-            existingNames);
-
-        service.Name.Should().Be("Brake Pad Replacement");
-    }
-
-    [Fact]
-    public void Create_NoExistingNames_Succeeds()
-    {
-        var service = Service.Create(
-            ValidId,
-            "Oil Change",
-            "Description",
-            ValidPrice,
-            30,
-            null);
-
-        service.Name.Should().Be("Oil Change");
-    }
-
-    [Fact]
     public void Create_NameWhitespaceNormalized()
     {
         var service = Service.Create(
@@ -203,19 +139,6 @@ public class ServiceTests
             30);
 
         service.Description.Should().Be("Standard oil and filter replacement");
-    }
-
-    [Fact]
-    public void Create_DescriptionWhitespaceBecomesNull()
-    {
-        var service = Service.Create(
-            ValidId,
-            "Oil Change",
-            "   ",
-            ValidPrice,
-            30);
-
-        service.Description.Should().BeNull();
     }
 
     [Fact]

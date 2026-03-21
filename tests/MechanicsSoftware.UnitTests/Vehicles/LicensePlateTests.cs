@@ -67,6 +67,7 @@ public class LicensePlateTests
     {
         var a = new LicensePlate("ABC1234");
         var b = new LicensePlate("ABC1234");
+
         a.Should().Be(b);
         (a == b).Should().BeTrue();
     }
@@ -76,6 +77,8 @@ public class LicensePlateTests
     {
         var a = new LicensePlate("ABC1234");
         var b = new LicensePlate("XYZ5678");
+
         (a != b).Should().BeTrue();
     }
 }
+
