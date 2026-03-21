@@ -174,3 +174,4 @@ public class ServiceTests
         service1.Should().NotBe(service2);
     }
 }
+
