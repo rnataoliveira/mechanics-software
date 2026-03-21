@@ -104,6 +104,19 @@ public sealed class Part : Entity<Guid>
         _movements.Add(StockMovement.Create(Id, StockMovementType.Release, quantity, reference));
     }
 
+public void Update(string name, string? description, Money unitPrice)
+{
+    if (string.IsNullOrWhiteSpace(name))
+        throw new DomainException("Part name is required.");
+
+    if (unitPrice is null)
+        throw new DomainException("Unit price is required.");
+
+    Name = name.Trim();
+    Description = description?.Trim();
+    UnitPrice = unitPrice;
+}
+
     public void Replenish(int quantity)
     {
         if (quantity <= 0)
@@ -112,4 +125,6 @@ public sealed class Part : Entity<Guid>
         StockQuantity += quantity;
         _movements.Add(StockMovement.Create(Id, StockMovementType.Inbound, quantity));
     }
+        // Bloqueia deleção se há reservas pendentes em ordens de serviço
+    public bool HasPendingReservations() => ReservedQuantity > 0;
 }
