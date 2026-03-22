@@ -50,6 +50,23 @@ public sealed class Vehicle : Entity<Guid>
         };
     }
 
+    public void Update(string make, string model, int year)
+    {
+        if (string.IsNullOrWhiteSpace(make))
+            throw new DomainException("Make is required.");
+
+        if (string.IsNullOrWhiteSpace(model))
+            throw new DomainException("Model is required.");
+
+        var currentYear = DateTime.UtcNow.Year;
+        if (year < 1886 || year > currentYear + 1)
+            throw new DomainException($"Year must be between 1886 and {currentYear + 1}.");
+
+        Make = make.Trim();
+        Model = model.Trim();
+        Year = year;
+    }
+
     public void UpdateLicensePlate(LicensePlate newLicensePlate)
     {
         if (newLicensePlate is null)
