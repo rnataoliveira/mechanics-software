@@ -117,14 +117,18 @@ public sealed class ServiceOrder : Entity<Guid>
 
     public Budget GenerateBudget()
     {
+
+        if (Budget is not null)
+            throw new DomainException("Budget already generated. Cannot overwrite an existing budget.");
+
         EnsureInDiagnosis();
 
-        var availableServices = _serviceItems;
-        if (availableServices.Count == 0)
+        var serviceItems = _serviceItems;
+        if (serviceItems.Count == 0)
             throw new DomainException(
                 "Cannot generate a budget: at least one service item is required.");
 
-        var servicesTotal = availableServices
+        var servicesTotal = serviceItems
             .Aggregate(new Money(0), (acc, item) => acc.Add(item.Total));
 
         var partsTotal = _partItems
