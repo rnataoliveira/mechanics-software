@@ -14,6 +14,6 @@ public sealed class UpdatePartUseCase(IPartRepository repository)
         part.Update(input.Name, input.Description, new Money(input.UnitPriceInCents));
 
         await repository.UpdateAsync(part, ct);
-        return CreatePartUseCase.ToOutput(part);
+        return PartOutput.From(part);
     }
 }

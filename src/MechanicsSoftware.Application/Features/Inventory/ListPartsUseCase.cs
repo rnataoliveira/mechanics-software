@@ -10,6 +10,6 @@ public sealed class ListPartsUseCase(IPartRepository repository)
         CancellationToken ct = default)
     {
         var parts = await repository.ListAsync(code, name, ct);
-        return parts.Select(CreatePartUseCase.ToOutput);
+        return parts.Select(PartOutput.From);
     }
 }

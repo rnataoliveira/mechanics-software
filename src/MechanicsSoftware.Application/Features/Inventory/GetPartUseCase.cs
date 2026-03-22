@@ -10,6 +10,6 @@ public sealed class GetPartUseCase(IPartRepository repository)
         var part = await repository.GetByIdAsync(id, ct)
                    ?? throw new DomainException($"Part with id '{id}' not found.");
 
-        return CreatePartUseCase.ToOutput(part);
+        return PartOutput.From(part);
     }
 }

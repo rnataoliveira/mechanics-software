@@ -1,12 +1,12 @@
-namespace MechanicsSoftware.Application.Features.Inventory;
+using MechanicsSoftware.Domain.Inventory;
 
-// ---- Inputs ----
+namespace MechanicsSoftware.Application.Features.Inventory;
 
 public sealed record CreatePartInput(
     string Code,
     string Name,
     string? Description,
-    int UnitPriceInCents,  // ex: 2500 = R$ 25,00
+    int UnitPriceInCents,
     int InitialStock
 );
 
@@ -20,16 +20,19 @@ public sealed record UpdateStockInput(
     int Quantity
 );
 
-// ---- Output ----
-
 public sealed record PartOutput(
     Guid Id,
     string Code,
     string Name,
     string? Description,
     int UnitPriceInCents,
-    string UnitPriceFormatted,  // ex: "R$ 25,00"
+    string UnitPriceFormatted,
     int StockQuantity,
     int ReservedQuantity,
-    int AvailableQuantity
-);
+    int AvailableQuantity)
+{
+    public static PartOutput From(Part p) =>
+        new(p.Id, p.Code, p.Name, p.Description,
+            p.UnitPrice.Cents, p.UnitPrice.ToFormatted(),
+            p.StockQuantity, p.ReservedQuantity, p.AvailableQuantity);
+}
