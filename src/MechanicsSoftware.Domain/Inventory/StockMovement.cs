@@ -7,8 +7,6 @@ public sealed class StockMovement : Entity<Guid>
     public Guid PartId { get; private set; }
     public StockMovementType Type { get; private set; }
     public int Quantity { get; private set; }
-    public string Reason { get; private set; } = string.Empty;
-
     public Guid? Reference { get; private set; }
     public DateTime CreatedAt { get; private set; }
 

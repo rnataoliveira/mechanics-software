@@ -11,10 +11,9 @@ public sealed class UpdateStockUseCase(IPartRepository repository)
         var part = await repository.GetByIdAsync(id, ct)
                    ?? throw new DomainException($"Part with id '{id}' not found.");
 
-        // Delega ao domínio — não manipula estoque diretamente
         part.Replenish(input.Quantity);
 
         await repository.UpdateAsync(part, ct);
-        return CreatePartUseCase.ToOutput(part);
+        return PartOutput.From(part);
     }
 }
