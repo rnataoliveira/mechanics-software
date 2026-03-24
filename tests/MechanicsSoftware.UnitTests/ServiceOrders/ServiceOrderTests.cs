@@ -260,7 +260,7 @@ public class ServiceOrderTests
     {
         var order = AwaitingApproval();
         var act = () => order.StartExecution();
-        act.Should().Throw<InvalidStatusTransitionException>();
+        act.Should().Throw<DomainException>();
     }
 
     [Fact]

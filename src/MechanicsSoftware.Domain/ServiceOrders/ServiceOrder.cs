@@ -71,10 +71,8 @@ public sealed class ServiceOrder : Entity<Guid>
     public void StartExecution()
     {
         if (!Status.Is(ServiceOrderStatus.Status.InExecution))
-            throw new InvalidStatusTransitionException(
-                Status.Value,
-                ServiceOrderStatus.Status.InExecution,
-                "Order must be IN_EXECUTION to start work.");
+            throw new DomainException(
+                $"Order must be IN_EXECUTION to start work. Current status: {Status}.");
     }
 
     public void Complete()
