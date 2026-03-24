@@ -1,13 +1,17 @@
+using MechanicsSoftware.Application.Common;
 using MechanicsSoftware.Domain.Inventory;
 using MechanicsSoftware.Domain.Shared;
+using Microsoft.EntityFrameworkCore;
 
 namespace MechanicsSoftware.Application.Features.Inventory;
 
-public sealed class CreatePartUseCase(IPartRepository repository)
+public sealed class CreatePartUseCase(IAppDbContext context)
 {
     public async Task<PartOutput> ExecuteAsync(CreatePartInput input, CancellationToken ct = default)
     {
-        var existing = await repository.GetByCodeAsync(input.Code, ct);
+        var existing = await context.Parts
+            .FirstOrDefaultAsync(p => p.Code == input.Code, ct);
+
         if (existing is not null)
             throw new DomainException($"A part with code '{input.Code}' already exists.");
 
@@ -20,7 +24,8 @@ public sealed class CreatePartUseCase(IPartRepository repository)
             input.InitialStock
         );
 
-        await repository.AddAsync(part, ct);
+        context.Parts.Add(part);
+        await context.SaveChangesAsync(ct);
         return PartOutput.From(part);
     }
 }

@@ -1,14 +1,15 @@
+using MechanicsSoftware.Application.Common;
+using MechanicsSoftware.Application.Common.Exceptions;
 using MechanicsSoftware.Domain.Inventory;
-using MechanicsSoftware.Domain.Shared;
 
 namespace MechanicsSoftware.Application.Features.Inventory;
 
-public sealed class GetPartUseCase(IPartRepository repository)
+public sealed class GetPartUseCase(IAppDbContext context)
 {
     public async Task<PartOutput> ExecuteAsync(Guid id, CancellationToken ct = default)
     {
-        var part = await repository.GetByIdAsync(id, ct)
-                   ?? throw new DomainException($"Part with id '{id}' not found.");
+        var part = await context.Parts.FindAsync([id], ct)
+            ?? throw new NotFoundException(nameof(Part), id);
 
         return PartOutput.From(part);
     }

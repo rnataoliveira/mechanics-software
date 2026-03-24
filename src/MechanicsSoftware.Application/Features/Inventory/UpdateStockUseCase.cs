@@ -1,19 +1,20 @@
+using MechanicsSoftware.Application.Common;
+using MechanicsSoftware.Application.Common.Exceptions;
 using MechanicsSoftware.Domain.Inventory;
-using MechanicsSoftware.Domain.Shared;
 
 namespace MechanicsSoftware.Application.Features.Inventory;
 
-public sealed class UpdateStockUseCase(IPartRepository repository)
+public sealed class UpdateStockUseCase(IAppDbContext context)
 {
     public async Task<PartOutput> ExecuteAsync(Guid id, UpdateStockInput input,
                                                CancellationToken ct = default)
     {
-        var part = await repository.GetByIdAsync(id, ct)
-                   ?? throw new DomainException($"Part with id '{id}' not found.");
+        var part = await context.Parts.FindAsync([id], ct)
+            ?? throw new NotFoundException(nameof(Part), id);
 
         part.Replenish(input.Quantity);
 
-        await repository.UpdateAsync(part, ct);
+        await context.SaveChangesAsync(ct);
         return PartOutput.From(part);
     }
 }
