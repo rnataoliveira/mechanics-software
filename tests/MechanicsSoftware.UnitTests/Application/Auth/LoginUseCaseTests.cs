@@ -95,9 +95,9 @@ public class LoginUseCaseTests
         hasher.Setup(h => h.Verify(ValidPassword, ValidHash)).Returns(false);
 
         var useCase = new LoginUseCase(db.Object, hasher.Object, jwt.Object);
-        await Assert.ThrowsAsync<UnauthorizedException>(() =>
-            useCase.HandleAsync(new LoginRequest(ValidEmail, ValidPassword)));
+        var act     = async () => await useCase.HandleAsync(new LoginRequest(ValidEmail, ValidPassword));
 
+        await act.Should().ThrowAsync<UnauthorizedException>();
         jwt.Verify(j => j.Generate(It.IsAny<User>()), Times.Never);
     }
 }
