@@ -47,6 +47,8 @@ public sealed class ServiceOrderStatus(ServiceOrderStatus.Status value): ValueOb
         _ => Value.ToString()
     };
 
+    public bool Is(Status s) => Value == s;
+
     public static ServiceOrderStatus CreateReceived() => new(Status.Received);
 
 }
