@@ -10,7 +10,7 @@ public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
         var connectionString =
             Environment.GetEnvironmentVariable("DATABASE_URL") ??
             Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") ??
-            "Host=localhost;Port=5432;Database=mechanics_software;Username=postgres;Password=postgres";
+            "Host=localhost;Port=5435;Database=mechanics_software;Username=postgres;Password=postgres";
 
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseNpgsql(connectionString)
