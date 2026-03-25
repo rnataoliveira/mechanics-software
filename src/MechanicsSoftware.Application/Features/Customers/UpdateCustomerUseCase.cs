@@ -4,17 +4,17 @@ using MechanicsSoftware.Domain.Customers;
 
 namespace MechanicsSoftware.Application.Features.Customers;
 
-public sealed class UpdateCustomerUseCase(IAppDbContext context)
+public sealed class UpdateCustomerUseCase(IAppDbdb db)
 {
-    public async Task<CustomerOutput> ExecuteAsync(UpdateCustomerInput input, CancellationToken ct = default)
+    public async Task<CustomerOutput> ExecuteAsync(UpdateCustomerRequest request, CancellationToken cancellationToken = default)
     {
-        var customer = await context.Customers.FindAsync([input.Id], ct)
-            ?? throw new NotFoundException(nameof(Customer), input.Id);
+        var customer = await db.Customers.FindAsync([request.Id], cancellationToken)
+            ?? throw new NotFoundException(nameof(Customer), request.Id);
 
-        var email = new Email(input.Email);
-        customer.Update(input.Name, email, input.Phone);
+        var email = new Email(request.Email);
+        customer.Update(request.Name, email, request.Phone);
 
-        await context.SaveChangesAsync(ct);
+        await db.SaveChangesAsync(cancellationToken);
 
         return CustomerOutput.From(customer);
     }

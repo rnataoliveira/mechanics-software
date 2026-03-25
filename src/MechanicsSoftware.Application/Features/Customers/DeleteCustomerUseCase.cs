@@ -4,14 +4,14 @@ using MechanicsSoftware.Domain.Customers;
 
 namespace MechanicsSoftware.Application.Features.Customers;
 
-public sealed class DeleteCustomerUseCase(IAppDbContext context)
+public sealed class DeleteCustomerUseCase(IAppDbContext db)
 {
-    public async Task ExecuteAsync(Guid id, CancellationToken ct = default)
+    public async Task ExecuteAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var customer = await context.Customers.FindAsync([id], ct)
+        var customer = await db.Customers.FindAsync([id], cancellationToken)
             ?? throw new NotFoundException(nameof(Customer), id);
 
-        context.Customers.Remove(customer);
-        await context.SaveChangesAsync(ct);
+        db.Customers.Remove(customer);
+        await db.SaveChangesAsync(cancellationToken);
     }
 }

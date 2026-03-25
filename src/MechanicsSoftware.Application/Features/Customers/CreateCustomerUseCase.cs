@@ -5,30 +5,30 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MechanicsSoftware.Application.Features.Customers;
 
-public sealed class CreateCustomerUseCase(IAppDbContext context)
+public sealed class CreateCustomerUseCase(IAppDbContext db)
 {
-    public async Task<CustomerOutput> ExecuteAsync(CreateCustomerInput input, CancellationToken ct = default)
+    public async Task<CustomerOutput> ExecuteAsync(CreateCustomerRequest request, CancellationToken cancellationToken = default)
     {
-        var existing = await context.Customers
-            .FirstOrDefaultAsync(c => c.Document.Value == input.Document, ct);
+        var existing = await db.Customers
+            .FirstOrDefaultAsync(c => c.Document.Value == request.Document, cancellationToken);
 
         if (existing is not null)
-            throw new DomainException($"A customer with document '{input.Document}' already exists.");
+            throw new DomainException($"A customer with document '{request.Document}' already exists.");
 
-        var personType = Enum.Parse<PersonType>(input.PersonType, ignoreCase: true);
-        var taxId = new TaxId(personType, input.Document);
-        var email = new Email(input.Email);
+        var personType = Enum.Parse<PersonType>(request.PersonType, ignoreCase: true);
+        var taxId = new TaxId(personType, request.Document);
+        var email = new Email(request.Email);
 
         var customer = Customer.Create(
             Guid.NewGuid(),
             personType,
             taxId,
-            input.Name,
+            request.Name,
             email,
-            input.Phone);
+            request.Phone);
 
-        context.Customers.Add(customer);
-        await context.SaveChangesAsync(ct);
+        db.Customers.Add(customer);
+        await db.SaveChangesAsync(cancellationToken);
 
         return CustomerOutput.From(customer);
     }

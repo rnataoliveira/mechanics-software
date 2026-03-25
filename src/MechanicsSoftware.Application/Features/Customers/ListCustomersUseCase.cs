@@ -3,30 +3,30 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MechanicsSoftware.Application.Features.Customers;
 
-public sealed class ListCustomersUseCase(IAppDbContext context)
+public sealed class ListCustomersUseCase(IAppDbContext db)
 {
-    public async Task<ListCustomersOutput> ExecuteAsync(ListCustomersInput input, CancellationToken ct = default)
+    public async Task<ListCustomersOutput> ExecuteAsync(ListCustomersRequest request, CancellationToken cancellationToken = default)
     {
-        var query = context.Customers.AsQueryable();
+        var query = db.Customers.AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(input.Name))
-            query = query.Where(c => c.Name.Contains(input.Name));
+        if (!string.IsNullOrWhiteSpace(request.Name))
+            query = query.Where(c => c.Name.Contains(request.Name));
 
-        if (!string.IsNullOrWhiteSpace(input.Document))
-            query = query.Where(c => c.Document.Value == input.Document);
+        if (!string.IsNullOrWhiteSpace(request.Document))
+            query = query.Where(c => c.Document.Value == request.Document);
 
-        var totalCount = await query.CountAsync(ct);
+        var totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query
             .OrderBy(c => c.Name)
-            .Skip((input.Page - 1) * input.PageSize)
-            .Take(input.PageSize)
-            .ToListAsync(ct);
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync(cancellationToken);
 
         return new ListCustomersOutput(
             items.Select(CustomerOutput.From).ToList(),
             totalCount,
-            input.Page,
-            input.PageSize);
+            request.Page,
+            request.PageSize);
     }
 }
