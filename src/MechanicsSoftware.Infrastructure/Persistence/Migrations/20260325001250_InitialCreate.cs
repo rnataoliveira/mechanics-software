@@ -197,7 +197,7 @@ namespace MechanicsSoftware.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_budgets_service_order_id",
+                name: "ix_budgets_service_order_id",
                 table: "budgets",
                 column: "service_order_id",
                 unique: true);
@@ -215,7 +215,7 @@ namespace MechanicsSoftware.Infrastructure.Persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_part_items_service_order_id",
+                name: "ix_part_items_service_order_id",
                 table: "part_items",
                 column: "service_order_id");
 
@@ -226,17 +226,17 @@ namespace MechanicsSoftware.Infrastructure.Persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_service_items_service_order_id",
+                name: "ix_service_items_service_order_id",
                 table: "service_items",
                 column: "service_order_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_service_orders_customer_id",
+                name: "ix_service_orders_customer_id",
                 table: "service_orders",
                 column: "customer_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_service_orders_vehicle_id",
+                name: "ix_service_orders_vehicle_id",
                 table: "service_orders",
                 column: "vehicle_id");
 
@@ -247,12 +247,12 @@ namespace MechanicsSoftware.Infrastructure.Persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_stock_movements_part_id",
+                name: "ix_stock_movements_part_id",
                 table: "stock_movements",
                 column: "part_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_vehicles_customer_id",
+                name: "ix_vehicles_customer_id",
                 table: "vehicles",
                 column: "customer_id");
 

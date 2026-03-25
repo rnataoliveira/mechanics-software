@@ -44,6 +44,9 @@ public sealed class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
             .IsUnique()
             .HasDatabaseName("ix_vehicles_license_plate");
 
+        builder.HasIndex(v => v.CustomerId)
+            .HasDatabaseName("ix_vehicles_customer_id");
+
         builder.HasOne<Customer>()
             .WithMany()
             .HasForeignKey(v => v.CustomerId)

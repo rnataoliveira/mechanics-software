@@ -13,7 +13,9 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            ?? configuration["DATABASE_URL"]
+            ?? throw new InvalidOperationException(
+                "Connection string not found. Set 'ConnectionStrings:DefaultConnection' or 'DATABASE_URL'.");
 
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(connectionString));

@@ -26,8 +26,8 @@ public sealed class ServiceOrderConfiguration : IEntityTypeConfiguration<Service
 
         builder.Property(so => so.Status)
             .HasConversion(
-                v => v.Value.ToString(),
-                v => new ServiceOrderStatus(Enum.Parse<ServiceOrderStatus.Status>(v)))
+                v => v.ToString(),
+                v => ParseOrderStatus(v))
             .HasColumnName("status")
             .HasMaxLength(30)
             .IsRequired();
@@ -46,6 +46,7 @@ public sealed class ServiceOrderConfiguration : IEntityTypeConfiguration<Service
             si.Property(s => s.Id).HasColumnName("id");
             si.WithOwner().HasForeignKey(s => s.ServiceOrderId);
             si.Property(s => s.ServiceOrderId).HasColumnName("service_order_id");
+            si.HasIndex(s => s.ServiceOrderId).HasDatabaseName("ix_service_items_service_order_id");
             si.Property(s => s.ServiceId).HasColumnName("service_id").IsRequired();
             si.Property(s => s.ServiceName)
                 .HasColumnName("service_name")
@@ -66,6 +67,7 @@ public sealed class ServiceOrderConfiguration : IEntityTypeConfiguration<Service
             pi.Property(p => p.Id).HasColumnName("id");
             pi.WithOwner().HasForeignKey(p => p.ServiceOrderId);
             pi.Property(p => p.ServiceOrderId).HasColumnName("service_order_id");
+            pi.HasIndex(p => p.ServiceOrderId).HasDatabaseName("ix_part_items_service_order_id");
             pi.Property(p => p.PartId).HasColumnName("part_id").IsRequired();
             pi.Property(p => p.PartName)
                 .HasColumnName("part_name")
@@ -90,19 +92,23 @@ public sealed class ServiceOrderConfiguration : IEntityTypeConfiguration<Service
             budget.Property(b => b.Id).HasColumnName("id");
             budget.WithOwner().HasForeignKey(b => b.ServiceOrderId);
             budget.Property(b => b.ServiceOrderId).HasColumnName("service_order_id");
+            budget.HasIndex(b => b.ServiceOrderId).IsUnique().HasDatabaseName("ix_budgets_service_order_id");
             budget.Property(b => b.Total)
                 .HasConversion(m => m.Cents, m => new Money(m))
                 .HasColumnName("total")
                 .IsRequired();
             budget.Property(b => b.Status)
                 .HasConversion(
-                    v => v.Value.ToString(),
-                    v => new BudgetStatus(Enum.Parse<BudgetStatus.Status>(v)))
+                    v => v.ToString(),
+                    v => ParseBudgetStatus(v))
                 .HasColumnName("status")
                 .HasMaxLength(20)
                 .IsRequired();
             budget.Property(b => b.CreatedAt).HasColumnName("created_at").IsRequired();
         });
+
+        builder.HasIndex(so => so.CustomerId).HasDatabaseName("ix_service_orders_customer_id");
+        builder.HasIndex(so => so.VehicleId).HasDatabaseName("ix_service_orders_vehicle_id");
 
         builder.HasOne<Customer>()
             .WithMany()
@@ -114,4 +120,26 @@ public sealed class ServiceOrderConfiguration : IEntityTypeConfiguration<Service
             .HasForeignKey(so => so.VehicleId)
             .OnDelete(DeleteBehavior.Restrict);
     }
+
+    private static ServiceOrderStatus ParseOrderStatus(string value) =>
+        new(value switch
+        {
+            "RECEIVED"          => ServiceOrderStatus.Status.Received,
+            "IN_DIAGNOSIS"      => ServiceOrderStatus.Status.InDiagnosis,
+            "AWAITING_APPROVAL" => ServiceOrderStatus.Status.AwaitingApproval,
+            "IN_EXECUTION"      => ServiceOrderStatus.Status.InExecution,
+            "COMPLETED"         => ServiceOrderStatus.Status.Completed,
+            "DELIVERED"         => ServiceOrderStatus.Status.Delivered,
+            "CANCELLED"         => ServiceOrderStatus.Status.Cancelled,
+            _ => throw new InvalidOperationException($"Unknown service order status: '{value}'")
+        });
+
+    private static BudgetStatus ParseBudgetStatus(string value) =>
+        new(value switch
+        {
+            "PENDING"  => BudgetStatus.Status.Pending,
+            "APPROVED" => BudgetStatus.Status.Approved,
+            "REJECTED" => BudgetStatus.Status.Rejected,
+            _ => throw new InvalidOperationException($"Unknown budget status: '{value}'")
+        });
 }

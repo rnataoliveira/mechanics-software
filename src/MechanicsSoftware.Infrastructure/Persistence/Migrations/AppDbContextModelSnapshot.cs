@@ -142,9 +142,11 @@ namespace MechanicsSoftware.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_service_orders_customer_id");
 
-                    b.HasIndex("VehicleId");
+                    b.HasIndex("VehicleId")
+                        .HasDatabaseName("ix_service_orders_vehicle_id");
 
                     b.ToTable("service_orders", (string)null);
                 });
@@ -219,7 +221,8 @@ namespace MechanicsSoftware.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_vehicles_customer_id");
 
                     b.HasIndex("LicensePlate")
                         .IsUnique()
@@ -260,7 +263,8 @@ namespace MechanicsSoftware.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("Id");
 
-                            b1.HasIndex("PartId");
+                            b1.HasIndex("PartId")
+                                .HasDatabaseName("ix_stock_movements_part_id");
 
                             b1.ToTable("stock_movements", (string)null);
 
@@ -313,7 +317,8 @@ namespace MechanicsSoftware.Infrastructure.Persistence.Migrations
                             b1.HasKey("Id");
 
                             b1.HasIndex("ServiceOrderId")
-                                .IsUnique();
+                                .IsUnique()
+                                .HasDatabaseName("ix_budgets_service_order_id");
 
                             b1.ToTable("budgets", (string)null);
 
@@ -357,7 +362,8 @@ namespace MechanicsSoftware.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("Id");
 
-                            b1.HasIndex("ServiceOrderId");
+                            b1.HasIndex("ServiceOrderId")
+                                .HasDatabaseName("ix_part_items_service_order_id");
 
                             b1.ToTable("part_items", (string)null);
 
@@ -396,7 +402,8 @@ namespace MechanicsSoftware.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("Id");
 
-                            b1.HasIndex("ServiceOrderId");
+                            b1.HasIndex("ServiceOrderId")
+                                .HasDatabaseName("ix_service_items_service_order_id");
 
                             b1.ToTable("service_items", (string)null);
 
