@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using MechanicsSoftware.Application.Common;
+using MechanicsSoftware.Application.Common.Exceptions;
 using MechanicsSoftware.Application.Features.Customers;
 using MechanicsSoftware.Domain.Customers;
 using MechanicsSoftware.Domain.Shared;
@@ -15,9 +16,6 @@ public class CreateCustomerUseCaseTests
     private const string ValidCpf   = "529.982.247-25";
     private const string ValidEmail = "joel@email.com";
     private const string ValidPhone = "11999999999";
-
-    private static Customer BuildCustomer(Guid? id = null) =>
-        Customer.Create(id ?? Guid.NewGuid(), ValidName, ValidCpf, PersonType.INDIVIDUAL, ValidEmail, ValidPhone);
 
     private static (Mock<IAppDbContext> db, Mock<DbSet<Customer>> customers)
         BuildContext(List<Customer>? customers = null)
@@ -37,21 +35,14 @@ public class CreateCustomerUseCaseTests
         var (db, mockCustomers) = BuildContext();
 
         var useCase = new CreateCustomerUseCase(db.Object);
-        var input = new CreateCustomerInput(
-            PersonType: "INDIVIDUAL",
-            Document: ValidCpf,
-            Name: ValidName,
-            Email: ValidEmail,
-            Phone: ValidPhone
-        );
+        var request = new CreateCustomerRequest(ValidName, ValidCpf, "INDIVIDUAL", ValidEmail, ValidPhone);
 
-        var result = await useCase.ExecuteAsync(input);
+        var result = await useCase.ExecuteAsync(request);
 
         result.Name.Should().Be(ValidName);
-        result.Document.Should().Be(ValidCpf);
-        result.Email.Should().Be(ValidEmail);
+        result.Email.Should().Be(ValidEmail.ToLowerInvariant());
         result.Phone.Should().Be(ValidPhone);
-        result.PersonType.Should().Be("INDIVIDUAL");
+        result.DocumentValue.Should().Be("52998224725");
         result.Id.Should().NotBeEmpty();
         mockCustomers.Verify(m => m.Add(It.IsAny<Customer>()), Times.Once);
         db.Verify(d => d.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -60,19 +51,14 @@ public class CreateCustomerUseCaseTests
     [Fact]
     public async Task ExecuteAsync_DuplicateDocument_ThrowsDomainException()
     {
-        var existingCustomer = BuildCustomer();
+        var existingCustomer = Customer.Create(
+            Guid.NewGuid(), ValidName, ValidCpf, PersonType.INDIVIDUAL, ValidEmail, ValidPhone);
         var (db, _) = BuildContext(customers: [existingCustomer]);
 
         var useCase = new CreateCustomerUseCase(db.Object);
-        var input = new CreateCustomerInput(
-            PersonType: "INDIVIDUAL",
-            Document: ValidCpf,
-            Name: "Outro Nome",
-            Email: "outro@email.com",
-            Phone: "11888888888"
-        );
+        var request = new CreateCustomerRequest("Outro Cliente", ValidCpf, "INDIVIDUAL", "outro@email.com", "11888888888");
 
-        var act = async () => await useCase.ExecuteAsync(input);
+        var act = async () => await useCase.ExecuteAsync(request);
 
         await act.Should().ThrowAsync<DomainException>().WithMessage($"*{ValidCpf}*");
     }
