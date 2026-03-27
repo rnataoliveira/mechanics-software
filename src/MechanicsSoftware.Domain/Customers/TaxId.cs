@@ -48,7 +48,7 @@ public sealed class TaxId : ValueObject
         var firstDigit = CalculateCpfDigit(cpf[..9], 10);
         var secondDigit = CalculateCpfDigit(cpf[..10], 11);
 
-        return cpf.EndsWith($"{firstDigit}{secondDigit}");
+        return cpf.EndsWith($"{firstDigit}{secondDigit}", StringComparison.Ordinal);
     }
 
     private static int CalculateCpfDigit(string baseDigits, int weightStart)
@@ -76,7 +76,7 @@ public sealed class TaxId : ValueObject
         var firstDigit = CalculateCnpjDigit(cnpj[..12]);
         var secondDigit = CalculateCnpjDigit(cnpj[..12] + firstDigit);
 
-        return cnpj.EndsWith($"{firstDigit}{secondDigit}");
+        return cnpj.EndsWith($"{firstDigit}{secondDigit}", StringComparison.Ordinal);
     }
 
     private static int CalculateCnpjDigit(string baseDigits)
