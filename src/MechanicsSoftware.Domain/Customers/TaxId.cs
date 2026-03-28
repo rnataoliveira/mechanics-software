@@ -11,8 +11,11 @@ public enum PersonType
 
 public sealed class TaxId : ValueObject
 {
-    public string Value { get; }
-    public PersonType PersonType { get; }
+    public string Value { get; private set; } = null!;
+    public PersonType PersonType { get; private set; }
+
+    private TaxId() { } // required for EF Core materialization
+
     public TaxId(string input, PersonType personType)
     {
         var digits = OnlyDigits(input);
