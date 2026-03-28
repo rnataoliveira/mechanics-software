@@ -1,26 +1,23 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MechanicsSoftware.Domain.Inventory;
+using MechanicsSoftware.Domain.Shared;
 
 namespace MechanicsSoftware.Infrastructure.Persistence.Configurations;
 
-internal sealed class PartConfiguration : IEntityTypeConfiguration<Part>
+public sealed class PartConfiguration : IEntityTypeConfiguration<Part>
 {
     public void Configure(EntityTypeBuilder<Part> builder)
     {
         builder.ToTable("parts");
 
         builder.HasKey(p => p.Id);
-
-        builder.Property(p => p.Id)
-            .HasColumnName("id");
+        builder.Property(p => p.Id).HasColumnName("id");
 
         builder.Property(p => p.Code)
             .HasColumnName("code")
-            .HasMaxLength(30)
+            .HasMaxLength(50)
             .IsRequired();
-
-        builder.HasIndex(p => p.Code).IsUnique();
 
         builder.Property(p => p.Name)
             .HasColumnName("name")
@@ -31,6 +28,13 @@ internal sealed class PartConfiguration : IEntityTypeConfiguration<Part>
             .HasColumnName("description")
             .HasMaxLength(500);
 
+        builder.Property(p => p.UnitPrice)
+            .HasConversion(
+                m => m.Cents,
+                m => new Money(m))
+            .HasColumnName("unit_price")
+            .IsRequired();
+
         builder.Property(p => p.StockQuantity)
             .HasColumnName("stock_quantity")
             .IsRequired();
@@ -39,19 +43,27 @@ internal sealed class PartConfiguration : IEntityTypeConfiguration<Part>
             .HasColumnName("reserved_quantity")
             .IsRequired();
 
-        builder.OwnsOne(p => p.UnitPrice, money =>
+        builder.Ignore(p => p.AvailableQuantity);
+
+        builder.HasIndex(p => p.Code)
+            .IsUnique()
+            .HasDatabaseName("ix_parts_code");
+
+        builder.OwnsMany(p => p.Movements, sm =>
         {
-            money.Property(m => m.Cents)
-                .HasColumnName("unit_price_cents")
+            sm.ToTable("stock_movements");
+            sm.HasKey(s => s.Id);
+            sm.Property(s => s.Id).HasColumnName("id");
+            sm.WithOwner().HasForeignKey(s => s.PartId);
+            sm.Property(s => s.PartId).HasColumnName("part_id");
+            sm.HasIndex(s => s.PartId).HasDatabaseName("ix_stock_movements_part_id");
+            sm.Property(s => s.Type)
+                .HasColumnName("type")
+                .HasConversion<string>()
                 .IsRequired();
+            sm.Property(s => s.Quantity).HasColumnName("quantity").IsRequired();
+            sm.Property(s => s.Reference).HasColumnName("reference");
+            sm.Property(s => s.CreatedAt).HasColumnName("created_at").IsRequired();
         });
-
-        builder.HasMany(p => p.Movements)
-            .WithOne()
-            .HasForeignKey(sm => sm.PartId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.Navigation(p => p.Movements)
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

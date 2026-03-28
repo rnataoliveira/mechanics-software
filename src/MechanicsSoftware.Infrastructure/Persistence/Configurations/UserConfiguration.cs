@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using MechanicsSoftware.Application.Features.Auth;
+using MechanicsSoftware.Domain.Auth;
+using MechanicsSoftware.Domain.Customers;
 
 namespace MechanicsSoftware.Infrastructure.Persistence.Configurations;
 
@@ -11,17 +12,24 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.ToTable("users");
 
         builder.HasKey(u => u.Id);
+        builder.Property(u => u.Id).HasColumnName("id");
 
-        builder.Property(u => u.Id)
-            .HasColumnName("id");
+        builder.Property(u => u.Name)
+            .HasColumnName("name")
+            .HasMaxLength(100)
+            .IsRequired();
 
         builder.Property(u => u.Email)
+            .HasConversion(
+                v => v.Value,
+                v => new Email(v))
             .HasColumnName("email")
             .HasMaxLength(256)
             .IsRequired();
 
         builder.HasIndex(u => u.Email)
-            .IsUnique();
+            .IsUnique()
+            .HasDatabaseName("ix_users_email");
 
         builder.Property(u => u.PasswordHash)
             .HasColumnName("password_hash")

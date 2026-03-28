@@ -18,6 +18,11 @@ A RESTful API that manages the full lifecycle of service orders, customers, vehi
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [Docker](https://www.docker.com/products/docker-desktop) + Docker Compose
+- EF Core CLI tools
+
+```bash
+dotnet tool install --global dotnet-ef --version 8.0.0
+```
 
 ### Run with Docker (recommended)
 
@@ -49,6 +54,35 @@ dotnet run --project src/MechanicsSoftware.API
 | `JWT_SECRET` | Secret key for JWT signing | — |
 | `JWT_EXPIRATION_MINUTES` | Token expiration time | `60` |
 | `BCRYPT_SALT_ROUNDS` | BCrypt salt rounds | `12` |
+
+---
+
+## Database Migrations
+
+### Apply existing migrations
+
+```bash
+dotnet ef database update \
+  --project src/MechanicsSoftware.Infrastructure \
+  --startup-project src/MechanicsSoftware.API
+```
+
+### Add a new migration
+
+```bash
+dotnet ef migrations add <MigrationName> \
+  --project src/MechanicsSoftware.Infrastructure \
+  --startup-project src/MechanicsSoftware.API \
+  --output-dir Persistence/Migrations
+```
+
+### Remove the last migration (if not yet applied)
+
+```bash
+dotnet ef migrations remove \
+  --project src/MechanicsSoftware.Infrastructure \
+  --startup-project src/MechanicsSoftware.API
+```
 
 ---
 

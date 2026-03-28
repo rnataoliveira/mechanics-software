@@ -4,16 +4,14 @@ using MechanicsSoftware.Domain.Customers;
 
 namespace MechanicsSoftware.Infrastructure.Persistence.Configurations;
 
-internal sealed class CustomerConfiguration : IEntityTypeConfiguration<Customer>
+public sealed class CustomerConfiguration : IEntityTypeConfiguration<Customer>
 {
     public void Configure(EntityTypeBuilder<Customer> builder)
     {
         builder.ToTable("customers");
 
         builder.HasKey(c => c.Id);
-
-        builder.Property(c => c.Id)
-            .HasColumnName("id");
+        builder.Property(c => c.Id).HasColumnName("id");
 
         builder.Property(c => c.Name)
             .HasColumnName("name")
@@ -25,28 +23,29 @@ internal sealed class CustomerConfiguration : IEntityTypeConfiguration<Customer>
             .HasMaxLength(20)
             .IsRequired();
 
-        builder.OwnsOne(c => c.Document, doc =>
-        {
-            doc.Property(d => d.Value)
-                .HasColumnName("document_value")
-                .HasMaxLength(14)
-                .IsRequired();
+        // TaxId — PersonType is inferred from digit count (11=CPF/INDIVIDUAL, 14=CNPJ/COMPANY)
+        builder.Property(c => c.Document)
+            .HasConversion(
+                v => v.Value,
+                v => new TaxId(v, v.Length == 11 ? PersonType.INDIVIDUAL : PersonType.COMPANY))
+            .HasColumnName("document")
+            .HasMaxLength(14)
+            .IsRequired();
 
-            doc.Property(d => d.PersonType)
-                .HasColumnName("document_person_type")
-                .HasConversion<string>()
-                .HasMaxLength(10)
-                .IsRequired();
+        builder.Property(c => c.Email)
+            .HasConversion(
+                v => v.Value,
+                v => new Email(v))
+            .HasColumnName("email")
+            .HasMaxLength(200)
+            .IsRequired();
 
-            doc.HasIndex(d => d.Value).IsUnique();
-        });
+        builder.HasIndex(c => c.Document)
+            .IsUnique()
+            .HasDatabaseName("ix_customers_document");
 
-        builder.OwnsOne(c => c.Email, email =>
-        {
-            email.Property(e => e.Value)
-                .HasColumnName("email")
-                .HasMaxLength(256)
-                .IsRequired();
-        });
+        builder.HasIndex(c => c.Email)
+            .IsUnique()
+            .HasDatabaseName("ix_customers_email");
     }
 }

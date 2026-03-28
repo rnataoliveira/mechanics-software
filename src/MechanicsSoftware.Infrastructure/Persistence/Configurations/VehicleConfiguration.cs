@@ -1,28 +1,35 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using MechanicsSoftware.Domain.Customers;
 using MechanicsSoftware.Domain.Vehicles;
 
 namespace MechanicsSoftware.Infrastructure.Persistence.Configurations;
 
-internal sealed class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
+public sealed class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
 {
     public void Configure(EntityTypeBuilder<Vehicle> builder)
     {
         builder.ToTable("vehicles");
 
         builder.HasKey(v => v.Id);
+        builder.Property(v => v.Id).HasColumnName("id");
 
-        builder.Property(v => v.Id)
-            .HasColumnName("id");
+        builder.Property(v => v.LicensePlate)
+            .HasConversion(
+                v => v.Value,
+                v => new LicensePlate(v))
+            .HasColumnName("license_plate")
+            .HasMaxLength(10)
+            .IsRequired();
 
         builder.Property(v => v.Make)
             .HasColumnName("make")
-            .HasMaxLength(60)
+            .HasMaxLength(50)
             .IsRequired();
 
         builder.Property(v => v.Model)
             .HasColumnName("model")
-            .HasMaxLength(60)
+            .HasMaxLength(50)
             .IsRequired();
 
         builder.Property(v => v.Year)
@@ -33,14 +40,16 @@ internal sealed class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
             .HasColumnName("customer_id")
             .IsRequired();
 
-        builder.OwnsOne(v => v.LicensePlate, lp =>
-        {
-            lp.Property(l => l.Value)
-                .HasColumnName("license_plate")
-                .HasMaxLength(7)
-                .IsRequired();
+        builder.HasIndex(v => v.LicensePlate)
+            .IsUnique()
+            .HasDatabaseName("ix_vehicles_license_plate");
 
-            lp.HasIndex(l => l.Value).IsUnique();
-        });
+        builder.HasIndex(v => v.CustomerId)
+            .HasDatabaseName("ix_vehicles_customer_id");
+
+        builder.HasOne<Customer>()
+            .WithMany()
+            .HasForeignKey(v => v.CustomerId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
