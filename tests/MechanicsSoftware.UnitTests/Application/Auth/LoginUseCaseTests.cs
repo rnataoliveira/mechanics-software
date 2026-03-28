@@ -18,7 +18,7 @@ public class LoginUseCaseTests
     private const string ValidToken    = "jwt.token.here";
 
     private static User BuildUser(string email = ValidEmail, string hash = ValidHash) =>
-        User.Create(Guid.NewGuid(), "Test User", email, hash);
+        User.Create(Guid.NewGuid(), "Test User", email, hash, User.Roles.Mechanic);
 
     private static (Mock<IAppDbContext> db, Mock<IPasswordHasher> hasher, Mock<IJwtProvider> jwt)
         BuildDeps(List<User>? users = null)
