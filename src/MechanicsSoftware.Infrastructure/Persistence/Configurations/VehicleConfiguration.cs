@@ -39,8 +39,8 @@ internal sealed class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
                 .HasColumnName("license_plate")
                 .HasMaxLength(7)
                 .IsRequired();
-        });
 
-        builder.HasIndex("LicensePlate_Value").IsUnique();
+            lp.HasIndex(l => l.Value).IsUnique();
+        });
     }
 }

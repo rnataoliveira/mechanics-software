@@ -37,9 +37,9 @@ internal sealed class CustomerConfiguration : IEntityTypeConfiguration<Customer>
                 .HasConversion<string>()
                 .HasMaxLength(10)
                 .IsRequired();
-        });
 
-        builder.HasIndex("Document_Value").IsUnique();
+            doc.HasIndex(d => d.Value).IsUnique();
+        });
 
         builder.OwnsOne(c => c.Email, email =>
         {

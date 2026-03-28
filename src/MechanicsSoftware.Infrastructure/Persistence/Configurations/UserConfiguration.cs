@@ -25,7 +25,7 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.PasswordHash)
             .HasColumnName("password_hash")
-            .HasMaxLength(72)
+            .HasMaxLength(60) // BCrypt.Net-Next always produces 60-char hashes
             .IsRequired();
 
         builder.Property(u => u.Role)
