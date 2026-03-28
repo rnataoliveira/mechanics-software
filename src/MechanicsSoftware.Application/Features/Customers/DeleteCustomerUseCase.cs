@@ -5,8 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MechanicsSoftware.Application.Features.Customers;
 
-public sealed record DeleteCustomerRequest(Guid Id);
-
 public sealed class DeleteCustomerUseCase(IAppDbContext db)
 {
     public async Task ExecuteAsync(Guid id, CancellationToken cancellationToken = default)
