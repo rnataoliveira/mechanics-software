@@ -11,8 +11,8 @@ public enum PersonType
 
 public sealed class TaxId : ValueObject
 {
-    public string Value { get; private set; } = null!;
-    public PersonType PersonType { get; private set; }
+    public string Value { get; init; } = null!;
+    public PersonType PersonType { get; init; }
 
     private TaxId() { } // required for EF Core materialization
 
