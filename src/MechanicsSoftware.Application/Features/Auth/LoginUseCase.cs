@@ -21,6 +21,7 @@ public sealed class LoginUseCase(IAppDbContext context, IPasswordHasher hasher, 
         if (!hasher.Verify(request.Password, user.PasswordHash))
             throw new UnauthorizedException();
 
-        return new LoginResponse(jwt.Generate(user), jwt.ExpiresAt());
+        var token = jwt.Generate(user);
+        return new LoginResponse(token.Token, token.ExpiresAt);
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MechanicsSoftware.Application.Common;
+using MechanicsSoftware.Application.Common.Auth;
 using MechanicsSoftware.Infrastructure.Persistence;
 using MechanicsSoftware.Infrastructure.Persistence.Seeding;
 using MechanicsSoftware.Infrastructure.Security;
@@ -23,7 +24,8 @@ public static class DependencyInjection
             options.UseNpgsql(connectionString));
 
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
-        services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
+        services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
+        services.AddScoped<IJwtProvider, JwtProvider>();
         services.AddScoped<DatabaseSeeder>();
 
         return services;
