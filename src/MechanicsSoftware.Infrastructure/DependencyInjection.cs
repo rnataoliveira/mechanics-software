@@ -3,6 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MechanicsSoftware.Application.Common;
 using MechanicsSoftware.Infrastructure.Persistence;
+using MechanicsSoftware.Infrastructure.Persistence.Seeding;
+using MechanicsSoftware.Infrastructure.Security;
 
 namespace MechanicsSoftware.Infrastructure;
 
@@ -21,6 +23,8 @@ public static class DependencyInjection
             options.UseNpgsql(connectionString));
 
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
+        services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
+        services.AddScoped<DatabaseSeeder>();
 
         return services;
     }
