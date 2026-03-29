@@ -24,8 +24,10 @@ public sealed class JwtProvider : IJwtProvider
             : 60;
     }
 
-    public string Generate(User user)
+    public JwtToken Generate(User user)
     {
+        var expiresAt = DateTime.UtcNow.AddMinutes(_expirationMinutes);
+
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
@@ -39,11 +41,9 @@ public sealed class JwtProvider : IJwtProvider
 
         var token = new JwtSecurityToken(
             claims: claims,
-            expires: ExpiresAt(),
+            expires: expiresAt,
             signingCredentials: credentials);
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return new JwtToken(new JwtSecurityTokenHandler().WriteToken(token), expiresAt);
     }
-
-    public DateTime ExpiresAt() => DateTime.UtcNow.AddMinutes(_expirationMinutes);
 }

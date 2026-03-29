@@ -2,8 +2,9 @@ using MechanicsSoftware.Domain.Auth;
 
 namespace MechanicsSoftware.Application.Common.Auth;
 
+public sealed record JwtToken(string Token, DateTime ExpiresAt);
+
 public interface IJwtProvider
 {
-    string Generate(User user);
-    DateTime ExpiresAt();
+    JwtToken Generate(User user);
 }
