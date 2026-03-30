@@ -17,10 +17,11 @@ public class UpdatePartUseCaseTests
     private static Mock<IAppDbContext> BuildContext(Part? part = null)
     {
         var db = new Mock<IAppDbContext>();
-        var mockParts = MockDbSetHelper.CreateMockDbSet(part is null ? [] : [part]);
+        var list = part is null ? new List<Part>() : new List<Part> { part };
+        var mockParts = MockDbSetHelper.CreateMockDbSet(list);
         mockParts
             .Setup(m => m.FindAsync(It.IsAny<object?[]?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(part);
+            .Returns(ValueTask.FromResult<Part?>(part));
         db.Setup(d => d.Parts).Returns(mockParts.Object);
         db.Setup(d => d.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
         return db;

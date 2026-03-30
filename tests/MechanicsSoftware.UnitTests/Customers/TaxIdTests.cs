@@ -1,3 +1,4 @@
+using FluentAssertions;
 using MechanicsSoftware.Domain.Customers;
 using MechanicsSoftware.Domain.Shared;
 using Xunit;

@@ -10,7 +10,7 @@ public sealed class ListPartsUseCase(IAppDbContext context)
         string? name = null,
         CancellationToken ct = default)
     {
-        var query = context.Parts.AsQueryable();
+        IQueryable<Domain.Inventory.Part> query = context.Parts;
 
         if (!string.IsNullOrWhiteSpace(code))
             query = query.Where(p => p.Code.Contains(code));
