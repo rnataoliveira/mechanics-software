@@ -1,0 +1,57 @@
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using MechanicsSoftware.Application.Common;
+using MechanicsSoftware.Application.Common.Exceptions;
+using MechanicsSoftware.Application.Features.Inventory;
+using MechanicsSoftware.Domain.Inventory;
+using MechanicsSoftware.Domain.Shared;
+using MechanicsSoftware.UnitTests.Helpers;
+using Moq;
+
+namespace MechanicsSoftware.UnitTests.Application.Inventory;
+
+public class GetPartUseCaseTests
+{
+    private static Part BuildPart(Guid? id = null) =>
+        Part.Create(id ?? Guid.NewGuid(), "OIL-001", "Engine Oil", "5W-30", new Money(2500), 10);
+
+    private static Mock<IAppDbContext> BuildContext(Part? part)
+    {
+        var db = new Mock<IAppDbContext>();
+        var list = part is null ? new List<Part>() : new List<Part> { part };
+        var mockParts = MockDbSetHelper.CreateMockDbSet(list);
+
+        db.Setup(d => d.Parts).Returns(mockParts.Object);
+        mockParts.Setup(m => m.FindAsync(It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
+                 .Returns(ValueTask.FromResult<Part?>(part));
+
+        return db;
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ExistingPart_ReturnsPartOutput()
+    {
+        var partId = Guid.NewGuid();
+        var part = BuildPart(partId);
+        var db = BuildContext(part);
+
+        var result = await new GetPartUseCase(db.Object).ExecuteAsync(partId);
+
+        result.Id.Should().Be(partId);
+        result.Code.Should().Be("OIL-001");
+        result.Name.Should().Be("Engine Oil");
+        result.UnitPriceInCents.Should().Be(2500);
+        result.StockQuantity.Should().Be(10);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_PartNotFound_ThrowsNotFoundException()
+    {
+        var nonExistentId = Guid.NewGuid();
+        var db = BuildContext(null);
+
+        var act = async () => await new GetPartUseCase(db.Object).ExecuteAsync(nonExistentId);
+
+        await act.Should().ThrowAsync<NotFoundException>().WithMessage($"*{nonExistentId}*");
+    }
+}
