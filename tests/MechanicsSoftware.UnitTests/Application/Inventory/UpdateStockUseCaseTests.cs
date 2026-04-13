@@ -11,44 +11,55 @@ namespace MechanicsSoftware.UnitTests.Application.Inventory;
 
 public class UpdateStockUseCaseTests
 {
-    private static Part BuildPart(Guid? id = null, int stock = 5) =>
-        Part.Create(id ?? Guid.NewGuid(), "ENG-001", "Oil Filter", null, new Money(2500), stock);
+    private static Part BuildPart(Guid? id = null) =>
+        Part.Create(id ?? Guid.NewGuid(), "OIL-001", "Engine Oil", null, new Money(2500), 5);
 
-    private static Mock<IAppDbContext> BuildContext(Part? part = null)
+    private static Mock<IAppDbContext> BuildContext(Part? part)
     {
         var db = new Mock<IAppDbContext>();
         var list = part is null ? new List<Part>() : new List<Part> { part };
         var mockParts = MockDbSetHelper.CreateMockDbSet(list);
-        mockParts
-            .Setup(m => m.FindAsync(It.IsAny<object?[]?>(), It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult<Part?>(part));
+
         db.Setup(d => d.Parts).Returns(mockParts.Object);
         db.Setup(d => d.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+        mockParts.Setup(m => m.FindAsync(It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
+                 .Returns(ValueTask.FromResult<Part?>(part));
+
         return db;
     }
 
     [Fact]
-    public async Task ExecuteAsync_ValidInput_ReplenishesStock()
+    public async Task ExecuteAsync_ValidReplenishment_IncreasesStock()
     {
-        var id = Guid.NewGuid();
-        var part = BuildPart(id, stock: 5);
+        var partId = Guid.NewGuid();
+        var part = BuildPart(partId);
         var db = BuildContext(part);
 
-        var useCase = new UpdateStockUseCase(db.Object);
-        var result = await useCase.ExecuteAsync(id, new UpdateStockInput(10));
+        var result = await new UpdateStockUseCase(db.Object).ExecuteAsync(partId, new UpdateStockInput(10));
 
         result.StockQuantity.Should().Be(15);
         db.Verify(d => d.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
-    public async Task ExecuteAsync_NotFound_ThrowsNotFoundException()
+    public async Task ExecuteAsync_PartNotFound_ThrowsNotFoundException()
     {
-        var db = BuildContext();
+        var db = BuildContext(null);
 
-        var useCase = new UpdateStockUseCase(db.Object);
-        var act = async () => await useCase.ExecuteAsync(Guid.NewGuid(), new UpdateStockInput(5));
+        var act = async () => await new UpdateStockUseCase(db.Object).ExecuteAsync(Guid.NewGuid(), new UpdateStockInput(5));
 
         await act.Should().ThrowAsync<NotFoundException>();
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ZeroQuantity_ThrowsDomainException()
+    {
+        var partId = Guid.NewGuid();
+        var part = BuildPart(partId);
+        var db = BuildContext(part);
+
+        var act = async () => await new UpdateStockUseCase(db.Object).ExecuteAsync(partId, new UpdateStockInput(0));
+
+        await act.Should().ThrowAsync<DomainException>().WithMessage("*greater than zero*");
     }
 }

@@ -11,44 +11,41 @@ namespace MechanicsSoftware.UnitTests.Application.Vehicles;
 public class GetVehicleUseCaseTests
 {
     private static readonly Guid CustomerId = Guid.NewGuid();
-    private static readonly LicensePlate ValidPlate = new("ABC1234");
 
     private static Vehicle BuildVehicle(Guid? id = null) =>
-        Vehicle.Create(id ?? Guid.NewGuid(), ValidPlate, "Toyota", "Corolla", 2020, CustomerId);
+        Vehicle.Create(id ?? Guid.NewGuid(), new LicensePlate("ABC1234"), "Toyota", "Corolla", 2020, CustomerId);
 
     private static Mock<IAppDbContext> BuildContext(List<Vehicle>? vehicles = null)
     {
         var db = new Mock<IAppDbContext>();
-        var mockVehicles = MockDbSetHelper.CreateMockDbSet(vehicles ?? []);
-        db.Setup(d => d.Vehicles).Returns(mockVehicles.Object);
+        db.Setup(d => d.Vehicles).Returns(MockDbSetHelper.CreateMockDbSet(vehicles ?? []).Object);
         return db;
     }
 
     [Fact]
-    public async Task ExecuteAsync_ValidId_ReturnsVehicleResponse()
+    public async Task ExecuteAsync_ExistingVehicle_ReturnsVehicleResponse()
     {
-        var id = Guid.NewGuid();
-        var vehicle = BuildVehicle(id);
+        var vehicleId = Guid.NewGuid();
+        var vehicle = BuildVehicle(vehicleId);
         var db = BuildContext([vehicle]);
 
-        var useCase = new GetVehicleUseCase(db.Object);
-        var result = await useCase.ExecuteAsync(id);
+        var result = await new GetVehicleUseCase(db.Object).ExecuteAsync(vehicleId);
 
-        result.Id.Should().Be(id);
-        result.LicensePlate.Should().Be(ValidPlate.Value);
+        result.Id.Should().Be(vehicleId);
+        result.LicensePlate.Should().Be("ABC1234");
         result.Make.Should().Be("Toyota");
         result.Model.Should().Be("Corolla");
         result.CustomerId.Should().Be(CustomerId);
     }
 
     [Fact]
-    public async Task ExecuteAsync_NotFound_ThrowsNotFoundException()
+    public async Task ExecuteAsync_VehicleNotFound_ThrowsNotFoundException()
     {
+        var nonExistentId = Guid.NewGuid();
         var db = BuildContext();
 
-        var useCase = new GetVehicleUseCase(db.Object);
-        var act = async () => await useCase.ExecuteAsync(Guid.NewGuid());
+        var act = async () => await new GetVehicleUseCase(db.Object).ExecuteAsync(nonExistentId);
 
-        await act.Should().ThrowAsync<NotFoundException>();
+        await act.Should().ThrowAsync<NotFoundException>().WithMessage($"*{nonExistentId}*");
     }
 }

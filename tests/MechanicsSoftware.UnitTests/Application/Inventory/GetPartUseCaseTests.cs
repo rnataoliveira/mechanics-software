@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using MechanicsSoftware.Application.Common;
 using MechanicsSoftware.Application.Common.Exceptions;
 using MechanicsSoftware.Application.Features.Inventory;
@@ -12,43 +13,45 @@ namespace MechanicsSoftware.UnitTests.Application.Inventory;
 public class GetPartUseCaseTests
 {
     private static Part BuildPart(Guid? id = null) =>
-        Part.Create(id ?? Guid.NewGuid(), "ENG-001", "Oil Filter", null, new Money(2500));
+        Part.Create(id ?? Guid.NewGuid(), "OIL-001", "Engine Oil", "5W-30", new Money(2500), 10);
 
-    private static Mock<IAppDbContext> BuildContext(Part? part = null)
+    private static Mock<IAppDbContext> BuildContext(Part? part)
     {
         var db = new Mock<IAppDbContext>();
         var list = part is null ? new List<Part>() : new List<Part> { part };
         var mockParts = MockDbSetHelper.CreateMockDbSet(list);
-        mockParts
-            .Setup(m => m.FindAsync(It.IsAny<object?[]?>(), It.IsAny<CancellationToken>()))
-            .Returns(ValueTask.FromResult<Part?>(part));
+
         db.Setup(d => d.Parts).Returns(mockParts.Object);
+        mockParts.Setup(m => m.FindAsync(It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
+                 .Returns(ValueTask.FromResult<Part?>(part));
+
         return db;
     }
 
     [Fact]
-    public async Task ExecuteAsync_ValidId_ReturnsPartOutput()
+    public async Task ExecuteAsync_ExistingPart_ReturnsPartOutput()
     {
-        var id = Guid.NewGuid();
-        var part = BuildPart(id);
+        var partId = Guid.NewGuid();
+        var part = BuildPart(partId);
         var db = BuildContext(part);
 
-        var useCase = new GetPartUseCase(db.Object);
-        var result = await useCase.ExecuteAsync(id);
+        var result = await new GetPartUseCase(db.Object).ExecuteAsync(partId);
 
-        result.Id.Should().Be(id);
-        result.Code.Should().Be("ENG-001");
-        result.Name.Should().Be("Oil Filter");
+        result.Id.Should().Be(partId);
+        result.Code.Should().Be("OIL-001");
+        result.Name.Should().Be("Engine Oil");
+        result.UnitPriceInCents.Should().Be(2500);
+        result.StockQuantity.Should().Be(10);
     }
 
     [Fact]
-    public async Task ExecuteAsync_NotFound_ThrowsNotFoundException()
+    public async Task ExecuteAsync_PartNotFound_ThrowsNotFoundException()
     {
-        var db = BuildContext();
+        var nonExistentId = Guid.NewGuid();
+        var db = BuildContext(null);
 
-        var useCase = new GetPartUseCase(db.Object);
-        var act = async () => await useCase.ExecuteAsync(Guid.NewGuid());
+        var act = async () => await new GetPartUseCase(db.Object).ExecuteAsync(nonExistentId);
 
-        await act.Should().ThrowAsync<NotFoundException>();
+        await act.Should().ThrowAsync<NotFoundException>().WithMessage($"*{nonExistentId}*");
     }
 }

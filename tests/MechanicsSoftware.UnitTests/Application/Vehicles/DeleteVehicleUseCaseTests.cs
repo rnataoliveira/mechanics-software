@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using MechanicsSoftware.Application.Common;
 using MechanicsSoftware.Application.Common.Exceptions;
 using MechanicsSoftware.Application.Features.Vehicles;
@@ -11,43 +12,43 @@ namespace MechanicsSoftware.UnitTests.Application.Vehicles;
 public class DeleteVehicleUseCaseTests
 {
     private static readonly Guid CustomerId = Guid.NewGuid();
-    private static readonly LicensePlate ValidPlate = new("ABC1234");
 
     private static Vehicle BuildVehicle(Guid? id = null) =>
-        Vehicle.Create(id ?? Guid.NewGuid(), ValidPlate, "Toyota", "Corolla", 2020, CustomerId);
+        Vehicle.Create(id ?? Guid.NewGuid(), new LicensePlate("ABC1234"), "Toyota", "Corolla", 2020, CustomerId);
 
-    private static (Mock<IAppDbContext> db, Mock<Microsoft.EntityFrameworkCore.DbSet<Vehicle>> mockVehicles)
+    private static (Mock<IAppDbContext> db, Mock<DbSet<Vehicle>> vehicles)
         BuildContext(List<Vehicle>? vehicles = null)
     {
         var db = new Mock<IAppDbContext>();
         var mockVehicles = MockDbSetHelper.CreateMockDbSet(vehicles ?? []);
+
         db.Setup(d => d.Vehicles).Returns(mockVehicles.Object);
         db.Setup(d => d.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+
         return (db, mockVehicles);
     }
 
     [Fact]
-    public async Task ExecuteAsync_ValidId_RemovesVehicle()
+    public async Task ExecuteAsync_ExistingVehicle_RemovesAndSaves()
     {
-        var id = Guid.NewGuid();
-        var vehicle = BuildVehicle(id);
+        var vehicleId = Guid.NewGuid();
+        var vehicle = BuildVehicle(vehicleId);
         var (db, mockVehicles) = BuildContext([vehicle]);
 
-        var useCase = new DeleteVehicleUseCase(db.Object);
-        await useCase.ExecuteAsync(id);
+        await new DeleteVehicleUseCase(db.Object).ExecuteAsync(vehicleId);
 
         mockVehicles.Verify(m => m.Remove(vehicle), Times.Once);
         db.Verify(d => d.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
-    public async Task ExecuteAsync_NotFound_ThrowsNotFoundException()
+    public async Task ExecuteAsync_VehicleNotFound_ThrowsNotFoundException()
     {
+        var nonExistentId = Guid.NewGuid();
         var (db, _) = BuildContext();
 
-        var useCase = new DeleteVehicleUseCase(db.Object);
-        var act = async () => await useCase.ExecuteAsync(Guid.NewGuid());
+        var act = async () => await new DeleteVehicleUseCase(db.Object).ExecuteAsync(nonExistentId);
 
-        await act.Should().ThrowAsync<NotFoundException>();
+        await act.Should().ThrowAsync<NotFoundException>().WithMessage($"*{nonExistentId}*");
     }
 }

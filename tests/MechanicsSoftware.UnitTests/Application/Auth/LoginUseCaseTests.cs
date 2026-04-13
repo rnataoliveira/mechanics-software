@@ -5,7 +5,6 @@ using MechanicsSoftware.Application.Common.Exceptions;
 using MechanicsSoftware.Application.Features.Auth;
 using MechanicsSoftware.Domain.Auth;
 using MechanicsSoftware.UnitTests.Helpers;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 
 namespace MechanicsSoftware.UnitTests.Application.Auth;
@@ -16,6 +15,8 @@ public class LoginUseCaseTests
     private const string ValidPassword = "secret123";
     private const string ValidHash     = "hashed_secret";
     private const string ValidToken    = "jwt.token.here";
+
+    private static readonly DateTime ValidExpiresAt = DateTime.UtcNow.AddHours(1);
 
     private static User BuildUser(string email = ValidEmail, string hash = ValidHash) =>
         User.Create(Guid.NewGuid(), "Test User", email, hash, User.Roles.Mechanic);
@@ -30,8 +31,8 @@ public class LoginUseCaseTests
         var mockUsers = MockDbSetHelper.CreateMockDbSet(users ?? []);
         db.Setup(d => d.Users).Returns(mockUsers.Object);
 
-        jwt.Setup(j => j.Generate(It.IsAny<User>())).Returns(ValidToken);
-        jwt.Setup(j => j.ExpiresAt()).Returns(DateTime.UtcNow.AddHours(1));
+        jwt.Setup(j => j.Generate(It.IsAny<User>()))
+           .Returns(new JwtToken(ValidToken, ValidExpiresAt));
 
         return (db, hasher, jwt);
     }
@@ -47,7 +48,7 @@ public class LoginUseCaseTests
         var result  = await useCase.HandleAsync(new LoginRequest(ValidEmail, ValidPassword));
 
         result.Token.Should().Be(ValidToken);
-        result.ExpiresAt.Should().BeAfter(DateTime.UtcNow);
+        result.ExpiresAt.Should().Be(ValidExpiresAt);
     }
 
     [Fact]

@@ -1,83 +1,66 @@
 using FluentAssertions;
-using MechanicsSoftware.Application.Common;
 using MechanicsSoftware.Application.Features.Inventory;
 using MechanicsSoftware.Domain.Inventory;
 using MechanicsSoftware.Domain.Shared;
 using MechanicsSoftware.UnitTests.Helpers;
-using Moq;
 
 namespace MechanicsSoftware.UnitTests.Application.Inventory;
 
 public class ListPartsUseCaseTests
 {
     private static Part BuildPart(string code, string name) =>
-        Part.Create(Guid.NewGuid(), code, name, null, new Money(1000));
-
-    private static Mock<IAppDbContext> BuildContext(List<Part>? parts = null)
-    {
-        var db = new Mock<IAppDbContext>();
-        var mockParts = MockDbSetHelper.CreateMockDbSet(parts ?? []);
-        db.Setup(d => d.Parts).Returns(mockParts.Object);
-        return db;
-    }
+        Part.Create(Guid.NewGuid(), code, name, null, new Money(1000), 5);
 
     [Fact]
     public async Task ExecuteAsync_NoFilter_ReturnsAll()
     {
-        var parts = new List<Part>
-        {
-            BuildPart("ENG-001", "Oil Filter"),
-            BuildPart("BRK-001", "Brake Pad")
-        };
-        var db = BuildContext(parts);
+        await using var db = InMemoryDbContextHelper.Create();
+        db.Parts.AddRange(
+            BuildPart("OIL-001", "Engine Oil"),
+            BuildPart("BOLT-001", "Hex Bolt"));
+        await db.SaveChangesAsync();
 
-        var useCase = new ListPartsUseCase(db.Object);
-        var result = await useCase.ExecuteAsync();
+        var result = await new ListPartsUseCase(db).ExecuteAsync();
 
         result.Should().HaveCount(2);
     }
 
     [Fact]
-    public async Task ExecuteAsync_FilterByCode_ReturnsFiltered()
+    public async Task ExecuteAsync_FilterByCode_ReturnsMatching()
     {
-        var parts = new List<Part>
-        {
-            BuildPart("ENG-001", "Oil Filter"),
-            BuildPart("BRK-001", "Brake Pad")
-        };
-        var db = BuildContext(parts);
+        await using var db = InMemoryDbContextHelper.Create();
+        db.Parts.AddRange(
+            BuildPart("OIL-001", "Engine Oil"),
+            BuildPart("BOLT-001", "Hex Bolt"));
+        await db.SaveChangesAsync();
 
-        var useCase = new ListPartsUseCase(db.Object);
-        var result = await useCase.ExecuteAsync(code: "ENG");
+        var result = await new ListPartsUseCase(db).ExecuteAsync(code: "OIL");
 
         result.Should().HaveCount(1);
-        result.First().Code.Should().Be("ENG-001");
+        result.First().Code.Should().Be("OIL-001");
     }
 
     [Fact]
-    public async Task ExecuteAsync_FilterByName_ReturnsFiltered()
+    public async Task ExecuteAsync_FilterByName_ReturnsMatching()
     {
-        var parts = new List<Part>
-        {
-            BuildPart("ENG-001", "Oil Filter"),
-            BuildPart("BRK-001", "Brake Pad")
-        };
-        var db = BuildContext(parts);
+        await using var db = InMemoryDbContextHelper.Create();
+        db.Parts.AddRange(
+            BuildPart("OIL-001", "Engine Oil"),
+            BuildPart("BOLT-001", "Hex Bolt"));
+        await db.SaveChangesAsync();
 
-        var useCase = new ListPartsUseCase(db.Object);
-        var result = await useCase.ExecuteAsync(name: "Brake");
+        var result = await new ListPartsUseCase(db).ExecuteAsync(name: "Bolt");
 
         result.Should().HaveCount(1);
-        result.First().Name.Should().Be("Brake Pad");
+        result.First().Name.Should().Be("Hex Bolt");
     }
 
     [Fact]
-    public async Task ExecuteAsync_NoResults_ReturnsEmpty()
+    public async Task ExecuteAsync_EmptyDatabase_ReturnsEmpty()
     {
-        var db = BuildContext();
+        await using var db = InMemoryDbContextHelper.Create();
 
-        var useCase = new ListPartsUseCase(db.Object);
-        var result = await useCase.ExecuteAsync();
+        var result = await new ListPartsUseCase(db).ExecuteAsync();
 
         result.Should().BeEmpty();
     }

@@ -4,9 +4,23 @@ namespace MechanicsSoftware.Infrastructure.Security;
 
 public sealed class BCryptPasswordHasher : IPasswordHasher
 {
-    public string Hash(string password) =>
-        BCrypt.Net.BCrypt.HashPassword(password);
+    private static readonly int SaltRounds = int.TryParse(
+        Environment.GetEnvironmentVariable("BCRYPT_SALT_ROUNDS"), out var rounds) && rounds > 0
+        ? rounds
+        : 12;
 
-    public bool Verify(string password, string hash) =>
-        BCrypt.Net.BCrypt.Verify(password, hash);
+    public string Hash(string password) =>
+        BCrypt.Net.BCrypt.HashPassword(password, SaltRounds);
+
+    public bool Verify(string password, string hash)
+    {
+        try
+        {
+            return BCrypt.Net.BCrypt.Verify(password, hash);
+        }
+        catch (BCrypt.Net.SaltParseException)
+        {
+            return false;
+        }
+    }
 }
