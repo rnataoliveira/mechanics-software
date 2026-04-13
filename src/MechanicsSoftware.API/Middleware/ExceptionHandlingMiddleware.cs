@@ -1,6 +1,5 @@
 using System.Text.Json;
 using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Domain.ServiceOrders;
 using MechanicsSoftware.Domain.Shared;
 
 namespace MechanicsSoftware.API.Middleware;
@@ -33,7 +32,7 @@ public sealed class ExceptionHandlingMiddleware
         var (statusCode, message) = exception switch
         {
             NotFoundException notFound => (StatusCodes.Status404NotFound, notFound.Message),
-            InvalidStatusTransitionException invalidTransition => (StatusCodes.Status409Conflict, invalidTransition.Message),
+            ConflictException conflict => (StatusCodes.Status409Conflict, conflict.Message),
             DomainException domain => (StatusCodes.Status422UnprocessableEntity, domain.Message),
             _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
         };
