@@ -27,7 +27,7 @@ FIAP POS Tech · 15SOAT · Fase 1
 | Repository | https://github.com/rnataoliveira/mechanics-software | ready |
 | DDD Documentation | <!-- Miro or docs/ link --> | pending |
 | Demo Video | <!-- YouTube or Drive link --> | pending |
-| Vulnerability Report | <!-- link or see section below --> | pending |
+| Vulnerability Report | see section below | ready |
 
 ---
 
@@ -49,19 +49,45 @@ Hosted in the repository under `docs/`:
 
 ## Vulnerability Report
 
-<!-- Paste the output of the vulnerability scan here, or link to the report file -->
+Tool used: `dotnet list package --vulnerable --include-transitive` (built-in NuGet vulnerability audit)
 
-Tool used: <!-- Snyk / dotnet security audit / other -->
+Scan date: 2026-04-08
 
-Findings:
+### Findings (before remediation)
+
+| Package | Version | Severity | Advisory | Projects affected |
+|---|---|---|---|---|
+| `Microsoft.Extensions.Caching.Memory` | 8.0.0 | High | [GHSA-qj66-m88j-hmgj](https://github.com/advisories/GHSA-qj66-m88j-hmgj) | Application, Infrastructure, API, UnitTests, IntegrationTests |
+| `Npgsql` | 8.0.0 | High | [GHSA-x9vc-6hfv-hg8c](https://github.com/advisories/GHSA-x9vc-6hfv-hg8c) | Infrastructure, API, UnitTests, IntegrationTests |
+| `System.Text.Json` | 8.0.0 | High | [GHSA-hh2w-p6rv-4g7w](https://github.com/advisories/GHSA-hh2w-p6rv-4g7w) | Infrastructure, API |
+| `System.Text.Json` | 8.0.0 | High | [GHSA-8g4q-xg66-9fp4](https://github.com/advisories/GHSA-8g4q-xg66-9fp4) | Infrastructure, API |
+| `System.Net.Http` | 4.3.0 | High | [GHSA-7jgj-8wvc-jh57](https://github.com/advisories/GHSA-7jgj-8wvc-jh57) | UnitTests, IntegrationTests |
+| `System.Text.RegularExpressions` | 4.3.0 | High | [GHSA-cmhx-cq75-c4mj](https://github.com/advisories/GHSA-cmhx-cq75-c4mj) | UnitTests, IntegrationTests |
+
+All findings were **transitive** dependencies — none were directly referenced by the project.
+
+### Remediation
+
+| Package | Action |
+|---|---|
+| `Microsoft.Extensions.Caching.Memory` | Fixed — updated `Microsoft.EntityFrameworkCore` to 8.0.11, which pulls 8.0.1+ |
+| `Npgsql` | Fixed — updated `Npgsql.EntityFrameworkCore.PostgreSQL` to 8.0.11, which pulls Npgsql 8.0.6 |
+| `System.Text.Json` | Fixed — resolved transitively via EF Core 8.0.11 update |
+| `System.Net.Http` | Fixed — pinned `System.Net.Http` 4.3.4 directly in test projects |
+| `System.Text.RegularExpressions` | Fixed — pinned `System.Text.RegularExpressions` 4.3.1 directly in test projects |
+
+### Post-remediation scan
 
 ```
-<!-- scan output here -->
+O projeto fornecido `MechanicsSoftware.Domain` não tem nenhum pacote vulnerável.
+O projeto fornecido `MechanicsSoftware.Application` não tem nenhum pacote vulnerável.
+O projeto fornecido `MechanicsSoftware.Infrastructure` não tem nenhum pacote vulnerável.
+O projeto fornecido `MechanicsSoftware.API` não tem nenhum pacote vulnerável.
+O projeto fornecido `MechanicsSoftware.UnitTests` não tem nenhum pacote vulnerável.
+O projeto fornecido `MechanicsSoftware.IntegrationTests` não tem nenhum pacote vulnerável.
 ```
 
-Analysis:
-
-<!-- Brief description of vulnerabilities found and how they were addressed -->
+**Result:** 0 vulnerabilities remaining — all HIGH findings resolved.
 
 ---
 
