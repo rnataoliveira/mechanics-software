@@ -1,4 +1,5 @@
 using MechanicsSoftware.API.Middleware;
+using MechanicsSoftware.API.Extensions;
 using MechanicsSoftware.Application;
 using MechanicsSoftware.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
@@ -6,8 +7,9 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerDocumentation();
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -23,11 +25,13 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Mechanics Software API v1");
+    options.RoutePrefix = "swagger"; 
+});
+
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 

@@ -20,7 +20,7 @@ public class ListPartsUseCaseTests
             BuildPart("BOLT-001", "Hex Bolt"));
         await db.SaveChangesAsync();
 
-        var result = await new ListPartsUseCase(db).ExecuteAsync();
+        var result = await new ListPartsUseCase(db).ExecuteAsync(new ListPartsQuery());
 
         result.Should().HaveCount(2);
     }
@@ -34,7 +34,7 @@ public class ListPartsUseCaseTests
             BuildPart("BOLT-001", "Hex Bolt"));
         await db.SaveChangesAsync();
 
-        var result = await new ListPartsUseCase(db).ExecuteAsync(code: "OIL");
+        var result = await new ListPartsUseCase(db).ExecuteAsync(new ListPartsQuery(Code: "OIL"));
 
         result.Should().HaveCount(1);
         result.First().Code.Should().Be("OIL-001");
@@ -49,7 +49,7 @@ public class ListPartsUseCaseTests
             BuildPart("BOLT-001", "Hex Bolt"));
         await db.SaveChangesAsync();
 
-        var result = await new ListPartsUseCase(db).ExecuteAsync(name: "Bolt");
+        var result = await new ListPartsUseCase(db).ExecuteAsync(new ListPartsQuery(Name: "Bolt"));
 
         result.Should().HaveCount(1);
         result.First().Name.Should().Be("Hex Bolt");
@@ -60,7 +60,7 @@ public class ListPartsUseCaseTests
     {
         await using var db = InMemoryDbContextHelper.Create();
 
-        var result = await new ListPartsUseCase(db).ExecuteAsync();
+        var result = await new ListPartsUseCase(db).ExecuteAsync(new ListPartsQuery());
 
         result.Should().BeEmpty();
     }
