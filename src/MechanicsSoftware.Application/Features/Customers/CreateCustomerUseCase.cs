@@ -8,7 +8,7 @@ namespace MechanicsSoftware.Application.Features.Customers;
 public sealed record CreateCustomerRequest(
     string Name,
     string DocumentValue,
-    string PersonType,
+    PersonType PersonType,
     string Email,
     string Phone
 );
@@ -17,8 +17,7 @@ public sealed class CreateCustomerUseCase(IAppDbContext db)
 {
     public async Task<CustomerResponse> ExecuteAsync(CreateCustomerRequest request, CancellationToken cancellationToken = default)
     {
-        var personType = Enum.Parse<PersonType>(request.PersonType, ignoreCase: true);
-        var documentVo = new TaxId(request.DocumentValue, personType);
+        var documentVo = new TaxId(request.DocumentValue, request.PersonType);
 
         var customerExisting = await db.Customers
             .AnyAsync(c => c.Document == documentVo, cancellationToken);
@@ -28,7 +27,7 @@ public sealed class CreateCustomerUseCase(IAppDbContext db)
 
         var customer = Customer.Create(
             id: Guid.NewGuid(),
-            personType: personType,
+            personType: request.PersonType,
             taxId: request.DocumentValue,
             name: request.Name,
             email: request.Email,
