@@ -1,4 +1,5 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using MechanicsSoftware.API.Filters;
+using Microsoft.OpenApi.Models;
 
 namespace MechanicsSoftware.API.Extensions;
 
@@ -41,6 +42,7 @@ public static class SwaggerExtensions
                 }
             });
             options.UseInlineDefinitionsForEnums();
+            options.OperationFilter<AuthorizeOperationFilter>();
         });
 
         return services;

@@ -37,9 +37,9 @@ public class PartsController(CreatePartUseCase createPart,
     }
 
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] string? code, [FromQuery] string? name, CancellationToken cancellationToken)
+    public async Task<IActionResult> List([FromQuery] ListPartsQuery query, CancellationToken cancellationToken)
     {
-        var result = await listParts.ExecuteAsync(code, name, cancellationToken);
+        var result = await listParts.ExecuteAsync(query, cancellationToken);
         return Ok(result);
     }
 

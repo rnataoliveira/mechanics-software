@@ -6,7 +6,6 @@ namespace MechanicsSoftware.API.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-[Authorize]
 public class AuthController(LoginUseCase loginUseCase) : ControllerBase
 {
     [HttpPost("login")]
