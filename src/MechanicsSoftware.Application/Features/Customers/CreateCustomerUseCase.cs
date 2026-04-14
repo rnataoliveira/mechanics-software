@@ -17,15 +17,14 @@ public sealed class CreateCustomerUseCase(IAppDbContext db)
 {
     public async Task<CustomerResponse> ExecuteAsync(CreateCustomerRequest request, CancellationToken cancellationToken = default)
     {
-        var normalizedDocument = string.Concat(request.DocumentValue.Where(char.IsDigit));
+        var personType = Enum.Parse<PersonType>(request.PersonType, ignoreCase: true);
+        var documentVo = new TaxId(request.DocumentValue, personType);
 
         var customerExisting = await db.Customers
-            .AnyAsync(c => c.Document.Value == normalizedDocument, cancellationToken);
+            .AnyAsync(c => c.Document == documentVo, cancellationToken);
 
         if (customerExisting)
             throw new DomainException($"A customer with document '{request.DocumentValue}' already exists.");
-
-        var personType = Enum.Parse<PersonType>(request.PersonType, ignoreCase: true);
 
         var customer = Customer.Create(
             id: Guid.NewGuid(),
