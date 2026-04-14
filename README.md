@@ -102,7 +102,7 @@ All protected endpoints will now work.
 
 | Variable | Required | Description | Default |
 |---|---|---|---|
-| `JWT_SECRET` | **Yes** | Secret key for JWT signing (min 32 chars) | — |
+| `JWT_SECRET` | **Yes** (production) | Secret key for JWT signing (min 32 chars) | pre-configured in `appsettings.Development.json` for local dev |
 | `DATABASE_URL` | No | PostgreSQL connection string | see `appsettings.Development.json` |
 | `JWT_EXPIRATION_MINUTES` | No | Token expiration time in minutes | `60` |
 | `BCRYPT_SALT_ROUNDS` | No | BCrypt cost factor | `12` |
