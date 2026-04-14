@@ -4,7 +4,6 @@ using MechanicsSoftware.Application.Common;
 using MechanicsSoftware.Application.Common.Exceptions;
 using MechanicsSoftware.Application.Features.Customers;
 using MechanicsSoftware.Domain.Customers;
-using MechanicsSoftware.Domain.Customers;
 using MechanicsSoftware.Domain.Shared;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
