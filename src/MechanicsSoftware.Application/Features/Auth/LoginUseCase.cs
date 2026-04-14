@@ -13,9 +13,9 @@ public sealed class LoginUseCase(IAppDbContext context, IPasswordHasher hasher, 
 {
     public async Task<LoginResponse> HandleAsync(LoginRequest request, CancellationToken ct = default)
     {
-        var normalizedEmail = request.Email.ToLowerInvariant();
+        var emailVo = new Domain.Customers.Email(request.Email);
         var user = await context.Users
-            .FirstOrDefaultAsync(u => u.Email.Value == normalizedEmail, ct)
+            .FirstOrDefaultAsync(u => u.Email == emailVo, ct)
             ?? throw new NotFoundException("User", request.Email);
 
         if (!hasher.Verify(request.Password, user.PasswordHash))
