@@ -10,13 +10,20 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    var policy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+    options.Filters.Add(new AuthorizeFilter(policy));
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerDocumentation();
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
+<<<<<<< HEAD
 builder.Services.AddControllers(options =>
 {
     var policy = new AuthorizationPolicyBuilder()
@@ -25,6 +32,8 @@ builder.Services.AddControllers(options =>
     options.Filters.Add(new AuthorizeFilter(policy));
 });
 
+=======
+>>>>>>> a10605a (test(integration): integration tests for Customers and Inventory endpoints)
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
@@ -63,3 +72,5 @@ app.Lifetime.ApplicationStarted.Register(() =>
 });
 
 app.Run();
+
+public partial class Program { }

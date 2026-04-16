@@ -32,6 +32,7 @@ public sealed class ExceptionHandlingMiddleware
         var (statusCode, message) = exception switch
         {
             NotFoundException notFound => (StatusCodes.Status404NotFound, notFound.Message),
+            UnauthorizedException unauthorized => (StatusCodes.Status401Unauthorized, unauthorized.Message),
             ConflictException conflict => (StatusCodes.Status409Conflict, conflict.Message),
             DomainException domain => (StatusCodes.Status422UnprocessableEntity, domain.Message),
             _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")

@@ -53,7 +53,9 @@ public sealed class PartConfiguration : IEntityTypeConfiguration<Part>
         {
             sm.ToTable("stock_movements");
             sm.HasKey(s => s.Id);
-            sm.Property(s => s.Id).HasColumnName("id");
+            sm.Property(s => s.Id)
+                .HasColumnName("id")
+                .ValueGeneratedNever();
             sm.WithOwner().HasForeignKey(s => s.PartId);
             sm.Property(s => s.PartId).HasColumnName("part_id");
             sm.HasIndex(s => s.PartId).HasDatabaseName("ix_stock_movements_part_id");
