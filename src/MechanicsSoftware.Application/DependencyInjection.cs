@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using MechanicsSoftware.Application.Features.Auth;
 using MechanicsSoftware.Application.Features.Customers;
 using MechanicsSoftware.Application.Features.Inventory;
+using MechanicsSoftware.Application.Features.ServiceOrders;
 using MechanicsSoftware.Application.Features.Vehicles;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -36,6 +37,23 @@ public static class DependencyInjection
         services.AddScoped<UpdatePartUseCase>();
         services.AddScoped<DeletePartUseCase>();
         services.AddScoped<UpdateStockUseCase>();
+
+        // Service Orders
+        services.AddScoped<CreateServiceOrderUseCase>();
+        services.AddScoped<StartDiagnosisUseCase>();
+        services.AddScoped<AddServiceItemUseCase>();
+        services.AddScoped<AddPartItemUseCase>();
+        services.AddScoped<GenerateBudgetUseCase>();
+        services.AddScoped<SendBudgetUseCase>();
+        services.AddScoped<ApproveServiceOrderUseCase>();
+        services.AddScoped<RejectServiceOrderUseCase>();
+        services.AddScoped<StartExecutionUseCase>();
+        services.AddScoped<CompleteServiceOrderUseCase>();
+        services.AddScoped<DeliverServiceOrderUseCase>();
+        services.AddScoped<GetServiceOrderStatusUseCase>();
+        services.AddScoped<GetServiceOrderUseCase>();
+        services.AddScoped<ListServiceOrdersUseCase>();
+        services.AddScoped<GetAverageExecutionTimeUseCase>();
 
         return services;
     }
