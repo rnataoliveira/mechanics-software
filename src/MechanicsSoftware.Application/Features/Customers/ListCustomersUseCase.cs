@@ -22,8 +22,10 @@ public sealed class ListCustomersUseCase(IAppDbContext db)
 
         if (!string.IsNullOrWhiteSpace(query.Document))
         {
-            var normalized = query.Document.Trim();
-            customers = customers.Where(c => c.Document.Value == normalized);
+            var digits = string.Concat(query.Document.Where(char.IsDigit));
+            var pt = digits.Length == 14 ? PersonType.COMPANY : PersonType.INDIVIDUAL;
+            var documentVo = new TaxId(digits, pt);
+            customers = customers.Where(c => c.Document == documentVo);
         }
 
         return await customers

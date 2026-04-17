@@ -19,7 +19,7 @@ public sealed class DatabaseSeeder(AppDbContext db, IPasswordHasher hasher)
             ?? DefaultAdminPassword;
 
         var exists = await db.Users
-            .AnyAsync(u => u.Email.Value == adminEmail, cancellationToken);
+            .AnyAsync(u => u.Email == new Domain.Customers.Email(adminEmail), cancellationToken);
 
         if (exists) return;
 

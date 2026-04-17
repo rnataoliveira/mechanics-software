@@ -23,6 +23,10 @@ public static class DependencyInjection
             ?? throw new InvalidOperationException(
                 "Connection string not found. Set 'ConnectionStrings:DefaultConnection' or 'DATABASE_URL'.");
 
+        var jwtSecret = configuration["JWT_SECRET"]
+            ?? throw new InvalidOperationException(
+                "JWT secret not configured. Set the 'JWT_SECRET' environment variable.");
+
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(connectionString));
 
@@ -31,24 +35,21 @@ public static class DependencyInjection
         services.AddScoped<IJwtProvider, JwtProvider>();
         services.AddScoped<DatabaseSeeder>();
 
-        var jwtSecret = configuration["JWT_SECRET"]
-            ?? throw new InvalidOperationException(
-                "JWT secret not configured. Set the 'JWT_SECRET' environment variable.");
-
-        services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 };
             });
+
+        services.AddAuthorization();
 
         return services;
     }

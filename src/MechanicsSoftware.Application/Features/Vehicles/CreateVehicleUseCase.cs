@@ -30,7 +30,7 @@ public sealed class CreateVehicleUseCase(IAppDbContext db)
         var plate = new LicensePlate(request.LicensePlate);
 
         var plateExists = await db.Vehicles
-            .AnyAsync(v => v.LicensePlate.Value == plate.Value, cancellationToken);
+            .AnyAsync(v => v.LicensePlate == plate, cancellationToken);
 
         if (plateExists)
             throw new DomainException($"License plate '{plate}' is already registered.");

@@ -2,6 +2,7 @@ using MechanicsSoftware.API.Middleware;
 using MechanicsSoftware.API.Extensions;
 using MechanicsSoftware.Application;
 using MechanicsSoftware.Infrastructure;
+using MechanicsSoftware.Infrastructure.Persistence.Seeding;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 
@@ -29,9 +30,14 @@ app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "Mechanics Software API v1");
-    options.RoutePrefix = "swagger"; 
+    options.RoutePrefix = "swagger";
 });
 
+using (var scope = app.Services.CreateScope())
+{
+    var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+    await seeder.SeedAsync();
+}
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
