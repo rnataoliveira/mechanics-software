@@ -1,0 +1,101 @@
+name: Coverage Report
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  coverage:
+    name: Unit Test Coverage
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Run unit tests with coverage
+        run: |
+          dotnet test tests/MechanicsSoftware.UnitTests/ \
+            --no-restore \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage-results \
+            --logger "trx;LogFileName=test-results.trx"
+
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Generate HTML coverage report
+        run: |
+          reportgenerator \
+            -reports:"./coverage-results/**/coverage.cobertura.xml" \
+            -targetdir:"./coverage-html" \
+            -reporttypes:"Html;HtmlSummary;Cobertura" \
+            -assemblyfilters:"-*.Tests;-*.UnitTests;-*.IntegrationTests" \
+            -title:"MechanicsSoftware — Coverage Report"
+
+      - name: Enforce 80% line coverage threshold
+        run: |
+          python3 - <<'EOF'
+          import xml.etree.ElementTree as ET, glob, sys
+
+          files = glob.glob("coverage-results/**/coverage.cobertura.xml", recursive=True)
+          if not files:
+              print("No coverage file found", file=sys.stderr)
+              sys.exit(1)
+
+          tree = ET.parse(files[0])
+          root = tree.getroot()
+          line_rate = float(root.get("line-rate", 0))
+          branch_rate = float(root.get("branch-rate", 0))
+          line_pct = line_rate * 100
+          branch_pct = branch_rate * 100
+
+          print(f"Line coverage:   {line_pct:.1f}%")
+          print(f"Branch coverage: {branch_pct:.1f}%")
+
+          if line_pct < 80:
+              print(f"FAILED: line coverage {line_pct:.1f}% is below the 80% minimum.", file=sys.stderr)
+              sys.exit(1)
+
+          print("Coverage threshold met.")
+          EOF
+
+      - name: Upload HTML report as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ github.run_number }}
+          path: ./coverage-html
+          retention-days: 30
+
+      - name: Post coverage summary on PR
+        if: github.event_name == 'pull_request'
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: coverage-results/**/coverage.cobertura.xml
+          badge: true
+          fail_below_min: true
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: true
+          indicators: true
+          output: both
+          thresholds: '80 90'
+
+      - name: Add PR comment with coverage summary
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          path: code-coverage-results.md
