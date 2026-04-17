@@ -138,4 +138,68 @@ public class VehicleTests
         var act = () => vehicle.UpdateLicensePlate(null!);
         act.Should().Throw<DomainException>().WithMessage("*License plate*");
     }
+
+    [Fact]
+    public void Update_ValidArguments_UpdatesProperties()
+    {
+        var vehicle = Vehicle.Create(ValidId, ValidPlate, "Toyota", "Corolla", ValidYear, ValidCustomerId);
+
+        vehicle.Update("Honda", "Civic", 2020);
+
+        vehicle.Make.Should().Be("Honda");
+        vehicle.Model.Should().Be("Civic");
+        vehicle.Year.Should().Be(2020);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Update_EmptyMake_ThrowsDomainException(string make)
+    {
+        var vehicle = Vehicle.Create(ValidId, ValidPlate, "Toyota", "Corolla", ValidYear, ValidCustomerId);
+        var act = () => vehicle.Update(make, "Civic", 2020);
+        act.Should().Throw<DomainException>().WithMessage("*Make*");
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Update_EmptyModel_ThrowsDomainException(string model)
+    {
+        var vehicle = Vehicle.Create(ValidId, ValidPlate, "Toyota", "Corolla", ValidYear, ValidCustomerId);
+        var act = () => vehicle.Update("Honda", model, 2020);
+        act.Should().Throw<DomainException>().WithMessage("*Model*");
+    }
+
+    [Fact]
+    public void Update_InvalidYear_ThrowsDomainException()
+    {
+        var vehicle = Vehicle.Create(ValidId, ValidPlate, "Toyota", "Corolla", ValidYear, ValidCustomerId);
+        var act = () => vehicle.Update("Honda", "Civic", 1800);
+        act.Should().Throw<DomainException>().WithMessage("*Year*");
+    }
+
+    [Fact]
+    public void Update_WhitespaceMakeAndModel_AreTrimmed()
+    {
+        var vehicle = Vehicle.Create(ValidId, ValidPlate, "Toyota", "Corolla", ValidYear, ValidCustomerId);
+        vehicle.Update("  Honda  ", "  Civic  ", 2020);
+        vehicle.Make.Should().Be("Honda");
+        vehicle.Model.Should().Be("Civic");
+    }
+
+    [Fact]
+    public void Equals_NullObject_ReturnsFalse()
+    {
+        var vehicle = Vehicle.Create(ValidId, ValidPlate, "Toyota", "Corolla", ValidYear, ValidCustomerId);
+        vehicle.Equals(null).Should().BeFalse();
+    }
+
+    [Fact]
+    public void GetHashCode_SameId_SameHash()
+    {
+        var a = Vehicle.Create(ValidId, ValidPlate, "Toyota", "Corolla", ValidYear, ValidCustomerId);
+        var b = Vehicle.Create(ValidId, new LicensePlate("XYZ1A23"), "Honda", "Civic", 2020, ValidCustomerId);
+        a.GetHashCode().Should().Be(b.GetHashCode());
+    }
 }

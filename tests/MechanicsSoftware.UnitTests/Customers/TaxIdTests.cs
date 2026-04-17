@@ -1,3 +1,4 @@
+using FluentAssertions;
 using MechanicsSoftware.Domain.Customers;
 using MechanicsSoftware.Domain.Shared;
 using Xunit;
@@ -48,5 +49,26 @@ public class TaxIdTests
     {
         Assert.Throws<DomainException>(() =>
             new TaxId("123", PersonType.INDIVIDUAL));
+    }
+
+    [Fact]
+    public void Should_Throw_When_CNPJ_Wrong_Length()
+    {
+        Assert.Throws<DomainException>(() =>
+            new TaxId("123456", PersonType.COMPANY));
+    }
+
+    [Fact]
+    public void Should_Reject_All_Equal_CNPJ()
+    {
+        Assert.Throws<DomainException>(() =>
+            new TaxId("11111111111111", PersonType.COMPANY));
+    }
+
+    [Fact]
+    public void ToString_ReturnsTaxIdValue()
+    {
+        var taxId = new TaxId("529.982.247-25", PersonType.INDIVIDUAL);
+        taxId.ToString().Should().Be("52998224725");
     }
 }

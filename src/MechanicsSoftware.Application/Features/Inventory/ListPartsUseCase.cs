@@ -9,7 +9,7 @@ public sealed class ListPartsUseCase(IAppDbContext context)
 {
     public async Task<IEnumerable<PartOutput>> ExecuteAsync(ListPartsQuery query, CancellationToken ct = default)
     {
-        var queryParts = context.Parts.AsQueryable();
+        var queryParts = context.Parts;
 
         if (!string.IsNullOrWhiteSpace(query.Code))
             queryParts = queryParts.Where(p => p.Code.Contains(query.Code));

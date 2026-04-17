@@ -343,4 +343,72 @@ public class ServiceOrderTests
         order.Status.Value.Should().Be(ServiceOrderStatus.Status.Cancelled);
         order.Budget!.Status.Value.Should().Be(BudgetStatus.Status.Rejected);
     }
+
+    [Fact]
+    public void AddServiceItem_EmptyServiceId_Throws()
+    {
+        var order = InDiagnosis();
+        var act = () => order.AddServiceItem(Guid.Empty, "Oil Change", new Money(5000), 1);
+        act.Should().Throw<DomainException>();
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void AddServiceItem_EmptyName_Throws(string name)
+    {
+        var order = InDiagnosis();
+        var act = () => order.AddServiceItem(Guid.NewGuid(), name, new Money(5000), 1);
+        act.Should().Throw<DomainException>();
+    }
+
+    [Fact]
+    public void AddServiceItem_NullPrice_Throws()
+    {
+        var order = InDiagnosis();
+        var act = () => order.AddServiceItem(Guid.NewGuid(), "Oil Change", null!, 1);
+        act.Should().Throw<DomainException>();
+    }
+
+    [Fact]
+    public void AddPartItem_EmptyPartId_Throws()
+    {
+        var order = InDiagnosis();
+        var act = () => order.AddPartItem(Guid.Empty, "Oil Filter", new Money(2500), 1, PartAvailability.Available);
+        act.Should().Throw<DomainException>();
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void AddPartItem_EmptyName_Throws(string name)
+    {
+        var order = InDiagnosis();
+        var act = () => order.AddPartItem(Guid.NewGuid(), name, new Money(2500), 1, PartAvailability.Available);
+        act.Should().Throw<DomainException>();
+    }
+
+    [Fact]
+    public void AddPartItem_NullPrice_Throws()
+    {
+        var order = InDiagnosis();
+        var act = () => order.AddPartItem(Guid.NewGuid(), "Oil Filter", null!, 1, PartAvailability.Available);
+        act.Should().Throw<DomainException>();
+    }
+
+    [Fact]
+    public void AddPartItem_ZeroQuantity_Throws()
+    {
+        var order = InDiagnosis();
+        var act = () => order.AddPartItem(Guid.NewGuid(), "Oil Filter", new Money(2500), 0, PartAvailability.Available);
+        act.Should().Throw<DomainException>();
+    }
+
+    [Fact]
+    public void GenerateBudget_AlreadyGenerated_Throws()
+    {
+        var order = WithBudget();
+        var act = () => order.GenerateBudget();
+        act.Should().Throw<DomainException>().WithMessage("*Budget already generated*");
+    }
 }

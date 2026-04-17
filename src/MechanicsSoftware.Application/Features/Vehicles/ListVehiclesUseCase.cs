@@ -14,7 +14,7 @@ public sealed class ListVehiclesUseCase(IAppDbContext db)
         ListVehiclesQuery query,
         CancellationToken cancellationToken = default)
     {
-        var vehicles = db.Vehicles.AsQueryable();
+        IQueryable<Domain.Vehicles.Vehicle> vehicles = db.Vehicles;
 
         if (query.CustomerId.HasValue)
             vehicles = vehicles.Where(v => v.CustomerId == query.CustomerId.Value);

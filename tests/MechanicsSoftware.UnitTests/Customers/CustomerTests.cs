@@ -144,4 +144,13 @@ public class CustomerTests
 
         customer.Id.Should().Be(id);
     }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_EmptyPhone_ThrowsDomainException(string phone)
+    {
+        var act = () => Build(phone: phone);
+        act.Should().Throw<DomainException>().WithMessage("*Phone*");
+    }
 }

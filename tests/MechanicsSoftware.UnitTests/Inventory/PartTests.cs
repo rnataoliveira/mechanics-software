@@ -204,4 +204,110 @@ public class PartTests
         var act = () => part.Replenish(0);
         act.Should().Throw<DomainException>();
     }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_EmptyName_ThrowsDomainException(string name)
+    {
+        var act = () => Part.Create(ValidId, "ENG-001", name, null, ValidPrice);
+        act.Should().Throw<DomainException>().WithMessage("*name*");
+    }
+
+    [Fact]
+    public void Create_NullUnitPrice_ThrowsDomainException()
+    {
+        var act = () => Part.Create(ValidId, "ENG-001", "Oil Filter", null, null!);
+        act.Should().Throw<DomainException>().WithMessage("*price*");
+    }
+
+    [Fact]
+    public void Reserve_EmptyReference_ThrowsDomainException()
+    {
+        var part = CreatePart(10);
+        var act = () => part.Reserve(3, Guid.Empty);
+        act.Should().Throw<DomainException>().WithMessage("*Reference*");
+    }
+
+    [Fact]
+    public void ConfirmUsage_ZeroQuantity_ThrowsDomainException()
+    {
+        var part = CreatePart(10);
+        part.Reserve(3, OrderRef);
+        var act = () => part.ConfirmUsage(0, OrderRef);
+        act.Should().Throw<DomainException>();
+    }
+
+    [Fact]
+    public void ConfirmUsage_EmptyReference_ThrowsDomainException()
+    {
+        var part = CreatePart(10);
+        part.Reserve(3, OrderRef);
+        var act = () => part.ConfirmUsage(3, Guid.Empty);
+        act.Should().Throw<DomainException>().WithMessage("*Reference*");
+    }
+
+    [Fact]
+    public void Release_ZeroQuantity_ThrowsDomainException()
+    {
+        var part = CreatePart(10);
+        part.Reserve(3, OrderRef);
+        var act = () => part.Release(0, OrderRef);
+        act.Should().Throw<DomainException>();
+    }
+
+    [Fact]
+    public void Release_EmptyReference_ThrowsDomainException()
+    {
+        var part = CreatePart(10);
+        part.Reserve(3, OrderRef);
+        var act = () => part.Release(3, Guid.Empty);
+        act.Should().Throw<DomainException>().WithMessage("*Reference*");
+    }
+
+    [Fact]
+    public void Update_ValidArguments_UpdatesProperties()
+    {
+        var part = CreatePart();
+        var newPrice = new Money(2000);
+
+        part.Update("New Name", "New description", newPrice);
+
+        part.Name.Should().Be("New Name");
+        part.Description.Should().Be("New description");
+        part.UnitPrice.Should().Be(newPrice);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Update_EmptyName_ThrowsDomainException(string name)
+    {
+        var part = CreatePart();
+        var act = () => part.Update(name, null, ValidPrice);
+        act.Should().Throw<DomainException>().WithMessage("*name*");
+    }
+
+    [Fact]
+    public void Update_NullUnitPrice_ThrowsDomainException()
+    {
+        var part = CreatePart();
+        var act = () => part.Update("Oil Filter", null, null!);
+        act.Should().Throw<DomainException>().WithMessage("*price*");
+    }
+
+    [Fact]
+    public void HasPendingReservations_WithReservations_ReturnsTrue()
+    {
+        var part = CreatePart(10);
+        part.Reserve(3, OrderRef);
+        part.HasPendingReservations().Should().BeTrue();
+    }
+
+    [Fact]
+    public void HasPendingReservations_WithoutReservations_ReturnsFalse()
+    {
+        var part = CreatePart(10);
+        part.HasPendingReservations().Should().BeFalse();
+    }
 }
