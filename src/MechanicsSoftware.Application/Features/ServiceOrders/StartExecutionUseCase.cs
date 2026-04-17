@@ -19,6 +19,8 @@ public sealed class StartExecutionUseCase(IAppDbContext db)
 
         order.StartExecution();
 
+        await db.SaveChangesAsync(ct);
+
         return ServiceOrderResponse.From(order);
     }
 }

@@ -8,10 +8,12 @@ public sealed class GetAverageExecutionTimeUseCase(IAppDbContext db)
 {
     public async Task<AverageExecutionTimeResponse> ExecuteAsync(CancellationToken ct = default)
     {
+        var completedStatus  = new ServiceOrderStatus(ServiceOrderStatus.Status.Completed);
+        var deliveredStatus  = new ServiceOrderStatus(ServiceOrderStatus.Status.Delivered);
+
         var completedOrders = await db.ServiceOrders
             .Where(o => o.CompletedAt != null)
-            .Where(o => o.Status.Value == ServiceOrderStatus.Status.Completed
-                     || o.Status.Value == ServiceOrderStatus.Status.Delivered)
+            .Where(o => o.Status == completedStatus || o.Status == deliveredStatus)
             .Select(o => new { o.CreatedAt, o.CompletedAt })
             .ToListAsync(ct);
 

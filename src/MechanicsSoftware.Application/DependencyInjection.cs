@@ -3,6 +3,7 @@ using MechanicsSoftware.Application.Features.Auth;
 using MechanicsSoftware.Application.Features.Customers;
 using MechanicsSoftware.Application.Features.Inventory;
 using MechanicsSoftware.Application.Features.ServiceOrders;
+using MechanicsSoftware.Application.Features.Services;
 using MechanicsSoftware.Application.Features.Vehicles;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -37,6 +38,13 @@ public static class DependencyInjection
         services.AddScoped<UpdatePartUseCase>();
         services.AddScoped<DeletePartUseCase>();
         services.AddScoped<UpdateStockUseCase>();
+
+        // Services catalogue
+        services.AddScoped<CreateServiceUseCase>();
+        services.AddScoped<GetServiceUseCase>();
+        services.AddScoped<ListServicesUseCase>();
+        services.AddScoped<UpdateServiceUseCase>();
+        services.AddScoped<DeleteServiceUseCase>();
 
         // Service Orders
         services.AddScoped<CreateServiceOrderUseCase>();
