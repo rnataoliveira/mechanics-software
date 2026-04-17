@@ -15,7 +15,10 @@ public sealed class ListServiceOrdersUseCase(IAppDbContext db)
         {
             var parsed = ParseStatus(query.Status);
             if (parsed.HasValue)
-                orders = orders.Where(o => o.Status.Value == parsed.Value);
+            {
+                var statusVo = new ServiceOrderStatus(parsed.Value);
+                orders = orders.Where(o => o.Status == statusVo);
+            }
         }
 
         return await orders
