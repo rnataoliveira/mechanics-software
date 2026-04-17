@@ -22,6 +22,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=mechanics_software;Username=postgres;Password=postgres
+      - JWT_SECRET=dev-secret-change-in-production-min-32-chars!!
     depends_on:
       db:
         condition: service_healthy
