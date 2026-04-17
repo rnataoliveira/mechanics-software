@@ -35,7 +35,7 @@ public class CreateCustomerUseCaseTests
         var (db, mockCustomers) = BuildContext();
 
         var useCase = new CreateCustomerUseCase(db.Object);
-        var request = new CreateCustomerRequest(ValidName, ValidCpf, "INDIVIDUAL", ValidEmail, ValidPhone);
+        var request = new CreateCustomerRequest(ValidName, ValidCpf, PersonType.INDIVIDUAL, ValidEmail, ValidPhone);
 
         var result = await useCase.ExecuteAsync(request);
 
@@ -56,7 +56,7 @@ public class CreateCustomerUseCaseTests
         var (db, _) = BuildContext(customers: [existingCustomer]);
 
         var useCase = new CreateCustomerUseCase(db.Object);
-        var request = new CreateCustomerRequest("Outro Cliente", ValidCpf, "INDIVIDUAL", "outro@email.com", "11888888888");
+        var request = new CreateCustomerRequest("Outro Cliente", ValidCpf, PersonType.INDIVIDUAL, "outro@email.com", "11888888888");
 
         var act = async () => await useCase.ExecuteAsync(request);
 

@@ -21,8 +21,8 @@ public sealed class ListVehiclesUseCase(IAppDbContext db)
 
         if (!string.IsNullOrWhiteSpace(query.LicensePlate))
         {
-            var normalized = query.LicensePlate.ToUpperInvariant().Replace("-", "");
-            vehicles = vehicles.Where(v => v.LicensePlate.Value == normalized);
+            var plateVo = new Domain.Vehicles.LicensePlate(query.LicensePlate);
+            vehicles = vehicles.Where(v => v.LicensePlate == plateVo);
         }
 
         return await vehicles

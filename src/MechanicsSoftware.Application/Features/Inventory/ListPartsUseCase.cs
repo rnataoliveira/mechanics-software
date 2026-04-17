@@ -3,22 +3,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MechanicsSoftware.Application.Features.Inventory;
 
+public sealed record ListPartsQuery(string? Code = null, string? Name = null);
+
 public sealed class ListPartsUseCase(IAppDbContext context)
 {
-    public async Task<IEnumerable<PartOutput>> ExecuteAsync(
-        string? code = null,
-        string? name = null,
-        CancellationToken ct = default)
+    public async Task<IEnumerable<PartOutput>> ExecuteAsync(ListPartsQuery query, CancellationToken ct = default)
     {
-        IQueryable<Domain.Inventory.Part> query = context.Parts;
+        var queryParts = context.Parts;
 
-        if (!string.IsNullOrWhiteSpace(code))
-            query = query.Where(p => p.Code.Contains(code));
+        if (!string.IsNullOrWhiteSpace(query.Code))
+            queryParts = queryParts.Where(p => p.Code.Contains(query.Code));
 
-        if (!string.IsNullOrWhiteSpace(name))
-            query = query.Where(p => p.Name.Contains(name));
+        if (!string.IsNullOrWhiteSpace(query.Name))
+            queryParts = queryParts.Where(p => p.Name.Contains(query.Name));
 
-        var parts = await query.ToListAsync(ct);
+        var parts = await queryParts.ToListAsync(ct);
         return parts.Select(PartOutput.From);
     }
 }

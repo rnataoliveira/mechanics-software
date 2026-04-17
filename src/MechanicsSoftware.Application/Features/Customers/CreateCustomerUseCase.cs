@@ -8,7 +8,7 @@ namespace MechanicsSoftware.Application.Features.Customers;
 public sealed record CreateCustomerRequest(
     string Name,
     string DocumentValue,
-    string PersonType,
+    PersonType PersonType,
     string Email,
     string Phone
 );
@@ -17,19 +17,17 @@ public sealed class CreateCustomerUseCase(IAppDbContext db)
 {
     public async Task<CustomerResponse> ExecuteAsync(CreateCustomerRequest request, CancellationToken cancellationToken = default)
     {
-        var normalizedDocument = string.Concat(request.DocumentValue.Where(char.IsDigit));
+        var documentVo = new TaxId(request.DocumentValue, request.PersonType);
 
         var customerExisting = await db.Customers
-            .AnyAsync(c => c.Document.Value == normalizedDocument, cancellationToken);
+            .AnyAsync(c => c.Document == documentVo, cancellationToken);
 
         if (customerExisting)
             throw new DomainException($"A customer with document '{request.DocumentValue}' already exists.");
 
-        var personType = Enum.Parse<PersonType>(request.PersonType, ignoreCase: true);
-
         var customer = Customer.Create(
             id: Guid.NewGuid(),
-            personType: personType,
+            personType: request.PersonType,
             taxId: request.DocumentValue,
             name: request.Name,
             email: request.Email,
