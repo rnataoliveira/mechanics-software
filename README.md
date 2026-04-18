@@ -48,14 +48,14 @@ dotnet tool restore
 
 ```bash
 dotnet dotnet-ef database update \
-  --project src/MechanicsSoftware.Infrastructure \
-  --startup-project src/MechanicsSoftware.API
+  --project src/MechanicsSoftware.Infrastructure/MechanicsSoftware.Infrastructure.csproj \
+  --startup-project src/MechanicsSoftware.API/MechanicsSoftware.API.csproj
 ```
 
 **4. Run the API**
 
 ```bash
-dotnet run --project src/MechanicsSoftware.API
+dotnet run --project src/MechanicsSoftware.API/MechanicsSoftware.API.csproj
 ```
 
 Swagger UI: `http://localhost:5066/swagger`
@@ -119,16 +119,16 @@ The project uses a local `dotnet-ef` tool pinned in `.config/dotnet-tools.json`.
 
 ```bash
 dotnet dotnet-ef database update \
-  --project src/MechanicsSoftware.Infrastructure \
-  --startup-project src/MechanicsSoftware.API
+  --project src/MechanicsSoftware.Infrastructure/MechanicsSoftware.Infrastructure.csproj \
+  --startup-project src/MechanicsSoftware.API/MechanicsSoftware.API.csproj
 ```
 
 ### Add a new migration
 
 ```bash
 dotnet dotnet-ef migrations add <MigrationName> \
-  --project src/MechanicsSoftware.Infrastructure \
-  --startup-project src/MechanicsSoftware.API \
+  --project src/MechanicsSoftware.Infrastructure/MechanicsSoftware.Infrastructure.csproj \
+  --startup-project src/MechanicsSoftware.API/MechanicsSoftware.API.csproj \
   --output-dir Persistence/Migrations
 ```
 
@@ -136,8 +136,8 @@ dotnet dotnet-ef migrations add <MigrationName> \
 
 ```bash
 dotnet dotnet-ef migrations remove \
-  --project src/MechanicsSoftware.Infrastructure \
-  --startup-project src/MechanicsSoftware.API
+  --project src/MechanicsSoftware.Infrastructure/MechanicsSoftware.Infrastructure.csproj \
+  --startup-project src/MechanicsSoftware.API/MechanicsSoftware.API.csproj
 ```
 
 ---
