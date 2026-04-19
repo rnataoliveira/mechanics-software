@@ -21,18 +21,22 @@ public sealed class ServiceOrderStatus(ServiceOrderStatus.Status value): ValueOb
         yield return Value;
     }
 
+    private static readonly HashSet<(Status From, Status To)> _validTransitions =
+    [
+        (Status.Received,         Status.InDiagnosis),
+        (Status.InDiagnosis,      Status.AwaitingApproval),
+        (Status.AwaitingApproval, Status.InExecution),
+        (Status.AwaitingApproval, Status.Cancelled),
+        (Status.InExecution,      Status.Completed),
+        (Status.Completed,        Status.Delivered),
+    ];
+
     public ServiceOrderStatus TransitionTo(Status newStatus)
     {
-        return (value, newStatus) switch
-        {
-            (Status.Received, Status.InDiagnosis) => new ServiceOrderStatus(Status.InDiagnosis),
-            (Status.InDiagnosis, Status.AwaitingApproval) => new ServiceOrderStatus(Status.AwaitingApproval),
-            (Status.AwaitingApproval, Status.InExecution) => new ServiceOrderStatus(Status.InExecution),
-            (Status.AwaitingApproval, Status.Cancelled) => new ServiceOrderStatus(Status.Cancelled),
-            (Status.InExecution, Status.Completed) => new ServiceOrderStatus(Status.Completed),
-            (Status.Completed, Status.Delivered) => new ServiceOrderStatus(Status.Delivered),
-            _ => throw new InvalidStatusTransitionException(this, new ServiceOrderStatus(newStatus))
-        };
+        if (!_validTransitions.Contains((value, newStatus)))
+            throw new InvalidStatusTransitionException(this, new ServiceOrderStatus(newStatus));
+
+        return new ServiceOrderStatus(newStatus);
     }
 
     public override string ToString() => Value switch
