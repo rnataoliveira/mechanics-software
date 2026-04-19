@@ -121,25 +121,31 @@ public sealed class ServiceOrderConfiguration : IEntityTypeConfiguration<Service
             .OnDelete(DeleteBehavior.Restrict);
     }
 
+    private static readonly Dictionary<string, ServiceOrderStatus.Status> _orderStatusMap = new()
+    {
+        ["RECEIVED"]          = ServiceOrderStatus.Status.Received,
+        ["IN_DIAGNOSIS"]      = ServiceOrderStatus.Status.InDiagnosis,
+        ["AWAITING_APPROVAL"] = ServiceOrderStatus.Status.AwaitingApproval,
+        ["IN_EXECUTION"]      = ServiceOrderStatus.Status.InExecution,
+        ["COMPLETED"]         = ServiceOrderStatus.Status.Completed,
+        ["DELIVERED"]         = ServiceOrderStatus.Status.Delivered,
+        ["CANCELLED"]         = ServiceOrderStatus.Status.Cancelled,
+    };
+
+    private static readonly Dictionary<string, BudgetStatus.Status> _budgetStatusMap = new()
+    {
+        ["PENDING"]  = BudgetStatus.Status.Pending,
+        ["APPROVED"] = BudgetStatus.Status.Approved,
+        ["REJECTED"] = BudgetStatus.Status.Rejected,
+    };
+
     internal static ServiceOrderStatus ParseOrderStatus(string value) =>
-        new(value switch
-        {
-            "RECEIVED"          => ServiceOrderStatus.Status.Received,
-            "IN_DIAGNOSIS"      => ServiceOrderStatus.Status.InDiagnosis,
-            "AWAITING_APPROVAL" => ServiceOrderStatus.Status.AwaitingApproval,
-            "IN_EXECUTION"      => ServiceOrderStatus.Status.InExecution,
-            "COMPLETED"         => ServiceOrderStatus.Status.Completed,
-            "DELIVERED"         => ServiceOrderStatus.Status.Delivered,
-            "CANCELLED"         => ServiceOrderStatus.Status.Cancelled,
-            _ => throw new InvalidOperationException($"Unknown service order status: '{value}'")
-        });
+        _orderStatusMap.TryGetValue(value, out var status)
+            ? new ServiceOrderStatus(status)
+            : throw new InvalidOperationException($"Unknown service order status: '{value}'");
 
     internal static BudgetStatus ParseBudgetStatus(string value) =>
-        new(value switch
-        {
-            "PENDING"  => BudgetStatus.Status.Pending,
-            "APPROVED" => BudgetStatus.Status.Approved,
-            "REJECTED" => BudgetStatus.Status.Rejected,
-            _ => throw new InvalidOperationException($"Unknown budget status: '{value}'")
-        });
+        _budgetStatusMap.TryGetValue(value, out var status)
+            ? new BudgetStatus(status)
+            : throw new InvalidOperationException($"Unknown budget status: '{value}'");
 }
