@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using MechanicsSoftware.Application.Features.Auth;
 using MechanicsSoftware.Application.Features.Customers;
 using MechanicsSoftware.Application.Features.Inventory;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MechanicsSoftware.Application;
 
+[ExcludeFromCodeCoverage]
 public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
