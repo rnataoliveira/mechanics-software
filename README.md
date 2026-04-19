@@ -214,11 +214,11 @@ See [`docs/architecture/overview.md`](./docs/architecture/overview.md) for full 
 # Unit tests
 dotnet test tests/MechanicsSoftware.UnitTests
 
-# Integration tests
-dotnet test tests/MechanicsSoftware.IntegrationTests
-
-# All tests with coverage
-dotnet test --collect:"XPlat Code Coverage"
+# Unit tests with coverage report
+dotnet test tests/MechanicsSoftware.UnitTests \
+  --collect:"XPlat Code Coverage" \
+  --settings coverlet.runsettings \
+  --results-directory ./coverage-results
 ```
 
 Coverage report (HTML): [rnataoliveira.github.io/mechanics-software](https://rnataoliveira.github.io/mechanics-software/)
