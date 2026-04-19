@@ -9,13 +9,13 @@ namespace MechanicsSoftware.Application.Features.ServiceOrders;
 public sealed class AddServiceItemUseCase(IAppDbContext db)
 {
     public async Task<ServiceItemResponse> ExecuteAsync(
-        Guid serviceOrderId, AddServiceItemRequest request, CancellationToken ct = default)
+        Guid serviceOrderId, AddServiceItemRequest request, CancellationToken cancellationToken = default)
     {
         var order = await db.ServiceOrders
-            .FirstOrDefaultAsync(o => o.Id == serviceOrderId, ct)
+            .FirstOrDefaultAsync(o => o.Id == serviceOrderId, cancellationToken)
             ?? throw new NotFoundException(nameof(ServiceOrder), serviceOrderId);
 
-        var service = await db.Services.FindAsync([request.ServiceId], ct)
+        var service = await db.Services.FindAsync([request.ServiceId], cancellationToken)
             ?? throw new NotFoundException(nameof(Service), request.ServiceId);
 
         var item = order.AddServiceItem(
@@ -24,7 +24,7 @@ public sealed class AddServiceItemUseCase(IAppDbContext db)
             service.BasePrice,
             request.Quantity);
 
-        await db.SaveChangesAsync(ct);
+        await db.SaveChangesAsync(cancellationToken);
 
         return ServiceItemResponse.From(item);
     }

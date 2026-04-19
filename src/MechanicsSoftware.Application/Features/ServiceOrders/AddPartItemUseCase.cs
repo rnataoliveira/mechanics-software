@@ -9,13 +9,13 @@ namespace MechanicsSoftware.Application.Features.ServiceOrders;
 public sealed class AddPartItemUseCase(IAppDbContext db)
 {
     public async Task<AddPartItemResponse> ExecuteAsync(
-        Guid serviceOrderId, AddPartItemRequest request, CancellationToken ct = default)
+        Guid serviceOrderId, AddPartItemRequest request, CancellationToken cancellationToken = default)
     {
         var order = await db.ServiceOrders
-            .FirstOrDefaultAsync(o => o.Id == serviceOrderId, ct)
+            .FirstOrDefaultAsync(o => o.Id == serviceOrderId, cancellationToken)
             ?? throw new NotFoundException(nameof(ServiceOrder), serviceOrderId);
 
-        var part = await db.Parts.FindAsync([request.PartId], ct)
+        var part = await db.Parts.FindAsync([request.PartId], cancellationToken)
             ?? throw new NotFoundException(nameof(Part), request.PartId);
 
         PartAvailability availability;
@@ -41,7 +41,7 @@ public sealed class AddPartItemUseCase(IAppDbContext db)
             request.Quantity,
             availability);
 
-        await db.SaveChangesAsync(ct);
+        await db.SaveChangesAsync(cancellationToken);
 
         return new AddPartItemResponse(
             item.Id,

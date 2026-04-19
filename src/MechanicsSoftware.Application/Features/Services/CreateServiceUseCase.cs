@@ -9,10 +9,10 @@ namespace MechanicsSoftware.Application.Features.Services;
 public sealed class CreateServiceUseCase(IAppDbContext db)
 {
     public async Task<ServiceResponse> ExecuteAsync(
-        CreateServiceRequest request, CancellationToken ct = default)
+        CreateServiceRequest request, CancellationToken cancellationToken = default)
     {
         var nameExists = await db.Services
-            .AnyAsync(s => s.Name == request.Name.Trim(), ct);
+            .AnyAsync(s => s.Name == request.Name.Trim(), cancellationToken);
 
         if (nameExists)
             throw new DomainException($"A service named '{request.Name}' already exists.");
@@ -25,7 +25,7 @@ public sealed class CreateServiceUseCase(IAppDbContext db)
             request.EstimatedMinutes);
 
         db.Services.Add(service);
-        await db.SaveChangesAsync(ct);
+        await db.SaveChangesAsync(cancellationToken);
 
         return ServiceResponse.From(service);
     }

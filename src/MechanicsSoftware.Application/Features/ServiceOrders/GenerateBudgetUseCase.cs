@@ -8,18 +8,13 @@ namespace MechanicsSoftware.Application.Features.ServiceOrders;
 public sealed class GenerateBudgetUseCase(IAppDbContext db)
 {
     public async Task<BudgetResponse> ExecuteAsync(
-        Guid serviceOrderId, CancellationToken ct = default)
+        Guid serviceOrderId, CancellationToken cancellationToken = default)
     {
-        var order = await db.ServiceOrders
-            .Include(o => o.ServiceItems)
-            .Include(o => o.PartItems)
-            .Include(o => o.Budget)
-            .FirstOrDefaultAsync(o => o.Id == serviceOrderId, ct)
-            ?? throw new NotFoundException(nameof(ServiceOrder), serviceOrderId);
+        var order = await db.ServiceOrders.FindFullAsync(serviceOrderId, cancellationToken);
 
         var budget = order.GenerateBudget();
 
-        await db.SaveChangesAsync(ct);
+        await db.SaveChangesAsync(cancellationToken);
 
         return BudgetResponse.From(budget);
     }

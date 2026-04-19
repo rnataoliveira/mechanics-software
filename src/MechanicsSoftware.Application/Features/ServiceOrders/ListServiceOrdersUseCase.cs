@@ -7,7 +7,7 @@ namespace MechanicsSoftware.Application.Features.ServiceOrders;
 public sealed class ListServiceOrdersUseCase(IAppDbContext db)
 {
     public async Task<IReadOnlyList<ServiceOrderSummaryResponse>> ExecuteAsync(
-        ListServiceOrdersQuery query, CancellationToken ct = default)
+        ListServiceOrdersQuery query, CancellationToken cancellationToken = default)
     {
         var orders = db.ServiceOrders.AsQueryable();
 
@@ -29,7 +29,7 @@ public sealed class ListServiceOrdersUseCase(IAppDbContext db)
                 o.VehicleId,
                 o.Status.ToString()!,
                 o.CreatedAt))
-            .ToListAsync(ct);
+            .ToListAsync(cancellationToken);
     }
 
     private static ServiceOrderStatus.Status? ParseStatus(string value)

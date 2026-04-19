@@ -15,37 +15,37 @@ public class ServicesController(
     DeleteServiceUseCase deleteUseCase) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> Create(CreateServiceRequest request, CancellationToken ct)
+    public async Task<IActionResult> Create(CreateServiceRequest request, CancellationToken cancellationToken)
     {
-        var result = await createUseCase.ExecuteAsync(request, ct);
+        var result = await createUseCase.ExecuteAsync(request, cancellationToken);
         return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> Get(Guid id, CancellationToken ct)
+    public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
     {
-        var result = await getUseCase.ExecuteAsync(id, ct);
+        var result = await getUseCase.ExecuteAsync(id, cancellationToken);
         return Ok(result);
     }
 
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] ListServicesQuery query, CancellationToken ct)
+    public async Task<IActionResult> List([FromQuery] ListServicesQuery query, CancellationToken cancellationToken)
     {
-        var result = await listUseCase.ExecuteAsync(query, ct);
+        var result = await listUseCase.ExecuteAsync(query, cancellationToken);
         return Ok(result);
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, UpdateServiceRequest request, CancellationToken ct)
+    public async Task<IActionResult> Update(Guid id, UpdateServiceRequest request, CancellationToken cancellationToken)
     {
-        var result = await updateUseCase.ExecuteAsync(id, request, ct);
+        var result = await updateUseCase.ExecuteAsync(id, request, cancellationToken);
         return Ok(result);
     }
 
     [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        await deleteUseCase.ExecuteAsync(id, ct);
+        await deleteUseCase.ExecuteAsync(id, cancellationToken);
         return NoContent();
     }
 }

@@ -8,10 +8,10 @@ namespace MechanicsSoftware.Application.Features.ServiceOrders;
 public sealed class GetServiceOrderStatusUseCase(IAppDbContext db)
 {
     public async Task<ServiceOrderStatusResponse> ExecuteAsync(
-        Guid serviceOrderId, CancellationToken ct = default)
+        Guid serviceOrderId, CancellationToken cancellationToken = default)
     {
         var order = await db.ServiceOrders
-            .FirstOrDefaultAsync(o => o.Id == serviceOrderId, ct)
+            .FirstOrDefaultAsync(o => o.Id == serviceOrderId, cancellationToken)
             ?? throw new NotFoundException(nameof(ServiceOrder), serviceOrderId);
 
         return new ServiceOrderStatusResponse(

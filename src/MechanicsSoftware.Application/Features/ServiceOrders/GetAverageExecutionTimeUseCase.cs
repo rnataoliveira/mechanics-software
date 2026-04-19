@@ -6,7 +6,7 @@ namespace MechanicsSoftware.Application.Features.ServiceOrders;
 
 public sealed class GetAverageExecutionTimeUseCase(IAppDbContext db)
 {
-    public async Task<AverageExecutionTimeResponse> ExecuteAsync(CancellationToken ct = default)
+    public async Task<AverageExecutionTimeResponse> ExecuteAsync(CancellationToken cancellationToken = default)
     {
         var completedStatus  = new ServiceOrderStatus(ServiceOrderStatus.Status.Completed);
         var deliveredStatus  = new ServiceOrderStatus(ServiceOrderStatus.Status.Delivered);
@@ -15,7 +15,7 @@ public sealed class GetAverageExecutionTimeUseCase(IAppDbContext db)
             .Where(o => o.CompletedAt != null)
             .Where(o => o.Status == completedStatus || o.Status == deliveredStatus)
             .Select(o => new { o.CreatedAt, o.CompletedAt })
-            .ToListAsync(ct);
+            .ToListAsync(cancellationToken);
 
         if (completedOrders.Count == 0)
             return new AverageExecutionTimeResponse(0, 0);
