@@ -1,6 +1,7 @@
 using FluentAssertions;
 using MechanicsSoftware.Domain.ServiceOrders;
 using MechanicsSoftware.Domain.Shared;
+using MechanicsSoftware.Infrastructure.Persistence.Configurations;
 using MechanicsSoftware.UnitTests.Helpers;
 
 namespace MechanicsSoftware.UnitTests.Infrastructure;
@@ -127,5 +128,19 @@ public class ServiceOrderConfigurationTests
         o.Reject();
         var loaded = await RoundTrip(o);
         loaded.Budget!.Status.Value.Should().Be(BudgetStatus.Status.Rejected);
+    }
+
+    [Fact]
+    public void ParseOrderStatus_UnknownValue_ThrowsInvalidOperationException()
+    {
+        var act = () => ServiceOrderConfiguration.ParseOrderStatus("UNKNOWN_STATUS");
+        act.Should().Throw<InvalidOperationException>().WithMessage("*UNKNOWN_STATUS*");
+    }
+
+    [Fact]
+    public void ParseBudgetStatus_UnknownValue_ThrowsInvalidOperationException()
+    {
+        var act = () => ServiceOrderConfiguration.ParseBudgetStatus("UNKNOWN_STATUS");
+        act.Should().Throw<InvalidOperationException>().WithMessage("*UNKNOWN_STATUS*");
     }
 }
