@@ -50,6 +50,8 @@ jobs:
             -reporttypes:"Html;HtmlSummary;Cobertura;MarkdownSummaryGithub" \
             -assemblyfilters:"-*.Tests;-*.UnitTests;-*.IntegrationTests" \
             -title:"MechanicsSoftware — Coverage Report"
+          find ./coverage-html -type f \( -name "*.css" -o -name "*.html" -o -name "*.htm" -o -name "*.svg" \) \
+            -exec sed -i -E 's/#c00([^0-9a-fA-F])/#0066cc\1/g' {} +
 
       - name: Write coverage summary to workflow run
         if: always()
