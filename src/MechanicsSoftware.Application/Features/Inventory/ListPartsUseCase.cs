@@ -7,7 +7,7 @@ public sealed record ListPartsQuery(string? Code = null, string? Name = null);
 
 public sealed class ListPartsUseCase(IAppDbContext context)
 {
-    public async Task<IEnumerable<PartOutput>> ExecuteAsync(ListPartsQuery query, CancellationToken ct = default)
+    public async Task<IEnumerable<PartOutput>> ExecuteAsync(ListPartsQuery query, CancellationToken cancellationToken = default)
     {
         IQueryable<Domain.Inventory.Part> queryParts = context.Parts;
 
@@ -17,7 +17,7 @@ public sealed class ListPartsUseCase(IAppDbContext context)
         if (!string.IsNullOrWhiteSpace(query.Name))
             queryParts = queryParts.Where(p => p.Name.Contains(query.Name));
 
-        var parts = await queryParts.ToListAsync(ct);
+        var parts = await queryParts.ToListAsync(cancellationToken);
         return parts.Select(PartOutput.From);
     }
 }

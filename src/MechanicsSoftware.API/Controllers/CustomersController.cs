@@ -29,9 +29,9 @@ public class CustomersController(
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> Get(Guid id, CancellationToken cancellationtoken)
+    public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
     {
-        var result = await getUseCase.ExecuteAsync(id, cancellationtoken);
+        var result = await getUseCase.ExecuteAsync(id, cancellationToken);
         return Ok(result);
     }
 

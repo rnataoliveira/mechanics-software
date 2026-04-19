@@ -29,7 +29,7 @@ public sealed class ListCustomersUseCase(IAppDbContext db)
         }
 
         return await customers
-            .Select(c => new CustomerResponse(c.Id, c.Name, c.Document.Value, c.Email.Value, c.Phone))
+            .Select(c => CustomerResponse.From(c))
             .ToListAsync(cancellationToken);
     }
 }

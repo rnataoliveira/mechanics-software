@@ -13,9 +13,6 @@ public sealed class GetCustomerUseCase(IAppDbContext db)
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken)
             ?? throw new NotFoundException(nameof(Customer), id);
 
-        return ToResponse(customer);
+        return CustomerResponse.From(customer);
     }
-
-    private static CustomerResponse ToResponse(Customer c) =>
-        new(c.Id, c.Name, c.Document.Value, c.Email.Value, c.Phone);
 }

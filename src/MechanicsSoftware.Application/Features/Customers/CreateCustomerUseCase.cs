@@ -36,8 +36,6 @@ public sealed class CreateCustomerUseCase(IAppDbContext db)
         db.Customers.Add(customer);
         await db.SaveChangesAsync(cancellationToken);
 
-        return ToResponse(customer);
+        return CustomerResponse.From(customer);
     }
-    private static CustomerResponse ToResponse(Customer c) =>
-        new(c.Id, c.Name, c.Document.Value, c.Email.Value, c.Phone);
 }

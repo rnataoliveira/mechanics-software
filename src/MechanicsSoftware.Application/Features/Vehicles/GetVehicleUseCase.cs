@@ -13,6 +13,6 @@ public sealed class GetVehicleUseCase(IAppDbContext db)
             .FirstOrDefaultAsync(v => v.Id == id, cancellationToken)
             ?? throw new NotFoundException(nameof(Vehicle), id);
 
-        return new VehicleResponse(vehicle.Id, vehicle.LicensePlate.Value, vehicle.Make, vehicle.Model, vehicle.Year, vehicle.CustomerId);
+        return VehicleResponse.From(vehicle);
     }
 }
