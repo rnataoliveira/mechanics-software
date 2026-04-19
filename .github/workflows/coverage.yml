@@ -94,13 +94,13 @@ jobs:
           retention-days: 30
 
       - name: Upload Pages artifact
-        if: always()
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./coverage-html
 
       - name: Deploy to GitHub Pages
-        if: always()
+        if: github.ref == 'refs/heads/main'
         id: deploy-pages
         uses: actions/deploy-pages@v4
 
@@ -125,7 +125,7 @@ jobs:
             cat code-coverage-results.md
             echo ""
             echo "---"
-            echo "📊 **[Full interactive coverage report →](https://rnataoliveira.github.io/mechanics-software/)**"
+            echo "📊 **[Full coverage report (latest from main) →](https://rnataoliveira.github.io/mechanics-software/)**"
           } > coverage-comment.md
 
       - name: Add PR comment with coverage summary
