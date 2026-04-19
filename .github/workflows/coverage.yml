@@ -13,6 +13,11 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy-pages.outputs.page_url }}
 
     steps:
       - uses: actions/checkout@v4
@@ -88,6 +93,17 @@ jobs:
           path: ./coverage-html
           retention-days: 30
 
+      - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./coverage-html
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        id: deploy-pages
+        uses: actions/deploy-pages@v4
+
       - name: Post coverage summary on PR
         if: github.event_name == 'pull_request'
         uses: irongut/CodeCoverageSummary@v1.3.0
@@ -101,6 +117,13 @@ jobs:
           indicators: true
           output: both
           thresholds: '80 90'
+
+      - name: Append Pages link to coverage summary
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "" >> code-coverage-results.md
+          echo "---" >> code-coverage-results.md
+          echo "📊 **[Full interactive coverage report →](https://rnataoliveira.github.io/mechanics-software/)**" >> code-coverage-results.md
 
       - name: Add PR comment with coverage summary
         if: github.event_name == 'pull_request'
