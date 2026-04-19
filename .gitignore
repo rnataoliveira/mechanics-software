@@ -19,3 +19,4 @@ TestResults/
 coverage/
 *.coverage
 *.coveragexml
+coverage-results/
