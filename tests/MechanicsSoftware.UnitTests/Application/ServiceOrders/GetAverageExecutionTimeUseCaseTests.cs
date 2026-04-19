@@ -25,7 +25,7 @@ public class GetAverageExecutionTimeUseCaseTests
         var result = await new GetAverageExecutionTimeUseCase(db.Object).ExecuteAsync();
 
         result.AverageHours.Should().Be(0);
-        result.Count.Should().Be(0);
+        result.OrderCount.Should().Be(0);
     }
 
     [Fact]
@@ -45,7 +45,7 @@ public class GetAverageExecutionTimeUseCaseTests
 
         var result = await new GetAverageExecutionTimeUseCase(db.Object).ExecuteAsync();
 
-        result.Count.Should().Be(1);
+        result.OrderCount.Should().Be(1);
         result.AverageHours.Should().BeGreaterThanOrEqualTo(0);
     }
 }

@@ -2,6 +2,7 @@ using FluentAssertions;
 using MechanicsSoftware.Application.Common.Exceptions;
 using MechanicsSoftware.Application.Features.ServiceOrders;
 using MechanicsSoftware.Domain.ServiceOrders;
+using MechanicsSoftware.Domain.Shared;
 using MechanicsSoftware.UnitTests.Helpers;
 
 namespace MechanicsSoftware.UnitTests.Application.ServiceOrders;
