@@ -25,7 +25,7 @@ public class AddServiceItemUseCaseTests
         var mockOrders = MockDbSetHelper.CreateMockDbSet(new List<ServiceOrder> { order });
         var mockServices = MockDbSetHelper.CreateMockDbSet(new List<Service> { service });
         mockServices.Setup(m => m.FindAsync(It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
-                    .Returns(ValueTask.FromResult<Service?>(service));
+                    .Returns(new ValueTask<Service?>(service));
 
         var db = new Mock<IAppDbContext>();
         db.Setup(d => d.ServiceOrders).Returns(mockOrders.Object);
