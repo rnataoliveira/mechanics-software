@@ -45,9 +45,13 @@ jobs:
           reportgenerator \
             -reports:"./coverage-results/**/coverage.cobertura.xml" \
             -targetdir:"./coverage-html" \
-            -reporttypes:"Html;HtmlSummary;Cobertura" \
+            -reporttypes:"Html;HtmlSummary;Cobertura;MarkdownSummaryGithub" \
             -assemblyfilters:"-*.Tests;-*.UnitTests;-*.IntegrationTests" \
             -title:"MechanicsSoftware — Coverage Report"
+
+      - name: Write coverage summary to workflow run
+        if: always()
+        run: cat ./coverage-html/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
 
       - name: Enforce 80% line coverage threshold
         run: |
