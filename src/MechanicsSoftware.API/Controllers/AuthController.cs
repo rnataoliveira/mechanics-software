@@ -10,10 +10,9 @@ public class AuthController(LoginUseCase loginUseCase) : ControllerBase
 {
     [HttpPost("login")]
     [AllowAnonymous]
-    public async Task<IActionResult> Login(LoginRequest request, CancellationToken cancellationToken )
+    public async Task<IActionResult> Login(LoginRequest request, CancellationToken cancellationToken)
     {
-        var result = await loginUseCase.HandleAsync(request, cancellationToken);
+        var result = await loginUseCase.ExecuteAsync(request, cancellationToken);
         return Ok(result);
-
     }
 }

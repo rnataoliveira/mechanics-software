@@ -36,7 +36,7 @@ public class CustomersController(
     }
 
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] ListCustomersQuery query, CancellationToken cancellationToken) 
+    public async Task<IActionResult> List([FromQuery] ListCustomersQuery query, CancellationToken cancellationToken)
     {
         var result = await listUseCase.ExecuteAsync(query, cancellationToken);
         return Ok(result);

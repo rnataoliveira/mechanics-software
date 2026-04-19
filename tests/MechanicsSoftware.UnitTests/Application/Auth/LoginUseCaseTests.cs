@@ -38,65 +38,65 @@ public class LoginUseCaseTests
     }
 
     [Fact]
-    public async Task HandleAsync_ValidCredentials_ReturnsToken()
+    public async Task ExecuteAsync_ValidCredentials_ReturnsToken()
     {
         var user = BuildUser();
         var (db, hasher, jwt) = BuildDeps(users: [user]);
         hasher.Setup(h => h.Verify(ValidPassword, ValidHash)).Returns(true);
 
         var useCase = new LoginUseCase(db.Object, hasher.Object, jwt.Object);
-        var result  = await useCase.HandleAsync(new LoginRequest(ValidEmail, ValidPassword));
+        var result  = await useCase.ExecuteAsync(new LoginRequest(ValidEmail, ValidPassword));
 
         result.Token.Should().Be(ValidToken);
         result.ExpiresAt.Should().Be(ValidExpiresAt);
     }
 
     [Fact]
-    public async Task HandleAsync_EmailNormalized_FindsUserWithUppercaseInput()
+    public async Task ExecuteAsync_EmailNormalized_FindsUserWithUppercaseInput()
     {
         var user = BuildUser();
         var (db, hasher, jwt) = BuildDeps(users: [user]);
         hasher.Setup(h => h.Verify(ValidPassword, ValidHash)).Returns(true);
 
         var useCase = new LoginUseCase(db.Object, hasher.Object, jwt.Object);
-        var result  = await useCase.HandleAsync(new LoginRequest(ValidEmail.ToUpperInvariant(), ValidPassword));
+        var result  = await useCase.ExecuteAsync(new LoginRequest(ValidEmail.ToUpperInvariant(), ValidPassword));
 
         result.Token.Should().Be(ValidToken);
     }
 
     [Fact]
-    public async Task HandleAsync_UserNotFound_ThrowsNotFoundException()
+    public async Task ExecuteAsync_UserNotFound_ThrowsNotFoundException()
     {
         var (db, hasher, jwt) = BuildDeps();
 
         var useCase = new LoginUseCase(db.Object, hasher.Object, jwt.Object);
-        var act     = async () => await useCase.HandleAsync(new LoginRequest(ValidEmail, ValidPassword));
+        var act     = async () => await useCase.ExecuteAsync(new LoginRequest(ValidEmail, ValidPassword));
 
         await act.Should().ThrowAsync<NotFoundException>();
     }
 
     [Fact]
-    public async Task HandleAsync_WrongPassword_ThrowsUnauthorizedException()
+    public async Task ExecuteAsync_WrongPassword_ThrowsUnauthorizedException()
     {
         var user = BuildUser();
         var (db, hasher, jwt) = BuildDeps(users: [user]);
         hasher.Setup(h => h.Verify(ValidPassword, ValidHash)).Returns(false);
 
         var useCase = new LoginUseCase(db.Object, hasher.Object, jwt.Object);
-        var act     = async () => await useCase.HandleAsync(new LoginRequest(ValidEmail, ValidPassword));
+        var act     = async () => await useCase.ExecuteAsync(new LoginRequest(ValidEmail, ValidPassword));
 
         await act.Should().ThrowAsync<UnauthorizedException>();
     }
 
     [Fact]
-    public async Task HandleAsync_WrongPassword_DoesNotGenerateToken()
+    public async Task ExecuteAsync_WrongPassword_DoesNotGenerateToken()
     {
         var user = BuildUser();
         var (db, hasher, jwt) = BuildDeps(users: [user]);
         hasher.Setup(h => h.Verify(ValidPassword, ValidHash)).Returns(false);
 
         var useCase = new LoginUseCase(db.Object, hasher.Object, jwt.Object);
-        var act     = async () => await useCase.HandleAsync(new LoginRequest(ValidEmail, ValidPassword));
+        var act     = async () => await useCase.ExecuteAsync(new LoginRequest(ValidEmail, ValidPassword));
 
         await act.Should().ThrowAsync<UnauthorizedException>();
         jwt.Verify(j => j.Generate(It.IsAny<User>()), Times.Never);
