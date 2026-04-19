@@ -118,16 +118,19 @@ jobs:
           output: both
           thresholds: '80 90'
 
-      - name: Append Pages link to coverage summary
+      - name: Build PR comment with coverage summary and Pages link
         if: github.event_name == 'pull_request'
         run: |
-          echo "" >> code-coverage-results.md
-          echo "---" >> code-coverage-results.md
-          echo "📊 **[Full interactive coverage report →](https://rnataoliveira.github.io/mechanics-software/)**" >> code-coverage-results.md
+          {
+            cat code-coverage-results.md
+            echo ""
+            echo "---"
+            echo "📊 **[Full interactive coverage report →](https://rnataoliveira.github.io/mechanics-software/)**"
+          } > coverage-comment.md
 
       - name: Add PR comment with coverage summary
         if: github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           recreate: true
-          path: code-coverage-results.md
+          path: coverage-comment.md
