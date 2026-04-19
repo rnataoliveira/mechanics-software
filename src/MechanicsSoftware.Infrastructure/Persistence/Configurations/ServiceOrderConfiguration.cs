@@ -121,7 +121,7 @@ public sealed class ServiceOrderConfiguration : IEntityTypeConfiguration<Service
             .OnDelete(DeleteBehavior.Restrict);
     }
 
-    private static ServiceOrderStatus ParseOrderStatus(string value) =>
+    internal static ServiceOrderStatus ParseOrderStatus(string value) =>
         new(value switch
         {
             "RECEIVED"          => ServiceOrderStatus.Status.Received,
@@ -134,7 +134,7 @@ public sealed class ServiceOrderConfiguration : IEntityTypeConfiguration<Service
             _ => throw new InvalidOperationException($"Unknown service order status: '{value}'")
         });
 
-    private static BudgetStatus ParseBudgetStatus(string value) =>
+    internal static BudgetStatus ParseBudgetStatus(string value) =>
         new(value switch
         {
             "PENDING"  => BudgetStatus.Status.Pending,

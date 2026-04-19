@@ -13,6 +13,8 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      pages: write
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -28,11 +30,11 @@ jobs:
         run: dotnet restore
 
       - name: Run unit tests with coverage
-        continue-on-error: true
         run: |
           dotnet test tests/MechanicsSoftware.UnitTests/ \
             --no-restore \
             --collect:"XPlat Code Coverage" \
+            --settings coverlet.runsettings \
             --results-directory ./coverage-results \
             --logger "trx;LogFileName=test-results.trx"
 
@@ -45,11 +47,17 @@ jobs:
           reportgenerator \
             -reports:"./coverage-results/**/coverage.cobertura.xml" \
             -targetdir:"./coverage-html" \
-            -reporttypes:"Html;HtmlSummary;Cobertura" \
+            -reporttypes:"Html;HtmlSummary;Cobertura;MarkdownSummaryGithub" \
             -assemblyfilters:"-*.Tests;-*.UnitTests;-*.IntegrationTests" \
             -title:"MechanicsSoftware — Coverage Report"
+          find ./coverage-html -type f \( -name "*.css" -o -name "*.html" -o -name "*.htm" -o -name "*.svg" \) \
+            -exec sed -i -E 's/#c00([^0-9a-fA-F])/#0066cc\1/g' {} +
 
-      - name: Enforce 40% line coverage threshold
+      - name: Write coverage summary to workflow run
+        if: always()
+        run: cat ./coverage-html/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Enforce 80% line coverage threshold
         run: |
           python3 - <<'EOF'
           import xml.etree.ElementTree as ET, glob, sys
@@ -69,8 +77,8 @@ jobs:
           print(f"Line coverage:   {line_pct:.1f}%")
           print(f"Branch coverage: {branch_pct:.1f}%")
 
-          if line_pct < 40:
-              print(f"FAILED: line coverage {line_pct:.1f}% is below the 40% minimum.", file=sys.stderr)
+          if line_pct < 80:
+              print(f"FAILED: line coverage {line_pct:.1f}% is below the 80% minimum.", file=sys.stderr)
               sys.exit(1)
 
           print("Coverage threshold met.")
@@ -84,6 +92,17 @@ jobs:
           path: ./coverage-html
           retention-days: 30
 
+      - name: Upload Pages artifact
+        if: always()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./coverage-html
+
+      - name: Deploy to GitHub Pages
+        if: always()
+        id: deploy-pages
+        uses: actions/deploy-pages@v4
+
       - name: Post coverage summary on PR
         if: github.event_name == 'pull_request'
         uses: irongut/CodeCoverageSummary@v1.3.0
@@ -96,11 +115,21 @@ jobs:
           hide_complexity: true
           indicators: true
           output: both
-          thresholds: '40 80'
+          thresholds: '80 90'
+
+      - name: Build PR comment with coverage summary and Pages link
+        if: github.event_name == 'pull_request'
+        run: |
+          {
+            cat code-coverage-results.md
+            echo ""
+            echo "---"
+            echo "📊 **[Full interactive coverage report →](https://rnataoliveira.github.io/mechanics-software/)**"
+          } > coverage-comment.md
 
       - name: Add PR comment with coverage summary
         if: github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           recreate: true
-          path: code-coverage-results.md
+          path: coverage-comment.md

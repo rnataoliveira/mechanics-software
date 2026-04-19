@@ -1,9 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using MechanicsSoftware.Application.Common;
 using MechanicsSoftware.Domain.Auth;
 
 namespace MechanicsSoftware.Infrastructure.Persistence.Seeding;
 
+[ExcludeFromCodeCoverage]
 public sealed class DatabaseSeeder(AppDbContext db, IPasswordHasher hasher)
 {
     private const string DefaultAdminEmail = "admin@mechanics.local";
