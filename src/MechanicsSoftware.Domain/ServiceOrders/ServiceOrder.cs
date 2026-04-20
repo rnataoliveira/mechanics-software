@@ -12,6 +12,7 @@ public sealed class ServiceOrder : Entity<Guid>
     public ServiceOrderStatus Status { get; private set; } = null!;
     public Budget? Budget { get; private set; }
     public DateTime CreatedAt { get; private set; }
+    public DateTime? CompletedAt { get; private set; }
     public DateTime? DeliveredAt { get; private set; }
 
     public IReadOnlyCollection<ServiceItem> ServiceItems => _serviceItems.AsReadOnly();
@@ -78,6 +79,7 @@ public sealed class ServiceOrder : Entity<Guid>
     public void Complete()
     {
         Status = Status.TransitionTo(ServiceOrderStatus.Status.Completed);
+        CompletedAt = DateTime.UtcNow;
     }
 
     public void Deliver()

@@ -157,8 +157,8 @@ dotnet dotnet-ef migrations remove \
 | Customers | `GET/POST /api/customers` · `GET/PUT/DELETE /api/customers/{id}` |
 | Vehicles | `GET/POST /api/vehicles` · `GET/PUT/DELETE /api/vehicles/{id}` |
 | Parts | `GET/POST /api/parts` · `GET/PUT/DELETE /api/parts/{id}` · `PATCH /api/parts/{id}/stock` |
-
-> **Not yet implemented:** Services and Service Orders endpoints are planned for the next milestone.
+| Services | `GET/POST /api/services` · `GET/PUT/DELETE /api/services/{id}` |
+| Service Orders | `GET/POST /api/service-orders` · full lifecycle via action endpoints |
 
 Full documentation and request/response schemas available at `/swagger` when running.
 
@@ -214,12 +214,14 @@ See [`docs/architecture/overview.md`](./docs/architecture/overview.md) for full 
 # Unit tests
 dotnet test tests/MechanicsSoftware.UnitTests
 
-# Integration tests
-dotnet test tests/MechanicsSoftware.IntegrationTests
-
-# All tests with coverage
-dotnet test --collect:"XPlat Code Coverage"
+# Unit tests with coverage report
+dotnet test tests/MechanicsSoftware.UnitTests \
+  --collect:"XPlat Code Coverage" \
+  --settings coverlet.runsettings \
+  --results-directory ./coverage-results
 ```
+
+Coverage report (HTML): [rnataoliveira.github.io/mechanics-software](https://rnataoliveira.github.io/mechanics-software/)
 
 ---
 

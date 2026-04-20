@@ -39,5 +39,22 @@ public sealed class Service : Entity<Guid>
             EstimatedMinutes = estimatedMinutes
         };
     }
+
+    public void Update(string name, string? description, Money basePrice, int estimatedMinutes)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new DomainException("Name is required.");
+
+        if (basePrice is null)
+            throw new DomainException("Base price is required.");
+
+        if (estimatedMinutes <= 0)
+            throw new DomainException("EstimatedMinutes must be positive.");
+
+        Name = name.Trim();
+        Description = description?.Trim();
+        BasePrice = basePrice;
+        EstimatedMinutes = estimatedMinutes;
+    }
 }
 

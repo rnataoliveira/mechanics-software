@@ -36,6 +36,9 @@ public sealed class ServiceOrderConfiguration : IEntityTypeConfiguration<Service
             .HasColumnName("created_at")
             .IsRequired();
 
+        builder.Property(so => so.CompletedAt)
+            .HasColumnName("completed_at");
+
         builder.Property(so => so.DeliveredAt)
             .HasColumnName("delivered_at");
 
