@@ -12,11 +12,11 @@ FIAP POS Tech · 15SOAT · Fase 1
 
 | Name | RM | Discord Username |
 |---|---|---|
-| Diogo | RM371224 | <!-- @username --> |
-| Lucas | RM371615 | <!-- @username --> |
-| Renata | RM371593 | <!-- @username --> |
-| Allan | RM373714 | <!-- @username --> |
-| Daniel | RM370852 | <!-- @username --> |
+| Diogo | RM371224 | @smilipow |
+| Lucas | RM371615 | @lucaspamponet |
+| Renata | RM371593 | @rnataoliveira |
+| Allan | RM373714 | @zer07629 |
+| Daniel | RM370852 | @danielthx23 |
 
 ---
 
