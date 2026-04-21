@@ -54,4 +54,12 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    var url = (app.Urls.FirstOrDefault() ?? "http://localhost:8080")
+        .Replace("[::]", "localhost")
+        .Replace("0.0.0.0", "localhost");
+    app.Logger.LogInformation("Swagger UI: {SwaggerUrl}", $"{url}/swagger");
+});
+
 app.Run();
