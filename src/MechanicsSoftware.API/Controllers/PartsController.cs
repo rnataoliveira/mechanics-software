@@ -16,7 +16,7 @@ public class PartsController(CreatePartUseCase createPart,
 {
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreatePartInput request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(CreatePartRequest request, CancellationToken cancellationToken)
     {
         var result = await createPart.ExecuteAsync(request, cancellationToken);
         return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
@@ -44,14 +44,14 @@ public class PartsController(CreatePartUseCase createPart,
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, UpdatePartInput request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(Guid id, UpdatePartRequest request, CancellationToken cancellationToken)
     {
         var result = await updatePart.ExecuteAsync(id, request, cancellationToken);
         return Ok(result);
     }
 
     [HttpPatch("{id:guid}/stock")]
-    public async Task<IActionResult> UpdateStock(Guid id, UpdateStockInput request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateStock(Guid id, UpdateStockRequest request, CancellationToken cancellationToken)
     {
         var result = await updateStock.ExecuteAsync(id, request, cancellationToken);
         return Ok(result);

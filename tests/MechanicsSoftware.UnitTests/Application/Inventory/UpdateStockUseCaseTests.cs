@@ -35,7 +35,7 @@ public class UpdateStockUseCaseTests
         var part = BuildPart(partId);
         var db = BuildContext(part);
 
-        var result = await new UpdateStockUseCase(db.Object).ExecuteAsync(partId, new UpdateStockInput(10));
+        var result = await new UpdateStockUseCase(db.Object).ExecuteAsync(partId, new UpdateStockRequest(10));
 
         result.StockQuantity.Should().Be(15);
         db.Verify(d => d.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -46,7 +46,7 @@ public class UpdateStockUseCaseTests
     {
         var db = BuildContext(null);
 
-        var act = async () => await new UpdateStockUseCase(db.Object).ExecuteAsync(Guid.NewGuid(), new UpdateStockInput(5));
+        var act = async () => await new UpdateStockUseCase(db.Object).ExecuteAsync(Guid.NewGuid(), new UpdateStockRequest(5));
 
         await act.Should().ThrowAsync<NotFoundException>();
     }
@@ -58,7 +58,7 @@ public class UpdateStockUseCaseTests
         var part = BuildPart(partId);
         var db = BuildContext(part);
 
-        var act = async () => await new UpdateStockUseCase(db.Object).ExecuteAsync(partId, new UpdateStockInput(0));
+        var act = async () => await new UpdateStockUseCase(db.Object).ExecuteAsync(partId, new UpdateStockRequest(0));
 
         await act.Should().ThrowAsync<DomainException>().WithMessage("*greater than zero*");
     }

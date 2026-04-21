@@ -35,7 +35,7 @@ public class UpdatePartUseCaseTests
         var partId = Guid.NewGuid();
         var part = BuildPart(partId);
         var db = BuildContext(part);
-        var input = new UpdatePartInput("Synthetic Oil", "Full synthetic", 3500);
+        var input = new UpdatePartRequest("Synthetic Oil", "Full synthetic", 3500);
 
         var result = await new UpdatePartUseCase(db.Object).ExecuteAsync(partId, input);
 
@@ -49,7 +49,7 @@ public class UpdatePartUseCaseTests
     public async Task ExecuteAsync_PartNotFound_ThrowsNotFoundException()
     {
         var db = BuildContext(null);
-        var input = new UpdatePartInput("Synthetic Oil", null, 3500);
+        var input = new UpdatePartRequest("Synthetic Oil", null, 3500);
 
         var act = async () => await new UpdatePartUseCase(db.Object).ExecuteAsync(Guid.NewGuid(), input);
 

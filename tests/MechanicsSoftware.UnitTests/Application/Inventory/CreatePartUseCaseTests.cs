@@ -27,7 +27,7 @@ public class CreatePartUseCaseTests
     public async Task ExecuteAsync_ValidInput_CreatesAndReturnsPart()
     {
         var (db, mockParts) = BuildContext();
-        var input = new CreatePartInput("OIL-001", "Engine Oil", "5W-30", 2500, 10);
+        var input = new CreatePartRequest("OIL-001", "Engine Oil", "5W-30", 2500, 10);
 
         var result = await new CreatePartUseCase(db.Object).ExecuteAsync(input);
 
@@ -45,7 +45,7 @@ public class CreatePartUseCaseTests
     {
         var existing = Part.Create(Guid.NewGuid(), "OIL-001", "Engine Oil", null, new Money(2500), 5);
         var (db, _) = BuildContext([existing]);
-        var input = new CreatePartInput("OIL-001", "Another Oil", null, 1000, 0);
+        var input = new CreatePartRequest("OIL-001", "Another Oil", null, 1000, 0);
 
         var act = async () => await new CreatePartUseCase(db.Object).ExecuteAsync(input);
 
@@ -56,7 +56,7 @@ public class CreatePartUseCaseTests
     public async Task ExecuteAsync_ZeroInitialStock_CreatesWithoutMovement()
     {
         var (db, _) = BuildContext();
-        var input = new CreatePartInput("BOLT-001", "Hex Bolt", null, 50, 0);
+        var input = new CreatePartRequest("BOLT-001", "Hex Bolt", null, 50, 0);
 
         var result = await new CreatePartUseCase(db.Object).ExecuteAsync(input);
 

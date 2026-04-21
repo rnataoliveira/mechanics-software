@@ -2,7 +2,7 @@ using MechanicsSoftware.Domain.Inventory;
 
 namespace MechanicsSoftware.Application.Features.Inventory;
 
-public sealed record CreatePartInput(
+public sealed record CreatePartRequest(
     string Code,
     string Name,
     string? Description,
@@ -10,13 +10,13 @@ public sealed record CreatePartInput(
     int InitialStock
 );
 
-public sealed record UpdatePartInput(
+public sealed record UpdatePartRequest(
     string Name,
     string? Description,
     int UnitPriceInCents
 );
 
-public sealed record UpdateStockInput(
+public sealed record UpdateStockRequest(
     int Quantity
 );
 

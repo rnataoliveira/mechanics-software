@@ -25,6 +25,6 @@ public sealed class UpdateVehicleUseCase(IAppDbContext db)
         vehicle.Update(request.Make, request.Model, request.Year);
         await db.SaveChangesAsync(cancellationToken);
 
-        return new VehicleResponse(vehicle.Id, vehicle.LicensePlate.Value, vehicle.Make, vehicle.Model, vehicle.Year, vehicle.CustomerId);
+        return VehicleResponse.From(vehicle);
     }
 }

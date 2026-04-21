@@ -1,3 +1,5 @@
+using MechanicsSoftware.Domain.Customers;
+
 namespace MechanicsSoftware.Application.Features.Customers;
 
 public sealed record CustomerResponse(
@@ -6,4 +8,8 @@ public sealed record CustomerResponse(
     string DocumentValue,
     string Email,
     string Phone
-);
+)
+{
+    public static CustomerResponse From(Customer c) =>
+        new(c.Id, c.Name, c.Document.Value, c.Email.Value, c.Phone);
+}

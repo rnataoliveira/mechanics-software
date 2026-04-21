@@ -41,9 +41,6 @@ public sealed class CreateVehicleUseCase(IAppDbContext db)
         db.Vehicles.Add(vehicle);
         await db.SaveChangesAsync(cancellationToken);
 
-        return ToResponse(vehicle);
+        return VehicleResponse.From(vehicle);
     }
-
-    private static VehicleResponse ToResponse(Vehicle v) =>
-        new(v.Id, v.LicensePlate.Value, v.Make, v.Model, v.Year, v.CustomerId);
 }

@@ -26,7 +26,7 @@ public sealed class ListVehiclesUseCase(IAppDbContext db)
         }
 
         return await vehicles
-            .Select(v => new VehicleResponse(v.Id, v.LicensePlate.Value, v.Make, v.Model, v.Year, v.CustomerId))
+            .Select(v => VehicleResponse.From(v))
             .ToListAsync(cancellationToken);
     }
 }

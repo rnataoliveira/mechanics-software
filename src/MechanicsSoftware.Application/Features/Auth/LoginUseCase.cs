@@ -11,11 +11,11 @@ public sealed record LoginResponse(string Token, DateTime ExpiresAt);
 
 public sealed class LoginUseCase(IAppDbContext context, IPasswordHasher hasher, IJwtProvider jwt)
 {
-    public async Task<LoginResponse> HandleAsync(LoginRequest request, CancellationToken ct = default)
+    public async Task<LoginResponse> ExecuteAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
         var emailVo = new Domain.Customers.Email(request.Email);
         var user = await context.Users
-            .FirstOrDefaultAsync(u => u.Email == emailVo, ct)
+            .FirstOrDefaultAsync(u => u.Email == emailVo, cancellationToken)
             ?? throw new NotFoundException("User", request.Email);
 
         if (!hasher.Verify(request.Password, user.PasswordHash))

@@ -23,34 +23,31 @@ public sealed class Vehicle : Entity<Guid>
         if (licensePlate is null)
             throw new DomainException("License plate is required.");
 
-        if (string.IsNullOrWhiteSpace(make))
-            throw new DomainException("Make is required.");
-
-        if (string.IsNullOrWhiteSpace(model))
-            throw new DomainException("Model is required.");
-
-        make = make.Trim();
-        model = model.Trim();
-
-        var currentYear = DateTime.UtcNow.Year;
-        if (year < 1886 || year > currentYear + 1)
-            throw new DomainException($"Year must be between 1886 and {currentYear + 1}.");
-
         if (customerId == Guid.Empty)
             throw new DomainException("CustomerId is required.");
+
+        var (trimmedMake, trimmedModel) = ValidateFields(make, model, year);
 
         return new Vehicle
         {
             Id = id,
             LicensePlate = licensePlate,
-            Make = make,
-            Model = model,
+            Make = trimmedMake,
+            Model = trimmedModel,
             Year = year,
             CustomerId = customerId
         };
     }
 
     public void Update(string make, string model, int year)
+    {
+        var (trimmedMake, trimmedModel) = ValidateFields(make, model, year);
+        Make = trimmedMake;
+        Model = trimmedModel;
+        Year = year;
+    }
+
+    private static (string Make, string Model) ValidateFields(string make, string model, int year)
     {
         if (string.IsNullOrWhiteSpace(make))
             throw new DomainException("Make is required.");
@@ -62,9 +59,7 @@ public sealed class Vehicle : Entity<Guid>
         if (year < 1886 || year > currentYear + 1)
             throw new DomainException($"Year must be between 1886 and {currentYear + 1}.");
 
-        Make = make.Trim();
-        Model = model.Trim();
-        Year = year;
+        return (make.Trim(), model.Trim());
     }
 
     public void UpdateLicensePlate(LicensePlate newLicensePlate)
