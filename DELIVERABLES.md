@@ -6,7 +6,7 @@ FIAP POS Tech · 15SOAT · Fase 1
 
 ## Group
 
-**Name:** <!-- group name here -->
+**Name:** Pos Tech Fiap - Mechanics Software
 
 ## Participants
 
@@ -25,7 +25,7 @@ FIAP POS Tech · 15SOAT · Fase 1
 | Deliverable | Link | Status |
 |---|---|---|
 | Repository | https://github.com/rnataoliveira/mechanics-software | ready |
-| DDD Documentation | <!-- Miro or docs/ link --> | pending |
+| DDD Documentation | https://miro.com/app/board/uXjVGyCZXBU=/ | ready |
 | Demo Video | <!-- YouTube or Drive link --> | pending |
 | Vulnerability Report | see section below | ready |
 

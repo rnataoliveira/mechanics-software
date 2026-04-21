@@ -9,8 +9,8 @@ Progress tracker for the FIAP POS Tech 15SOAT challenge.
 - [x] Git repository created
 - [x] Branch protection (1 PR approval required on `main`)
 - [x] `CONTRIBUTING.md` — project conventions defined
-- [ ] Install .NET 8 SDK on all machines
-- [ ] Scaffold .NET solution (`MechanicsSoftware.sln` + 4 projects + 2 test projects)
+- [x] Install .NET 8 SDK on all machines
+- [x] Scaffold .NET solution (`MechanicsSoftware.sln` + 4 projects + 2 test projects)
 
 ---
 
@@ -37,118 +37,120 @@ Progress tracker for the FIAP POS Tech 15SOAT challenge.
 
 ## Domain (`MechanicsSoftware.Domain`)
 
-- [ ] Shared: `Entity`, `ValueObject`, `DomainException`, `Money`
-- [ ] Value Objects: `TaxId` (CPF/CNPJ), `LicensePlate`, `Email`
-- [ ] `Customer` entity
-- [ ] `Vehicle` entity
-- [ ] `Service` entity
-- [ ] `Part` entity + `StockMovement` entity
-- [ ] `ServiceOrder` aggregate root + state machine (`ServiceOrderStatus`)
-- [ ] `ServiceItem` and `PartItem` entities
-- [ ] `Budget` entity
+- [x] Shared: `Entity`, `ValueObject`, `DomainException`, `Money`
+- [x] Value Objects: `TaxId` (CPF/CNPJ), `LicensePlate`, `Email`
+- [x] `Customer` entity
+- [x] `Vehicle` entity
+- [x] `Service` entity
+- [x] `Part` entity + `StockMovement` entity
+- [x] `ServiceOrder` aggregate root + state machine (`ServiceOrderStatus`)
+- [x] `ServiceItem` and `PartItem` entities
+- [x] `Budget` entity
 
 ---
 
 ## Application (`MechanicsSoftware.Application`)
 
 ### Common
-- [ ] `IAppDbContext` interface
-- [ ] `NotFoundException`
+- [x] `IAppDbContext` interface
+- [x] `NotFoundException`
 
 ### Features — Auth
-- [ ] `LoginUseCase`
+- [x] `LoginUseCase`
 
 ### Features — Customers
-- [ ] `CreateCustomerUseCase`
-- [ ] `UpdateCustomerUseCase`
-- [ ] `DeleteCustomerUseCase`
-- [ ] `GetCustomerUseCase`
-- [ ] `ListCustomersUseCase`
+- [x] `CreateCustomerUseCase`
+- [x] `UpdateCustomerUseCase`
+- [x] `DeleteCustomerUseCase`
+- [x] `GetCustomerUseCase`
+- [x] `ListCustomersUseCase`
 
 ### Features — Vehicles
-- [ ] `CreateVehicleUseCase`
-- [ ] `UpdateVehicleUseCase`
-- [ ] `DeleteVehicleUseCase`
-- [ ] `GetVehicleUseCase`
-- [ ] `ListVehiclesUseCase`
+- [x] `CreateVehicleUseCase`
+- [x] `UpdateVehicleUseCase`
+- [x] `DeleteVehicleUseCase`
+- [x] `GetVehicleUseCase`
+- [x] `ListVehiclesUseCase`
 
 ### Features — Services
-- [ ] `CreateServiceUseCase`
-- [ ] `UpdateServiceUseCase`
-- [ ] `DeleteServiceUseCase`
-- [ ] `GetServiceUseCase`
-- [ ] `ListServicesUseCase`
+- [x] `CreateServiceUseCase`
+- [x] `UpdateServiceUseCase`
+- [x] `DeleteServiceUseCase`
+- [x] `GetServiceUseCase`
+- [x] `ListServicesUseCase`
 
 ### Features — Inventory
-- [ ] `CreatePartUseCase`
-- [ ] `UpdatePartUseCase`
-- [ ] `DeletePartUseCase`
-- [ ] `GetPartUseCase`
-- [ ] `ListPartsUseCase`
-- [ ] `UpdateStockUseCase`
+- [x] `CreatePartUseCase`
+- [x] `UpdatePartUseCase`
+- [x] `DeletePartUseCase`
+- [x] `GetPartUseCase`
+- [x] `ListPartsUseCase`
+- [x] `UpdateStockUseCase`
 
 ### Features — Service Orders
-- [ ] `CreateServiceOrderUseCase`
-- [ ] `AddServiceItemUseCase`
-- [ ] `AddPartItemUseCase`
-- [ ] `GenerateBudgetUseCase`
-- [ ] `SendBudgetUseCase`
-- [ ] `StartDiagnosisUseCase`
-- [ ] `ApproveServiceOrderUseCase`
-- [ ] `RejectServiceOrderUseCase`
-- [ ] `StartExecutionUseCase`
-- [ ] `CompleteServiceOrderUseCase`
-- [ ] `DeliverServiceOrderUseCase`
-- [ ] `GetServiceOrderStatusUseCase` ← public (no JWT)
-- [ ] `GetServiceOrderUseCase`
-- [ ] `ListServiceOrdersUseCase`
-- [ ] `GetAverageExecutionTimeUseCase`
+- [x] `CreateServiceOrderUseCase`
+- [x] `AddServiceItemUseCase`
+- [x] `AddPartItemUseCase`
+- [x] `GenerateBudgetUseCase`
+- [x] `SendBudgetUseCase`
+- [x] `StartDiagnosisUseCase`
+- [x] `ApproveServiceOrderUseCase`
+- [x] `RejectServiceOrderUseCase`
+- [x] `StartExecutionUseCase`
+- [x] `CompleteServiceOrderUseCase`
+- [x] `DeliverServiceOrderUseCase`
+- [x] `GetServiceOrderStatusUseCase` ← public (no JWT)
+- [x] `GetServiceOrderUseCase`
+- [x] `ListServiceOrdersUseCase`
+- [x] `GetAverageExecutionTimeUseCase`
 
 ---
 
 ## Infrastructure (`MechanicsSoftware.Infrastructure`)
 
-- [ ] `AppDbContext` implementing `IAppDbContext`
-- [ ] EF Core Fluent API configurations (snake_case table/column names)
-- [ ] Initial migration
-- [ ] `JwtProvider`
-- [ ] `PasswordHasher` (BCrypt)
+- [x] `AppDbContext` implementing `IAppDbContext`
+- [x] EF Core Fluent API configurations (snake_case table/column names)
+- [x] Initial migration + subsequent migrations
+- [x] `JwtProvider`
+- [x] `PasswordHasher` (BCrypt)
+- [x] `DatabaseSeeder`
 
 ---
 
 ## API (`MechanicsSoftware.API`)
 
-- [ ] `AuthController`
-- [ ] `CustomersController`
-- [ ] `VehiclesController`
-- [ ] `ServicesController`
-- [ ] `PartsController`
-- [ ] `ServiceOrdersController`
-- [ ] Swagger configured and documented
-- [ ] JWT middleware + `[Authorize]` on protected routes
-- [ ] Global exception handling middleware
-- [ ] `appsettings.json` with environment variable support
-- [ ] DI registration for all use cases
+- [x] `AuthController`
+- [x] `CustomersController`
+- [x] `VehiclesController`
+- [x] `ServicesController`
+- [x] `PartsController`
+- [x] `ServiceOrdersController`
+- [x] Swagger configured and documented
+- [x] JWT middleware + `[Authorize]` on protected routes
+- [x] Global exception handling middleware
+- [x] `appsettings.json` with environment variable support
+- [x] DI registration for all use cases
 
 ---
 
 ## Tests
 
 ### Unit — Domain
-- [ ] `TaxIdTests` — CPF and CNPJ validation
-- [ ] `LicensePlateTests` — Mercosul and legacy formats
-- [ ] `MoneyTests` — arithmetic operations
-- [ ] `ServiceOrderStatusTests` — valid and invalid transitions
-- [ ] `ServiceOrderTests` — business rules (add items, generate budget, state machine)
-- [ ] `BudgetTests` — total calculation
-- [ ] `PartTests` — stock rules (no negative stock)
+- [x] `TaxIdTests` — CPF and CNPJ validation
+- [x] `LicensePlateTests` — Mercosul and legacy formats
+- [x] `MoneyTests` — arithmetic operations
+- [x] `ServiceOrderStatusTests` — valid and invalid transitions
+- [x] `ServiceOrderTests` — business rules (add items, generate budget, state machine)
+- [x] `BudgetStatusTests` — status transitions
+- [x] `PartTests` — stock rules (no negative stock)
 
 ### Unit — Application
-- [ ] `CreateServiceOrderUseCaseTests`
-- [ ] `ApproveServiceOrderUseCaseTests`
-- [ ] `RejectServiceOrderUseCaseTests`
-- [ ] `GenerateBudgetUseCaseTests`
-- [ ] `UpdateStockUseCaseTests`
+- [x] `CreateServiceOrderUseCaseTests`
+- [x] `ApproveServiceOrderUseCaseTests`
+- [x] `RejectServiceOrderUseCaseTests`
+- [x] `GenerateBudgetUseCaseTests`
+- [x] `UpdateStockUseCaseTests`
+- [x] All remaining use case tests (customers, vehicles, services, inventory, auth)
 
 ### Integration
 - [ ] Customers CRUD endpoints
@@ -156,35 +158,37 @@ Progress tracker for the FIAP POS Tech 15SOAT challenge.
 - [ ] Inventory flow (stock reservation and deduction)
 
 ### Coverage
-- [ ] 80%+ on Domain and Application layers verified
+- [x] 96.9% on Domain and Application layers (exceeds 80% minimum)
+- [x] Coverage report published to GitHub Pages
 
 ---
 
 ## DevOps
 
-- [ ] `Dockerfile`
-- [ ] `docker-compose.yml` (API + PostgreSQL)
+- [x] `Dockerfile`
+- [x] `docker-compose.yml` (API + PostgreSQL)
 - [x] `README.md` — setup, how to run, env vars, endpoints
 
 ---
 
 ## Security
 
-- [ ] Vulnerability scan (Snyk or `dotnet list package --vulnerable`)
-- [ ] Vulnerability analysis report written
+- [x] Vulnerability scan (`dotnet list package --vulnerable --include-transitive`)
+- [x] Vulnerability analysis report written (`DELIVERABLES.md`)
+- [x] Security report published to GitHub Pages (`/security/`)
 
 ---
 
 ## Final Deliverables
 
-- [ ] Add `soat-architecture` as repository collaborator
-- [ ] DDD documentation link confirmed
-- [ ] Repository link confirmed
-- [ ] Vulnerability report complete
-- [ ] Delivery PDF:
-  - [ ] Group name
-  - [ ] Participants and Discord usernames
-  - [ ] Documentation link
-  - [ ] Repository link
-  - [ ] Vulnerability report
-- [ ] Demo video recorded (max 15 minutes)
+- [ ] Add `soat-architecture` as repository collaborator (GitHub Settings → Collaborators)
+- [x] DDD documentation in `docs/` (repository)
+- [x] Repository link confirmed
+- [x] Vulnerability report complete (`DELIVERABLES.md`)
+- [ ] Delivery PDF / `DELIVERABLES.md` finalization:
+  - [ ] Group name (fill in `DELIVERABLES.md` line 9)
+  - [x] Participants and Discord usernames
+  - [ ] DDD documentation link (fill in `DELIVERABLES.md` — Miro board URL or docs/ link)
+  - [x] Repository link
+  - [x] Vulnerability report
+- [ ] Demo video recorded (max 15 minutes) — link pending in `DELIVERABLES.md`

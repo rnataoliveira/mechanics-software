@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Deliverables — Tech Challenge Phase 1</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 40px;
+  }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; color: #0d1117; }
+  h2 { font-size: 15px; font-weight: 700; margin: 28px 0 10px; color: #0d1117;
+       border-bottom: 2px solid #e1e4e8; padding-bottom: 4px; }
+  h3 { font-size: 13px; font-weight: 700; margin: 18px 0 8px; color: #444; }
+  .subtitle { color: #555; font-size: 13px; margin-bottom: 6px; }
+  hr { border: none; border-top: 1px solid #e1e4e8; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12.5px; }
+  th { background: #f6f8fa; text-align: left; padding: 7px 10px;
+       border: 1px solid #d0d7de; font-weight: 600; color: #333; }
+  td { padding: 6px 10px; border: 1px solid #d0d7de; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+  code { background: #f3f4f6; padding: 1px 5px; border-radius: 3px;
+         font-family: "SF Mono", Menlo, monospace; font-size: 11.5px; color: #c7254e; }
+  pre { background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 5px;
+        padding: 12px 14px; font-size: 11.5px; white-space: pre-wrap; margin: 10px 0; }
+  a { color: #0969da; }
+  .badge-ok  { display:inline-block; background:#2ea44f; color:#fff;
+               padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600; }
+  .badge-pending { display:inline-block; background:#bf8700; color:#fff;
+               padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600; }
+  .badge-high { display:inline-block; background:#d73a49; color:#fff;
+               padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600; }
+  .section-header { background:#0d1117; color:#fff; padding:6px 10px;
+                    border-radius:4px; margin-bottom: 10px; font-weight:700; font-size:13px; }
+  @media print {
+    body { padding: 20px 30px; }
+    a { color: #0969da; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Deliverables — Tech Challenge Phase 1</h1>
+<p class="subtitle">FIAP POS Tech &nbsp;·&nbsp; 15SOAT &nbsp;·&nbsp; Fase 1</p>
+
+<hr>
+
+<h2>Group</h2>
+<p><strong>Name:</strong> Pos Tech Fiap - Mechanics Software</p>
+
+<h2>Participants</h2>
+<table>
+  <thead><tr><th>Name</th><th>RM</th><th>Discord Username</th></tr></thead>
+  <tbody>
+    <tr><td>Diogo</td><td>RM371224</td><td>@smilipow</td></tr>
+    <tr><td>Lucas</td><td>RM371615</td><td>@lucaspamponet</td></tr>
+    <tr><td>Renata</td><td>RM371593</td><td>@rnataoliveira</td></tr>
+    <tr><td>Allan</td><td>RM373714</td><td>@zer07629</td></tr>
+    <tr><td>Daniel</td><td>RM370852</td><td>@danielthx23</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2>Links</h2>
+<table>
+  <thead><tr><th>Deliverable</th><th>Link</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Repository</td>
+      <td><a href="https://github.com/rnataoliveira/mechanics-software">github.com/rnataoliveira/mechanics-software</a></td>
+      <td><span class="badge-ok">ready</span></td>
+    </tr>
+    <tr>
+      <td>DDD Documentation</td>
+      <td><a href="https://miro.com/app/board/uXjVGyCZXBU=/">miro.com/app/board/uXjVGyCZXBU=/</a></td>
+      <td><span class="badge-ok">ready</span></td>
+    </tr>
+    <tr>
+      <td>Demo Video</td>
+      <td>—</td>
+      <td><span class="badge-pending">pending</span></td>
+    </tr>
+    <tr>
+      <td>Vulnerability Report</td>
+      <td>see section below</td>
+      <td><span class="badge-ok">ready</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2>DDD Documentation</h2>
+<p>Hosted in the repository under <code>docs/</code> and on the Miro board linked above.</p>
+<table>
+  <thead><tr><th>Document</th><th>Path</th></tr></thead>
+  <tbody>
+    <tr><td>Ubiquitous Language</td><td><code>docs/domain/ubiquitous-language.md</code></td></tr>
+    <tr><td>Event Storming — Service Order</td><td><code>docs/domain/event-storming.md</code></td></tr>
+    <tr><td>Event Storming — Inventory</td><td><code>docs/domain/event-storming.md</code></td></tr>
+    <tr><td>Aggregates and Entities</td><td><code>docs/domain/aggregates-and-entities.md</code></td></tr>
+    <tr><td>Bounded Contexts</td><td><code>docs/domain/bounded-contexts.md</code></td></tr>
+    <tr><td>Domain Storytelling</td><td><code>docs/domain/domain-storytelling.md</code></td></tr>
+    <tr><td>Architecture Overview</td><td><code>docs/architecture/overview.md</code></td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2>Vulnerability Report</h2>
+<p><strong>Tool:</strong> <code>dotnet list package --vulnerable --include-transitive</code> (built-in NuGet vulnerability audit)<br>
+<strong>Scan date:</strong> 2026-04-08</p>
+
+<h3>Findings (before remediation)</h3>
+<table>
+  <thead><tr><th>Package</th><th>Version</th><th>Severity</th><th>Advisory</th><th>Projects affected</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>Microsoft.Extensions.Caching.Memory</code></td><td>8.0.0</td>
+      <td><span class="badge-high">High</span></td>
+      <td><a href="https://github.com/advisories/GHSA-qj66-m88j-hmgj">GHSA-qj66-m88j-hmgj</a></td>
+      <td>Application, Infrastructure, API, UnitTests, IntegrationTests</td>
+    </tr>
+    <tr>
+      <td><code>Npgsql</code></td><td>8.0.0</td>
+      <td><span class="badge-high">High</span></td>
+      <td><a href="https://github.com/advisories/GHSA-x9vc-6hfv-hg8c">GHSA-x9vc-6hfv-hg8c</a></td>
+      <td>Infrastructure, API, UnitTests, IntegrationTests</td>
+    </tr>
+    <tr>
+      <td><code>System.Text.Json</code></td><td>8.0.0</td>
+      <td><span class="badge-high">High</span></td>
+      <td><a href="https://github.com/advisories/GHSA-hh2w-p6rv-4g7w">GHSA-hh2w-p6rv-4g7w</a></td>
+      <td>Infrastructure, API</td>
+    </tr>
+    <tr>
+      <td><code>System.Text.Json</code></td><td>8.0.0</td>
+      <td><span class="badge-high">High</span></td>
+      <td><a href="https://github.com/advisories/GHSA-8g4q-xg66-9fp4">GHSA-8g4q-xg66-9fp4</a></td>
+      <td>Infrastructure, API</td>
+    </tr>
+    <tr>
+      <td><code>System.Net.Http</code></td><td>4.3.0</td>
+      <td><span class="badge-high">High</span></td>
+      <td><a href="https://github.com/advisories/GHSA-7jgj-8wvc-jh57">GHSA-7jgj-8wvc-jh57</a></td>
+      <td>UnitTests, IntegrationTests</td>
+    </tr>
+    <tr>
+      <td><code>System.Text.RegularExpressions</code></td><td>4.3.0</td>
+      <td><span class="badge-high">High</span></td>
+      <td><a href="https://github.com/advisories/GHSA-cmhx-cq75-c4mj">GHSA-cmhx-cq75-c4mj</a></td>
+      <td>UnitTests, IntegrationTests</td>
+    </tr>
+  </tbody>
+</table>
+<p>All findings were <strong>transitive</strong> dependencies — none were directly referenced by the project.</p>
+
+<h3>Remediation</h3>
+<table>
+  <thead><tr><th>Package</th><th>Action</th></tr></thead>
+  <tbody>
+    <tr><td><code>Microsoft.Extensions.Caching.Memory</code></td><td>Fixed — updated <code>Microsoft.EntityFrameworkCore</code> to 8.0.11, which pulls 8.0.1+</td></tr>
+    <tr><td><code>Npgsql</code></td><td>Fixed — updated <code>Npgsql.EntityFrameworkCore.PostgreSQL</code> to 8.0.11, which pulls Npgsql 8.0.6</td></tr>
+    <tr><td><code>System.Text.Json</code></td><td>Fixed — resolved transitively via EF Core 8.0.11 update</td></tr>
+    <tr><td><code>System.Net.Http</code></td><td>Fixed — pinned <code>System.Net.Http</code> 4.3.4 directly in test projects</td></tr>
+    <tr><td><code>System.Text.RegularExpressions</code></td><td>Fixed — pinned <code>System.Text.RegularExpressions</code> 4.3.1 directly in test projects</td></tr>
+  </tbody>
+</table>
+
+<h3>Post-remediation scan</h3>
+<pre>O projeto fornecido `MechanicsSoftware.Domain` não tem nenhum pacote vulnerável.
+O projeto fornecido `MechanicsSoftware.Application` não tem nenhum pacote vulnerável.
+O projeto fornecido `MechanicsSoftware.Infrastructure` não tem nenhum pacote vulnerável.
+O projeto fornecido `MechanicsSoftware.API` não tem nenhum pacote vulnerável.
+O projeto fornecido `MechanicsSoftware.UnitTests` não tem nenhum pacote vulnerável.
+O projeto fornecido `MechanicsSoftware.IntegrationTests` não tem nenhum pacote vulnerável.</pre>
+
+<p><strong>Result:</strong> <span class="badge-ok">0 vulnerabilities remaining</span> — all HIGH findings resolved.</p>
+
+</body>
+</html>
