@@ -28,6 +28,8 @@ docker compose up --build
 API available at: `http://localhost:8080`  
 Swagger UI: `http://localhost:8080/swagger`
 
+> Migrations and the default admin user are applied automatically on startup.
+
 ### Run locally (step by step)
 
 **1. Start the database**
@@ -38,21 +40,7 @@ docker compose up db -d
 
 PostgreSQL will be available at `localhost:5435`.
 
-**2. Install the local EF Core CLI tool**
-
-```bash
-dotnet tool restore
-```
-
-**3. Apply migrations**
-
-```bash
-dotnet dotnet-ef database update \
-  --project src/MechanicsSoftware.Infrastructure/MechanicsSoftware.Infrastructure.csproj \
-  --startup-project src/MechanicsSoftware.API/MechanicsSoftware.API.csproj
-```
-
-**4. Run the API**
+**2. Run the API**
 
 ```bash
 dotnet run --project src/MechanicsSoftware.API/MechanicsSoftware.API.csproj
@@ -60,7 +48,7 @@ dotnet run --project src/MechanicsSoftware.API/MechanicsSoftware.API.csproj
 
 Swagger UI: `http://localhost:5066/swagger`
 
-On first startup the application automatically creates a default admin user.
+On first startup the application automatically applies all pending migrations and creates a default admin user.
 
 ---
 
@@ -149,6 +137,7 @@ dotnet dotnet-ef migrations remove \
 | Method | Endpoint | Description |
 |---|---|---|
 | `POST` | `/api/auth/login` | Authenticate and receive JWT |
+| `GET` | `/api/service-orders/{id}/status` | Check service order status (for customers) |
 
 ### Protected endpoints (JWT required)
 
