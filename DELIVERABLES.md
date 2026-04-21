@@ -33,17 +33,9 @@ FIAP POS Tech · 15SOAT · Fase 1
 
 ## DDD Documentation
 
-Hosted in the repository under `docs/`:
+**Miro board:** https://miro.com/app/board/uXjVGyCZXBU=/
 
-| Document | Path |
-|---|---|
-| Ubiquitous Language | `docs/domain/ubiquitous-language.md` |
-| Event Storming — Service Order | `docs/domain/event-storming.md` |
-| Event Storming — Inventory | `docs/domain/event-storming.md` |
-| Aggregates and Entities | `docs/domain/aggregates-and-entities.md` |
-| Bounded Contexts | `docs/domain/bounded-contexts.md` |
-| Domain Storytelling | `docs/domain/domain-storytelling.md` |
-| Architecture Overview | `docs/architecture/overview.md` |
+Includes: Event Storming (Service Order and Inventory flows), Aggregates and Entities, Bounded Contexts, Domain Storytelling, Ubiquitous Language.
 
 ---
 

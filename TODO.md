@@ -182,13 +182,13 @@ Progress tracker for the FIAP POS Tech 15SOAT challenge.
 ## Final Deliverables
 
 - [ ] Add `soat-architecture` as repository collaborator (GitHub Settings → Collaborators)
-- [x] DDD documentation in `docs/` (repository)
+- [x] DDD documentation — Miro board: https://miro.com/app/board/uXjVGyCZXBU=/
 - [x] Repository link confirmed
 - [x] Vulnerability report complete (`DELIVERABLES.md`)
 - [ ] Delivery PDF / `DELIVERABLES.md` finalization:
   - [ ] Group name (fill in `DELIVERABLES.md` line 9)
   - [x] Participants and Discord usernames
-  - [ ] DDD documentation link (fill in `DELIVERABLES.md` — Miro board URL or docs/ link)
+  - [x] DDD documentation link — https://miro.com/app/board/uXjVGyCZXBU=/
   - [x] Repository link
   - [x] Vulnerability report
 - [ ] Demo video recorded (max 15 minutes) — link pending in `DELIVERABLES.md`
