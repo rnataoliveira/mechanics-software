@@ -6,7 +6,7 @@ FIAP POS Tech · 15SOAT · Fase 1
 
 ## Group
 
-**Name:** <!-- group name here -->
+**Name:** Pos Tech Fiap - Mechanics Software
 
 ## Participants
 
@@ -25,25 +25,18 @@ FIAP POS Tech · 15SOAT · Fase 1
 | Deliverable | Link | Status |
 |---|---|---|
 | Repository | https://github.com/rnataoliveira/mechanics-software | ready |
-| DDD Documentation | <!-- Miro or docs/ link --> | pending |
+| DDD Documentation | https://miro.com/app/board/uXjVGyCZXBU=/ | ready |
+| Coverage Report | https://rnataoliveira.github.io/mechanics-software/ | ready |
+| Vulnerability Report | https://rnataoliveira.github.io/mechanics-software/security/ | ready |
 | Demo Video | <!-- YouTube or Drive link --> | pending |
-| Vulnerability Report | see section below | ready |
 
 ---
 
 ## DDD Documentation
 
-Hosted in the repository under `docs/`:
+**Miro board:** https://miro.com/app/board/uXjVGyCZXBU=/
 
-| Document | Path |
-|---|---|
-| Ubiquitous Language | `docs/domain/ubiquitous-language.md` |
-| Event Storming — Service Order | `docs/domain/event-storming.md` |
-| Event Storming — Inventory | `docs/domain/event-storming.md` |
-| Aggregates and Entities | `docs/domain/aggregates-and-entities.md` |
-| Bounded Contexts | `docs/domain/bounded-contexts.md` |
-| Domain Storytelling | `docs/domain/domain-storytelling.md` |
-| Architecture Overview | `docs/architecture/overview.md` |
+Includes: Event Storming (Service Order and Inventory flows), Aggregates and Entities, Bounded Contexts, Domain Storytelling, Ubiquitous Language.
 
 ---
 
