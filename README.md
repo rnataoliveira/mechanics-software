@@ -28,6 +28,8 @@ docker compose up --build
 API available at: `http://localhost:8080`  
 Swagger UI: `http://localhost:8080/swagger`
 
+> Migrations and the default admin user are applied automatically on startup.
+
 ### Run locally (step by step)
 
 **1. Start the database**
@@ -149,6 +151,7 @@ dotnet dotnet-ef migrations remove \
 | Method | Endpoint | Description |
 |---|---|---|
 | `POST` | `/api/auth/login` | Authenticate and receive JWT |
+| `GET` | `/api/service-orders/{id}/status` | Check service order status (for customers) |
 
 ### Protected endpoints (JWT required)
 
