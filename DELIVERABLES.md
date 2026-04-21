@@ -26,8 +26,9 @@ FIAP POS Tech · 15SOAT · Fase 1
 |---|---|---|
 | Repository | https://github.com/rnataoliveira/mechanics-software | ready |
 | DDD Documentation | https://miro.com/app/board/uXjVGyCZXBU=/ | ready |
+| Coverage Report | https://rnataoliveira.github.io/mechanics-software/ | ready |
+| Vulnerability Report | https://rnataoliveira.github.io/mechanics-software/security/ | ready |
 | Demo Video | <!-- YouTube or Drive link --> | pending |
-| Vulnerability Report | see section below | ready |
 
 ---
 
