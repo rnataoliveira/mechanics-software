@@ -17,17 +17,17 @@ public class AuthIntegrationTests : IntegrationTestBase
 
     public override async Task InitializeAsync()
     {
-        await _factory.ResetDatabaseAsync();
+        await Factory.ResetDatabaseAsync();
     }
 
-    private HttpClient GetUnauthenticatedClient() => _factory.CreateClient();
+    private HttpClient GetUnauthenticatedClient() => Factory.CreateClient();
 
     [Fact]
     public async Task LoginWithValidCredentials_ReturnsJwtToken()
     {
         // Arrange
         var client = GetUnauthenticatedClient();
-        await using var scope = _factory.Services.CreateAsyncScope();
+        await using var scope = Factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await TestDataSeeder.SeedTestUserAsync(context, ValidEmail, ValidPassword);
 
@@ -53,7 +53,7 @@ public class AuthIntegrationTests : IntegrationTestBase
     {
         // Arrange
         var client = GetUnauthenticatedClient();
-        await using var scope = _factory.Services.CreateAsyncScope();
+        await using var scope = Factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await TestDataSeeder.SeedTestUserAsync(context, ValidEmail, ValidPassword);
 

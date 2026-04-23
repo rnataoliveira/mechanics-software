@@ -19,15 +19,8 @@ public sealed class CreateCustomerUseCase(IAppDbContext db)
     {
         var documentVo = new TaxId(request.DocumentValue, request.PersonType);
 
-        var inferredType = normalizedDocument.Length == 11 ? PersonType.INDIVIDUAL : PersonType.COMPANY;
-        var taxId = new TaxId(normalizedDocument, inferredType);
-
         var customerExisting = await db.Customers
-<<<<<<< HEAD
             .AnyAsync(c => c.Document == documentVo, cancellationToken);
-=======
-            .AnyAsync(c => c.Document == taxId, cancellationToken);
->>>>>>> 5590aaf (test(integration): integration tests for Customers and Inventory endpoints)
 
         if (customerExisting)
             throw new DomainException($"A customer with document '{request.DocumentValue}' already exists.");

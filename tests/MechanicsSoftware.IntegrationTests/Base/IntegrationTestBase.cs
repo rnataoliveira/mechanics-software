@@ -8,11 +8,16 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MechanicsSoftware.IntegrationTests.Base;
 
-public abstract class IntegrationTestBase : IAsyncLifetime
+public abstract class IntegrationTestBase : IAsyncLifetime, IDisposable
 {
-    protected readonly WebApplicationFactoryFixture _factory;
-    protected HttpClient _client;
-    protected string? _authToken;
+    private readonly WebApplicationFactoryFixture _factory;
+    private readonly HttpClient _client;
+    private string? _authToken;
+    private bool _disposed;
+
+    protected WebApplicationFactoryFixture Factory => _factory;
+    protected HttpClient Client => _client;
+    protected string? AuthToken => _authToken;
 
     protected IntegrationTestBase()
     {
@@ -28,8 +33,23 @@ public abstract class IntegrationTestBase : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
+        if (_disposed)
+            return;
+
         _client.Dispose();
         await _factory.DisposeAsync();
+        _disposed = true;
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        _client.Dispose();
+        _factory.Dispose();
+        _disposed = true;
+        GC.SuppressFinalize(this);
     }
     protected async Task AuthenticateAsync(string email = "test@example.com", string password = "Password123!")
     {
@@ -37,7 +57,6 @@ public abstract class IntegrationTestBase : IAsyncLifetime
 
         await using var scope = _factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await context.Database.EnsureCreatedAsync();
         var seeded = await TestDataSeeder.SeedTestUserAsync(context, email, password);
 
         var loginRequest = new LoginRequest(seeded.Email, seeded.Password);

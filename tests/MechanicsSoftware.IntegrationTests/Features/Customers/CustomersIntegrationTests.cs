@@ -13,7 +13,7 @@ public class CustomersIntegrationTests : IntegrationTestBase
 {
     public override async Task InitializeAsync()
     {
-        await _factory.ResetDatabaseAsync();
+        await Factory.ResetDatabaseAsync();
         await AuthenticateAsync();
     }
 
@@ -24,13 +24,13 @@ public class CustomersIntegrationTests : IntegrationTestBase
         var request = new CreateCustomerRequest(
             Name: "John Doe",
             DocumentValue: "11222333000181",
-            PersonType: "COMPANY",
+            PersonType: MechanicsSoftware.Domain.Customers.PersonType.COMPANY,
             Email: "john@example.com",
             Phone: "11999999999"
         );
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/customers", request);
+        var response = await Client.PostAsJsonAsync("/api/customers", request);
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.Created);
@@ -51,12 +51,12 @@ public class CustomersIntegrationTests : IntegrationTestBase
     public async Task GetCustomerById_WithValidId_Returns200Ok()
     {
         // Arrange
-        await using var scope = _factory.Services.CreateAsyncScope();
+        await using var scope = Factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var customerId = await TestDataSeeder.SeedTestCustomerAsync(context);
 
         // Act
-        var response = await _client.GetAsync($"/api/customers/{customerId}");
+        var response = await Client.GetAsync($"/api/customers/{customerId}");
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
@@ -77,7 +77,7 @@ public class CustomersIntegrationTests : IntegrationTestBase
         var nonExistentId = Guid.NewGuid();
 
         // Act
-        var response = await _client.GetAsync($"/api/customers/{nonExistentId}");
+        var response = await Client.GetAsync($"/api/customers/{nonExistentId}");
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.NotFound);
@@ -87,7 +87,7 @@ public class CustomersIntegrationTests : IntegrationTestBase
     public async Task UpdateCustomer_WithValidData_Returns200Ok()
     {
         // Arrange
-        await using var scope = _factory.Services.CreateAsyncScope();
+        await using var scope = Factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var customerId = await TestDataSeeder.SeedTestCustomerAsync(context);
 
@@ -98,7 +98,7 @@ public class CustomersIntegrationTests : IntegrationTestBase
         );
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/customers/{customerId}", updateRequest);
+        var response = await Client.PutAsJsonAsync($"/api/customers/{customerId}", updateRequest);
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
@@ -122,7 +122,7 @@ public class CustomersIntegrationTests : IntegrationTestBase
         var updateRequest = new UpdateCustomerRequest("Updated Name", "updated@example.com", "11988888888");
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/customers/{nonExistentId}", updateRequest);
+        var response = await Client.PutAsJsonAsync($"/api/customers/{nonExistentId}", updateRequest);
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.NotFound);
@@ -132,18 +132,18 @@ public class CustomersIntegrationTests : IntegrationTestBase
     public async Task DeleteCustomer_WithValidId_Returns204NoContent()
     {
         // Arrange
-        await using var scope = _factory.Services.CreateAsyncScope();
+        await using var scope = Factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var customerId = await TestDataSeeder.SeedTestCustomerAsync(context);
 
         // Act
-        var response = await _client.DeleteAsync($"/api/customers/{customerId}");
+        var response = await Client.DeleteAsync($"/api/customers/{customerId}");
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.NoContent);
 
         // Verify customer is deleted
-        var getResponse = await _client.GetAsync($"/api/customers/{customerId}");
+        var getResponse = await Client.GetAsync($"/api/customers/{customerId}");
         getResponse.StatusCode.Should().Be(System.Net.HttpStatusCode.NotFound);
     }
 
@@ -154,7 +154,7 @@ public class CustomersIntegrationTests : IntegrationTestBase
         var nonExistentId = Guid.NewGuid();
 
         // Act
-        var response = await _client.DeleteAsync($"/api/customers/{nonExistentId}");
+        var response = await Client.DeleteAsync($"/api/customers/{nonExistentId}");
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.NotFound);
@@ -164,20 +164,20 @@ public class CustomersIntegrationTests : IntegrationTestBase
     public async Task CreateCustomer_WithDuplicateDocument_ReturnsBadRequest()
     {
         // Arrange
-        await using var scope = _factory.Services.CreateAsyncScope();
+        await using var scope = Factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await TestDataSeeder.SeedTestCustomerAsync(context, documentValue: "11222333000181");
 
         var request = new CreateCustomerRequest(
             Name: "Another Customer",
             DocumentValue: "11222333000181",
-            PersonType: "COMPANY",
+            PersonType: MechanicsSoftware.Domain.Customers.PersonType.COMPANY,
             Email: "another@example.com",
             Phone: "11988888888"
         );
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/customers", request);
+        var response = await Client.PostAsJsonAsync("/api/customers", request);
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.UnprocessableEntity);

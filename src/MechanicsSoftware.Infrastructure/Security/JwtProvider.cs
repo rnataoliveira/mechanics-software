@@ -40,8 +40,6 @@ public sealed class JwtProvider : IJwtProvider
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            issuer: "mechanics-software",
-            audience: "mechanics-software-api",
             claims: claims,
             expires: expiresAt,
             signingCredentials: credentials);

@@ -1,0 +1,20 @@
+services:
+  postgres-tests:
+    image: postgres:16-alpine
+    container_name: mechanics-software-postgres-tests
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mechanics_software_test
+    ports:
+      - "5435:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mechanics_software_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    volumes:
+      - mechanics_software_test_pgdata:/var/lib/postgresql/data
+
+volumes:
+  mechanics_software_test_pgdata:

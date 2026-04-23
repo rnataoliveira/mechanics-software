@@ -14,7 +14,7 @@ public class InventoryIntegrationTests : IntegrationTestBase
 {
     public override async Task InitializeAsync()
     {
-        await _factory.ResetDatabaseAsync();
+        await Factory.ResetDatabaseAsync();
         await AuthenticateAsync();
     }
 
@@ -22,7 +22,7 @@ public class InventoryIntegrationTests : IntegrationTestBase
     public async Task CreatePart_WithValidData_Returns201Created()
     {
         // Arrange
-        var request = new CreatePartInput(
+        var request = new CreatePartRequest(
             Code: "OIL-002",
             Name: "Synthetic Engine Oil",
             Description: "High-quality synthetic oil",
@@ -31,7 +31,7 @@ public class InventoryIntegrationTests : IntegrationTestBase
         );
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/parts", request);
+        var response = await Client.PostAsJsonAsync("/api/parts", request);
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.Created);
@@ -54,14 +54,14 @@ public class InventoryIntegrationTests : IntegrationTestBase
     public async Task ReplenishStock_WithValidQuantity_Returns200Ok()
     {
         // Arrange
-        await using var scope = _factory.Services.CreateAsyncScope();
+        await using var scope = Factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var partId = await TestDataSeeder.SeedTestPartAsync(context, initialStock: 10);
 
-        var replenishRequest = new UpdateStockInput(Quantity: 15);
+        var replenishRequest = new UpdateStockRequest(Quantity: 15);
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/parts/{partId}/stock", replenishRequest);
+        var response = await Client.PatchAsJsonAsync($"/api/parts/{partId}/stock", replenishRequest);
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
@@ -77,20 +77,20 @@ public class InventoryIntegrationTests : IntegrationTestBase
     public async Task ReplenishStock_CreatesStockMovementRecord()
     {
         // Arrange
-        await using var scope = _factory.Services.CreateAsyncScope();
+        await using var scope = Factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var partId = await TestDataSeeder.SeedTestPartAsync(context, initialStock: 10);
 
-        var replenishRequest = new UpdateStockInput(Quantity: 20);
+        var replenishRequest = new UpdateStockRequest(Quantity: 20);
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/parts/{partId}/stock", replenishRequest);
+        var response = await Client.PatchAsJsonAsync($"/api/parts/{partId}/stock", replenishRequest);
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
 
         // Verify that StockMovement record was created in the database
-        await using var verifyScope = _factory.Services.CreateAsyncScope();
+        await using var verifyScope = Factory.Services.CreateAsyncScope();
         var verifyContext = verifyScope.ServiceProvider.GetRequiredService<AppDbContext>();
         var part = await verifyContext.Parts
             .Include(p => p.Movements)
@@ -106,10 +106,10 @@ public class InventoryIntegrationTests : IntegrationTestBase
     {
         // Arrange
         var nonExistentPartId = Guid.NewGuid();
-        var replenishRequest = new UpdateStockInput(Quantity: 10);
+        var replenishRequest = new UpdateStockRequest(Quantity: 10);
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/parts/{nonExistentPartId}/stock", replenishRequest);
+        var response = await Client.PatchAsJsonAsync($"/api/parts/{nonExistentPartId}/stock", replenishRequest);
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.NotFound);
@@ -119,14 +119,14 @@ public class InventoryIntegrationTests : IntegrationTestBase
     public async Task ReplenishStock_WithZeroQuantity_ReturnsBadRequest()
     {
         // Arrange
-        await using var scope = _factory.Services.CreateAsyncScope();
+        await using var scope = Factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var partId = await TestDataSeeder.SeedTestPartAsync(context);
 
-        var replenishRequest = new UpdateStockInput(Quantity: 0);
+        var replenishRequest = new UpdateStockRequest(Quantity: 0);
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/parts/{partId}/stock", replenishRequest);
+        var response = await Client.PatchAsJsonAsync($"/api/parts/{partId}/stock", replenishRequest);
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.UnprocessableEntity);
@@ -136,14 +136,14 @@ public class InventoryIntegrationTests : IntegrationTestBase
     public async Task ReplenishStock_WithNegativeQuantity_ReturnsBadRequest()
     {
         // Arrange
-        await using var scope = _factory.Services.CreateAsyncScope();
+        await using var scope = Factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var partId = await TestDataSeeder.SeedTestPartAsync(context);
 
-        var replenishRequest = new UpdateStockInput(Quantity: -5);
+        var replenishRequest = new UpdateStockRequest(Quantity: -5);
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/parts/{partId}/stock", replenishRequest);
+        var response = await Client.PatchAsJsonAsync($"/api/parts/{partId}/stock", replenishRequest);
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.UnprocessableEntity);
@@ -153,11 +153,11 @@ public class InventoryIntegrationTests : IntegrationTestBase
     public async Task CreatePart_WithDuplicateCode_ReturnsBadRequest()
     {
         // Arrange
-        await using var scope = _factory.Services.CreateAsyncScope();
+        await using var scope = Factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await TestDataSeeder.SeedTestPartAsync(context, code: "SPARK-001");
 
-        var request = new CreatePartInput(
+        var request = new CreatePartRequest(
             Code: "SPARK-001",
             Name: "Different Spark Plug",
             Description: "Test",
@@ -166,7 +166,7 @@ public class InventoryIntegrationTests : IntegrationTestBase
         );
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/parts", request);
+        var response = await Client.PostAsJsonAsync("/api/parts", request);
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.UnprocessableEntity);
@@ -176,7 +176,7 @@ public class InventoryIntegrationTests : IntegrationTestBase
     public async Task CreatePart_WithZeroInitialStock_Returns201Created()
     {
         // Arrange
-        var request = new CreatePartInput(
+        var request = new CreatePartRequest(
             Code: "EMPTY-001",
             Name: "Empty Part",
             Description: "Part with zero initial stock",
@@ -185,7 +185,7 @@ public class InventoryIntegrationTests : IntegrationTestBase
         );
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/parts", request);
+        var response = await Client.PostAsJsonAsync("/api/parts", request);
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.Created);
@@ -201,20 +201,20 @@ public class InventoryIntegrationTests : IntegrationTestBase
     public async Task MultipleReplenishments_AreAllTracked()
     {
         // Arrange
-        await using var scope = _factory.Services.CreateAsyncScope();
+        await using var scope = Factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var partId = await TestDataSeeder.SeedTestPartAsync(context, initialStock: 10);
 
         // Act - First replenishment
-        var response1 = await _client.PatchAsJsonAsync($"/api/parts/{partId}/stock", new UpdateStockInput(5));
+        var response1 = await Client.PatchAsJsonAsync($"/api/parts/{partId}/stock", new UpdateStockRequest(5));
         response1.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
 
         // Act - Second replenishment
-        var response2 = await _client.PatchAsJsonAsync($"/api/parts/{partId}/stock", new UpdateStockInput(3));
+        var response2 = await Client.PatchAsJsonAsync($"/api/parts/{partId}/stock", new UpdateStockRequest(3));
         response2.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
 
         // Verify database records
-        await using var verifyScope = _factory.Services.CreateAsyncScope();
+        await using var verifyScope = Factory.Services.CreateAsyncScope();
         var verifyContext = verifyScope.ServiceProvider.GetRequiredService<AppDbContext>();
         var part = await verifyContext.Parts.FindAsync(partId);
 

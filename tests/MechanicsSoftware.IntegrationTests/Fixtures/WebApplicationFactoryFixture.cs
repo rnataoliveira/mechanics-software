@@ -10,7 +10,7 @@ namespace MechanicsSoftware.IntegrationTests.Fixtures;
 public sealed class WebApplicationFactoryFixture : WebApplicationFactory<Program>
 {
     private static string CreateConnectionString()
-        => $"Server=localhost;Port=5432;Database=mechanics_software_test;User Id=postgres;Password=postgres;";
+        => $"Server=localhost;Port=5435;Database=mechanics_software_test;User Id=postgres;Password=postgres;";
 
     private readonly string _connectionString = CreateConnectionString();
     private const string _jwtSecret = "test-secret-key-for-testing-only-min-32-chars-required-here";
@@ -41,21 +41,14 @@ public sealed class WebApplicationFactoryFixture : WebApplicationFactory<Program
 
         await EnsureDatabaseExistsAsync();
 
-        try
-        {
-            await context.Database.EnsureDeletedAsync();
-            await context.Database.EnsureCreatedAsync();
-        }
-        catch (Exception ex)
-        {
-            await context.Database.EnsureCreatedAsync();
-        }
+        await context.Database.EnsureDeletedAsync();
+        await context.Database.MigrateAsync();
     }
 
     private async Task EnsureDatabaseExistsAsync()
     {
         var builder = new NpgsqlConnectionStringBuilder(_connectionString);
-        var databaseName = builder.Database;
+        var databaseName = builder.Database ?? throw new InvalidOperationException("Connection string did not specify a database name.");
 
         var maintenanceCsb = new NpgsqlConnectionStringBuilder(_connectionString)
         {
