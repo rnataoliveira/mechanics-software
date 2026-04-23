@@ -49,6 +49,10 @@ public sealed class PartConfiguration : IEntityTypeConfiguration<Part>
             .IsUnique()
             .HasDatabaseName("ix_parts_code");
 
+        builder.Navigation(p => p.Movements)
+            .HasField("_movements")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
         builder.OwnsMany(p => p.Movements, sm =>
         {
             sm.ToTable("stock_movements");

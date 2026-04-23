@@ -2,7 +2,6 @@ using MechanicsSoftware.Application.Common;
 using MechanicsSoftware.Application.Common.Exceptions;
 using MechanicsSoftware.Domain.Inventory;
 using MechanicsSoftware.Domain.ServiceOrders;
-using Microsoft.EntityFrameworkCore;
 
 namespace MechanicsSoftware.Application.Features.ServiceOrders;
 
@@ -11,9 +10,7 @@ public sealed class AddPartItemUseCase(IAppDbContext db)
     public async Task<AddPartItemResponse> ExecuteAsync(
         Guid serviceOrderId, AddPartItemRequest request, CancellationToken cancellationToken = default)
     {
-        var order = await db.ServiceOrders
-            .FirstOrDefaultAsync(o => o.Id == serviceOrderId, cancellationToken)
-            ?? throw new NotFoundException(nameof(ServiceOrder), serviceOrderId);
+        var order = await db.ServiceOrders.FindFullAsync(serviceOrderId, cancellationToken);
 
         var part = await db.Parts.FindAsync([request.PartId], cancellationToken)
             ?? throw new NotFoundException(nameof(Part), request.PartId);
