@@ -23,7 +23,7 @@ public class GetPartUseCaseTests
 
         db.Setup(d => d.Parts).Returns(mockParts.Object);
         mockParts.Setup(m => m.FindAsync(It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
-                 .Returns(ValueTask.FromResult<Part?>(part));
+                 .Returns(new ValueTask<Part?>(part));
 
         return db;
     }
