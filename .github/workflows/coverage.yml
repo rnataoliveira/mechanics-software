@@ -51,7 +51,7 @@ jobs:
             /o:"rnataoliveira" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.cs.opencover.reportsPaths="coverage-results/**/coverage.opencover.xml" \
-            /d:sonar.exclusions="**/Migrations/**,**/obj/**,**/bin/**,**/Persistence/Seeding/**,DELIVERABLES.html,docker-compose*.yml" \
+            /d:sonar.exclusions="**/Migrations/**,**/obj/**,**/bin/**,**/Persistence/Seeding/**,DELIVERABLES.html,docker-compose*.yml,**/appsettings.Development.json" \
             /d:sonar.coverage.exclusions="**/Migrations/**,**/obj/**,**/bin/**,**/Persistence/Seeding/DatabaseSeeder.cs"
 
       - name: Build solution
