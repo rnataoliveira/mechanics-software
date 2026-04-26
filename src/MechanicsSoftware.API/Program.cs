@@ -1,5 +1,5 @@
-using MechanicsSoftware.API.Middleware;
 using MechanicsSoftware.API.Extensions;
+using MechanicsSoftware.API.Middleware;
 using MechanicsSoftware.Application;
 using MechanicsSoftware.Infrastructure;
 using MechanicsSoftware.Infrastructure.Persistence;
@@ -7,6 +7,7 @@ using MechanicsSoftware.Infrastructure.Persistence.Seeding;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,6 +65,7 @@ app.Lifetime.ApplicationStarted.Register(() =>
 
 app.Run();
 
+[ExcludeFromCodeCoverage]
 public partial class Program
 {
     protected Program() { }
