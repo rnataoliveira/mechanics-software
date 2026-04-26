@@ -1,9 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using MechanicsSoftware.Application.Common.Exceptions;
 using MechanicsSoftware.Domain.Shared;
 
 namespace MechanicsSoftware.API.Middleware;
 
+[ExcludeFromCodeCoverage]
 public sealed class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
