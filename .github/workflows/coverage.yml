@@ -26,17 +26,46 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Setup Java (required by SonarScanner)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
       - name: Restore dependencies
         run: dotnet restore
+
+      - name: Install SonarScanner
+        run: dotnet tool install -g dotnet-sonarscanner
+
+      - name: Begin SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet sonarscanner begin \
+            /k:"renata-oliveira_mechanics-software" \
+            /o:"renata-oliveira" \
+            /d:sonar.token="$SONAR_TOKEN" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.cs.opencover.reportsPaths="coverage-results/**/coverage.opencover.xml" \
+            /d:sonar.coverage.exclusions="**/Migrations/**,**/obj/**,**/bin/**,**/Persistence/Seeding/**"
+
+      - name: Build solution
+        run: dotnet build --no-restore --no-incremental
 
       - name: Run unit tests with coverage
         run: |
           dotnet test tests/MechanicsSoftware.UnitTests/ \
-            --no-restore \
+            --no-build \
             --collect:"XPlat Code Coverage" \
             --settings coverlet.runsettings \
             --results-directory ./coverage-results \
             --logger "trx;LogFileName=test-results.trx"
+
+      - name: End SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
 
       - name: Install ReportGenerator
         run: dotnet tool install -g dotnet-reportgenerator-globaltool
