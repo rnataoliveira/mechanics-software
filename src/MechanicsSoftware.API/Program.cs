@@ -1,5 +1,5 @@
+using MechanicsSoftware.API;
 using MechanicsSoftware.API.Extensions;
-using MechanicsSoftware.API.Logging;
 using MechanicsSoftware.API.Middleware;
 using MechanicsSoftware.Application;
 using MechanicsSoftware.Infrastructure;
@@ -69,4 +69,13 @@ app.Run();
 public partial class Program
 {
     protected Program() { }
+}
+
+namespace MechanicsSoftware.API
+{
+    internal static partial class Log
+    {
+        [LoggerMessage(Level = LogLevel.Information, Message = "Swagger UI: {SwaggerUrl}")]
+        internal static partial void SwaggerUIReady(this ILogger logger, string swaggerUrl);
+    }
 }
