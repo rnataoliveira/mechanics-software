@@ -6,7 +6,7 @@ using MechanicsSoftware.Domain.Shared;
 namespace MechanicsSoftware.API.Middleware;
 
 [ExcludeFromCodeCoverage]
-public sealed class ExceptionHandlingMiddleware
+public sealed partial class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
@@ -41,7 +41,7 @@ public sealed class ExceptionHandlingMiddleware
         };
 
         if (statusCode == StatusCodes.Status500InternalServerError)
-            _logger.LogError(exception, "Unhandled exception");
+            LogUnhandledException(exception);
 
         context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/json";
@@ -49,4 +49,7 @@ public sealed class ExceptionHandlingMiddleware
         var body = JsonSerializer.Serialize(new { error = message });
         await context.Response.WriteAsync(body);
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unhandled exception")]
+    private partial void LogUnhandledException(Exception exception);
 }

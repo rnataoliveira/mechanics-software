@@ -7,7 +7,7 @@ namespace MechanicsSoftware.API.Controllers;
 [ApiController]
 [Route("api/parts")]
 [Authorize]
-public class PartsController(CreatePartUseCase createPart,
+public class PartsController(CreatePartUseCase createPart, // NOSONAR S6960: VSA — each action delegates to a dedicated use case
     DeletePartUseCase deletePart,
     GetPartUseCase getPart,
     ListPartsUseCase listParts,

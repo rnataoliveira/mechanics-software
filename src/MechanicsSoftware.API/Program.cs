@@ -1,4 +1,5 @@
 using MechanicsSoftware.API.Extensions;
+using MechanicsSoftware.API.Logging;
 using MechanicsSoftware.API.Middleware;
 using MechanicsSoftware.Application;
 using MechanicsSoftware.Infrastructure;
@@ -59,7 +60,7 @@ app.Lifetime.ApplicationStarted.Register(() =>
     var url = (app.Urls.FirstOrDefault() ?? "http://localhost:8080")
         .Replace("[::]", "localhost")
         .Replace("0.0.0.0", "localhost");
-    app.Logger.LogInformation("Swagger UI: {SwaggerUrl}", $"{url}/swagger");
+    app.Logger.SwaggerUIReady($"{url}/swagger");
 });
 
 app.Run();

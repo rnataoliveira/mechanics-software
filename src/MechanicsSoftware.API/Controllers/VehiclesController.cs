@@ -7,7 +7,7 @@ namespace MechanicsSoftware.API.Controllers;
 [ApiController]
 [Route("api/vehicles")]
 [Authorize]
-public class VehiclesController(CreateVehicleUseCase createVehicle,
+public class VehiclesController(CreateVehicleUseCase createVehicle, // NOSONAR S6960: VSA — each action delegates to a dedicated use case
     DeleteVehicleUseCase deleteVehicle,
     GetVehicleUseCase getVehicle,
     ListVehiclesUseCase listVehicles,

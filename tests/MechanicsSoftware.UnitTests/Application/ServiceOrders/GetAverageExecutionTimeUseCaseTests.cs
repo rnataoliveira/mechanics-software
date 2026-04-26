@@ -13,10 +13,10 @@ public class GetAverageExecutionTimeUseCaseTests
     [Fact]
     public async Task ExecuteAsync_NoCompletedOrders_ReturnsZero()
     {
-        var orders = new List<ServiceOrder>
-        {
+        List<ServiceOrder> orders =
+        [
             ServiceOrder.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()),
-        };
+        ];
 
         var mockOrders = MockDbSetHelper.CreateMockDbSet(orders);
         var db = new Mock<IAppDbContext>();
@@ -39,7 +39,7 @@ public class GetAverageExecutionTimeUseCaseTests
         order.Approve();
         order.Complete();
 
-        var mockOrders = MockDbSetHelper.CreateMockDbSet(new List<ServiceOrder> { order });
+        var mockOrders = MockDbSetHelper.CreateMockDbSet([order]);
         var db = new Mock<IAppDbContext>();
         db.Setup(d => d.ServiceOrders).Returns(mockOrders.Object);
 

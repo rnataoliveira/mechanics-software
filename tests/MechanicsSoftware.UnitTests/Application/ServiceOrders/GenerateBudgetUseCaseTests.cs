@@ -28,7 +28,7 @@ public class GenerateBudgetUseCaseTests
         var order = BuildOrderInDiagnosis();
         order.AddServiceItem(Guid.NewGuid(), "Oil Change", new Money(5000), 1);
 
-        var mockOrders = MockDbSetHelper.CreateMockDbSet(new List<ServiceOrder> { order });
+        var mockOrders = MockDbSetHelper.CreateMockDbSet([order]);
         var db = new Mock<IAppDbContext>();
         db.Setup(d => d.ServiceOrders).Returns(mockOrders.Object);
         db.Setup(d => d.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
