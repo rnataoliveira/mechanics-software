@@ -28,7 +28,7 @@ internal static class MockDbSetHelper
     }
 }
 
-internal class TestAsyncQueryProvider<TEntity>(IQueryProvider inner) : IAsyncQueryProvider
+internal sealed class TestAsyncQueryProvider<TEntity>(IQueryProvider inner) : IAsyncQueryProvider
 {
     public IQueryable CreateQuery(Expression expression) =>
         new TestAsyncEnumerable<TEntity>(expression);
@@ -52,7 +52,7 @@ internal class TestAsyncQueryProvider<TEntity>(IQueryProvider inner) : IAsyncQue
     }
 }
 
-internal class TestAsyncEnumerable<T>(Expression expression)
+internal sealed class TestAsyncEnumerable<T>(Expression expression)
     : EnumerableQuery<T>(expression), IAsyncEnumerable<T>, IQueryable<T>
 {
     IQueryProvider IQueryable.Provider => new TestAsyncQueryProvider<T>(this);
@@ -61,11 +61,11 @@ internal class TestAsyncEnumerable<T>(Expression expression)
         new TestAsyncEnumerator<T>(this.AsEnumerable().GetEnumerator());
 }
 
-internal class TestAsyncEnumerator<T>(IEnumerator<T> inner) : IAsyncEnumerator<T>
+internal sealed class TestAsyncEnumerator<T>(IEnumerator<T> inner) : IAsyncEnumerator<T>
 {
     public T Current => inner.Current;
 
-    public ValueTask<bool> MoveNextAsync() => ValueTask.FromResult(inner.MoveNext());
+    public ValueTask<bool> MoveNextAsync() => new(inner.MoveNext());
 
     public ValueTask DisposeAsync()
     {

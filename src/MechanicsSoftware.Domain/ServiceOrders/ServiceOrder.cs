@@ -117,7 +117,6 @@ public sealed class ServiceOrder : Entity<Guid>
 
     public Budget GenerateBudget()
     {
-
         if (Budget is not null)
             throw new DomainException("Budget already generated. Cannot overwrite an existing budget.");
 
