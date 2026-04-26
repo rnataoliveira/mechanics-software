@@ -50,7 +50,8 @@ jobs:
             /o:"renata-oliveira" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.cs.opencover.reportsPaths="coverage-results/**/coverage.opencover.xml" \
-            /d:sonar.coverage.exclusions="**/Migrations/**,**/obj/**,**/bin/**,**/Persistence/Seeding/**"
+            /d:sonar.exclusions="**/Migrations/**,**/obj/**,**/bin/**,**/Persistence/Seeding/**,DELIVERABLES.html" \
+            /d:sonar.coverage.exclusions="**/Migrations/**,**/obj/**,**/bin/**,**/Persistence/Seeding/DatabaseSeeder.cs"
 
       - name: Build solution
         run: dotnet build --no-restore --no-incremental
