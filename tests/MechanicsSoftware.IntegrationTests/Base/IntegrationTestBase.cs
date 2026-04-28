@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Json;
 using System.Text.Json;
 using MechanicsSoftware.Application.Features.Auth;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MechanicsSoftware.IntegrationTests.Base;
 
+[SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable", Justification = "Class implements IAsyncLifetime which handles async disposal via xUnit")]
 public abstract class IntegrationTestBase : IAsyncLifetime
 {
     private readonly WebApplicationFactoryFixture _factory;
@@ -30,7 +32,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         await AuthenticateAsync();
     }
 
-    public async Task DisposeAsync()
+    public virtual async Task DisposeAsync()
     {
         _client.Dispose();
         await _factory.DisposeAsync();
