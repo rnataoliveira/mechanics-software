@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
 using MechanicsSoftware.Application.Common;
+using MechanicsSoftware.Domain.Customers;
 using MechanicsSoftware.Domain.Inventory;
 using MechanicsSoftware.IntegrationTests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -170,7 +171,7 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
         {
             name = "Test Customer",
             documentValue = document,
-            personType = 0, // 0 = INDIVIDUAL, 1 = COMPANY (enum serialized as int)
+            personType = (int)PersonType.INDIVIDUAL,
             email,
             phone
         });
@@ -329,7 +330,7 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
 
     private async Task AssertStockAsync(Guid partId, int expectedStock, int expectedReserved)
     {
-        using var scope = _factory.Services.CreateScope();
+        await using var scope = _factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var part = await db.Parts.AsNoTracking().FirstOrDefaultAsync(p => p.Id == partId);
         part.Should().NotBeNull();
@@ -340,7 +341,7 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
     private async Task AssertMovementExistsAsync(
         Guid partId, StockMovementType type, int quantity, Guid reference)
     {
-        using var scope = _factory.Services.CreateScope();
+        await using var scope = _factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var part = await db.Parts.AsNoTracking().FirstOrDefaultAsync(p => p.Id == partId);
         part.Should().NotBeNull();
@@ -350,7 +351,7 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
 
     private async Task AssertMovementDoesNotExistAsync(Guid partId, StockMovementType type)
     {
-        using var scope = _factory.Services.CreateScope();
+        await using var scope = _factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var part = await db.Parts.AsNoTracking().FirstOrDefaultAsync(p => p.Id == partId);
         part.Should().NotBeNull();

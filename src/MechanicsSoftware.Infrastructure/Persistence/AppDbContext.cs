@@ -26,30 +26,84 @@ public sealed class AppDbContext : DbContext, IAppDbContext
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    // Workaround for EF Core 9.0.14 + Npgsql 9.0.4: brand-new owned entities (collection items
+    // and owned scalars) are sometimes attached as Modified instead of Added even when the
+    // owner is loaded with .Include(...) of the navigation. The resulting UPDATE affects 0
+    // rows and throws DbUpdateConcurrencyException. We promote those entries before saving.
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        PromoteNewOwnedItemsToAdded();
-        return base.SaveChangesAsync(cancellationToken);
+        ChangeTracker.DetectChanges();
+        PromoteNewOwnedCollectionItems();
+        await PromoteNewOwnedScalarsAsync(cancellationToken);
+
+        var auto = ChangeTracker.AutoDetectChangesEnabled;
+        ChangeTracker.AutoDetectChangesEnabled = false;
+        try
+        {
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+        finally
+        {
+            ChangeTracker.AutoDetectChangesEnabled = auto;
+        }
     }
 
     public override int SaveChanges()
     {
-        PromoteNewOwnedItemsToAdded();
-        return base.SaveChanges();
+        ChangeTracker.DetectChanges();
+        PromoteNewOwnedCollectionItems();
+        PromoteNewOwnedScalars();
+
+        var auto = ChangeTracker.AutoDetectChangesEnabled;
+        ChangeTracker.AutoDetectChangesEnabled = false;
+        try
+        {
+            return base.SaveChanges();
+        }
+        finally
+        {
+            ChangeTracker.AutoDetectChangesEnabled = auto;
+        }
     }
 
-    // Workaround: EF Core may track freshly-added owned entities as Modified instead of
-    // Added, producing UPDATE statements that affect 0 rows and throw
-    // DbUpdateConcurrencyException. For each Modified owned entity, check the DB: if no row
-    // exists for that key, flip the state to Added.
-    private void PromoteNewOwnedItemsToAdded()
+    // Owned-collection items in this domain are append-only (ServiceItems, PartItems,
+    // StockMovements). Any Modified entry is therefore a freshly-added item. No DB round-trip.
+    private void PromoteNewOwnedCollectionItems()
     {
-        ChangeTracker.DetectChanges();
-        foreach (var entry in ChangeTracker.Entries().ToList())
+        foreach (var entry in ChangeTracker.Entries())
         {
             if (entry.State != EntityState.Modified) continue;
-            if (entry.Metadata.FindOwnership() is null) continue;
+            var ownership = entry.Metadata.FindOwnership();
+            if (ownership is null || ownership.IsUnique) continue;
+            entry.State = EntityState.Added;
+        }
+    }
 
+    // Owned scalars (e.g. Budget) ARE mutated after creation (Approve/Reject), so we cannot
+    // blindly flip Modified → Added. A single DB lookup distinguishes new from existing.
+    private async Task PromoteNewOwnedScalarsAsync(CancellationToken cancellationToken)
+    {
+        var candidates = ChangeTracker.Entries()
+            .Where(e => e.State == EntityState.Modified
+                     && e.Metadata.FindOwnership() is { IsUnique: true })
+            .ToList();
+
+        foreach (var entry in candidates)
+        {
+            if (await entry.GetDatabaseValuesAsync(cancellationToken) is null)
+                entry.State = EntityState.Added;
+        }
+    }
+
+    private void PromoteNewOwnedScalars()
+    {
+        var candidates = ChangeTracker.Entries()
+            .Where(e => e.State == EntityState.Modified
+                     && e.Metadata.FindOwnership() is { IsUnique: true })
+            .ToList();
+
+        foreach (var entry in candidates)
+        {
             if (entry.GetDatabaseValues() is null)
                 entry.State = EntityState.Added;
         }

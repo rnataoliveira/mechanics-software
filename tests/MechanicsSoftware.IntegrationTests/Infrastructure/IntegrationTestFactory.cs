@@ -17,7 +17,8 @@ public sealed class IntegrationTestFactory : WebApplicationFactory<Program>, IAs
     public async Task InitializeAsync()
     {
         await ExecuteAdminCommandAsync($"CREATE DATABASE \"{_testDatabaseName}\"");
-        _ = CreateClient();
+        // Boot the host so Program.cs runs migrations and admin seeding against the new database.
+        _ = Server;
     }
 
     public new async Task DisposeAsync()
