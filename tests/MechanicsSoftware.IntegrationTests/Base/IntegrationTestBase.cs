@@ -32,7 +32,7 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         await AuthenticateAsync();
     }
 
-    public virtual async Task DisposeAsync()
+    public async Task DisposeAsync()
     {
         _client.Dispose();
         await _factory.DisposeAsync();
