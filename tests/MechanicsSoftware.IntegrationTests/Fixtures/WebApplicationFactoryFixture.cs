@@ -36,37 +36,10 @@ public sealed class WebApplicationFactoryFixture : WebApplicationFactory<Program
 
     public async Task ResetDatabaseAsync()
     {
-        using var scope = Services.CreateScope();
+        await using var scope = Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-        await EnsureDatabaseExistsAsync();
 
         await context.Database.EnsureDeletedAsync();
         await context.Database.MigrateAsync();
-    }
-
-    private async Task EnsureDatabaseExistsAsync()
-    {
-        var builder = new NpgsqlConnectionStringBuilder(_connectionString);
-        var databaseName = builder.Database ?? throw new InvalidOperationException("Connection string did not specify a database name.");
-
-        var maintenanceCsb = new NpgsqlConnectionStringBuilder(_connectionString)
-        {
-            Database = "postgres"
-        };
-
-        await using var conn = new NpgsqlConnection(maintenanceCsb.ConnectionString);
-        await conn.OpenAsync();
-
-        await using (var existsCmd = new NpgsqlCommand("SELECT 1 FROM pg_database WHERE datname = @name", conn))
-        {
-            existsCmd.Parameters.AddWithValue("name", databaseName);
-            var exists = await existsCmd.ExecuteScalarAsync();
-            if (exists is not null)
-                return;
-        }
-
-        await using var createCmd = new NpgsqlCommand($"CREATE DATABASE \"{databaseName}\"", conn);
-        await createCmd.ExecuteNonQueryAsync();
     }
 }

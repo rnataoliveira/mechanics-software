@@ -161,7 +161,7 @@ public class CustomersIntegrationTests : IntegrationTestBase
     }
 
     [Fact]
-    public async Task CreateCustomer_WithDuplicateDocument_ReturnsBadRequest()
+    public async Task CreateCustomer_WithDuplicateDocument_ReturnsUnprocessableEntity()
     {
         // Arrange
         await using var scope = Factory.Services.CreateAsyncScope();
@@ -181,5 +181,18 @@ public class CustomersIntegrationTests : IntegrationTestBase
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.UnprocessableEntity);
+    }
+
+    [Fact]
+    public async Task GetCustomers_WithoutToken_ReturnsUnauthorized()
+    {
+        // Arrange
+        var unauthenticatedClient = Factory.CreateClient();
+
+        // Act
+        var response = await unauthenticatedClient.GetAsync("/api/customers");
+
+        // Assert
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);
     }
 }

@@ -79,17 +79,4 @@ public class AuthIntegrationTests : IntegrationTestBase
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.NotFound);
     }
-
-    [Fact]
-    public async Task GetCustomersWithoutToken_ReturnsUnauthorized()
-    {
-        // Arrange
-        var unauthenticatedClient = GetUnauthenticatedClient();
-
-        // Act
-        var response = await unauthenticatedClient.GetAsync("/api/customers");
-
-        // Assert
-        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);
-    }
 }

@@ -14,31 +14,25 @@ public static class TestDataSeeder
 
     public static async Task<(string Email, string Password)> SeedTestUserAsync(AppDbContext context, string email = "test@example.com", string password = "Password123!")
     {
-        var userEmail = Environment.GetEnvironmentVariable("SEED_TEST_USER_EMAIL")
-            ?? email;
-
-        var userPassword = Environment.GetEnvironmentVariable("SEED_TEST_USER_PASSWORD")
-            ?? password;
-
-        var normalizedEmail = userEmail.ToLowerInvariant();
+        var normalizedEmail = email.ToLowerInvariant();
 
         var exists = await context.Users
             .AnyAsync(u => u.Email == new Email(normalizedEmail));
 
-        if (exists) return (normalizedEmail, userPassword);
+        if (exists) return (normalizedEmail, password);
 
         var user = User.Create(
             id: Guid.NewGuid(),
             name: "Test User",
             email: normalizedEmail,
-            passwordHash: _passwordHasher.Hash(userPassword),
+            passwordHash: _passwordHasher.Hash(password),
             role: User.Roles.Attendant
         );
 
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
-        return (normalizedEmail, userPassword);
+        return (normalizedEmail, password);
     }
 
     public static async Task<Guid> SeedTestCustomerAsync(

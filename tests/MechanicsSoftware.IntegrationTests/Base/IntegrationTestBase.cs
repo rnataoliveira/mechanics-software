@@ -8,12 +8,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MechanicsSoftware.IntegrationTests.Base;
 
-public abstract class IntegrationTestBase : IAsyncLifetime, IDisposable
+public abstract class IntegrationTestBase : IAsyncLifetime
 {
     private readonly WebApplicationFactoryFixture _factory;
     private readonly HttpClient _client;
     private string? _authToken;
-    private bool _disposed;
 
     protected WebApplicationFactoryFixture Factory => _factory;
     protected HttpClient Client => _client;
@@ -33,23 +32,8 @@ public abstract class IntegrationTestBase : IAsyncLifetime, IDisposable
 
     public async Task DisposeAsync()
     {
-        if (_disposed)
-            return;
-
         _client.Dispose();
         await _factory.DisposeAsync();
-        _disposed = true;
-    }
-
-    public void Dispose()
-    {
-        if (_disposed)
-            return;
-
-        _client.Dispose();
-        _factory.Dispose();
-        _disposed = true;
-        GC.SuppressFinalize(this);
     }
     protected async Task AuthenticateAsync(string email = "test@example.com", string password = "Password123!")
     {

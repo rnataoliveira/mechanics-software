@@ -116,7 +116,7 @@ public class InventoryIntegrationTests : IntegrationTestBase
     }
 
     [Fact]
-    public async Task ReplenishStock_WithZeroQuantity_ReturnsBadRequest()
+    public async Task ReplenishStock_WithZeroQuantity_ReturnsUnprocessableEntity()
     {
         // Arrange
         await using var scope = Factory.Services.CreateAsyncScope();
@@ -133,7 +133,7 @@ public class InventoryIntegrationTests : IntegrationTestBase
     }
 
     [Fact]
-    public async Task ReplenishStock_WithNegativeQuantity_ReturnsBadRequest()
+    public async Task ReplenishStock_WithNegativeQuantity_ReturnsUnprocessableEntity()
     {
         // Arrange
         await using var scope = Factory.Services.CreateAsyncScope();
@@ -216,7 +216,9 @@ public class InventoryIntegrationTests : IntegrationTestBase
         // Verify database records
         await using var verifyScope = Factory.Services.CreateAsyncScope();
         var verifyContext = verifyScope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var part = await verifyContext.Parts.FindAsync(partId);
+        var part = await verifyContext.Parts
+            .Include(p => p.Movements)
+            .FirstAsync(p => p.Id == partId);
 
         part.Should().NotBeNull();
         part!.StockQuantity.Should().Be(18); // 10 + 5 + 3
