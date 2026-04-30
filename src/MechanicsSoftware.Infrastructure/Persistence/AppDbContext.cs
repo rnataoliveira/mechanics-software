@@ -1,5 +1,6 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using MechanicsSoftware.Application.Common;
 using MechanicsSoftware.Domain.Auth;
 using MechanicsSoftware.Domain.Customers;
@@ -48,24 +49,6 @@ public sealed class AppDbContext : DbContext, IAppDbContext
         }
     }
 
-    public override int SaveChanges()
-    {
-        ChangeTracker.DetectChanges();
-        PromoteNewOwnedCollectionItems();
-        PromoteNewOwnedScalars();
-
-        var auto = ChangeTracker.AutoDetectChangesEnabled;
-        ChangeTracker.AutoDetectChangesEnabled = false;
-        try
-        {
-            return base.SaveChanges();
-        }
-        finally
-        {
-            ChangeTracker.AutoDetectChangesEnabled = auto;
-        }
-    }
-
     // Owned-collection items in this domain are append-only (ServiceItems, PartItems,
     // StockMovements). Any Modified entry is therefore a freshly-added item. No DB round-trip.
     private void PromoteNewOwnedCollectionItems()
@@ -89,23 +72,12 @@ public sealed class AppDbContext : DbContext, IAppDbContext
             .ToList();
 
         foreach (var entry in candidates)
-        {
-            if (await entry.GetDatabaseValuesAsync(cancellationToken) is null)
-                entry.State = EntityState.Added;
-        }
+            await PromoteIfMissingAsync(entry, cancellationToken);
     }
 
-    private void PromoteNewOwnedScalars()
+    private static async Task PromoteIfMissingAsync(EntityEntry entry, CancellationToken ct)
     {
-        var candidates = ChangeTracker.Entries()
-            .Where(e => e.State == EntityState.Modified
-                     && e.Metadata.FindOwnership() is { IsUnique: true })
-            .ToList();
-
-        foreach (var entry in candidates)
-        {
-            if (entry.GetDatabaseValues() is null)
-                entry.State = EntityState.Added;
-        }
+        if (await entry.GetDatabaseValuesAsync(ct) is null)
+            entry.State = EntityState.Added;
     }
 }
