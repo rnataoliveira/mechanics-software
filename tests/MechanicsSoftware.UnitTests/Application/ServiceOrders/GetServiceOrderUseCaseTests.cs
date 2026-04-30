@@ -15,7 +15,7 @@ public class GetServiceOrderUseCaseTests
     {
         var order = ServiceOrder.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
 
-        var mockOrders = MockDbSetHelper.CreateMockDbSet(new List<ServiceOrder> { order });
+        var mockOrders = MockDbSetHelper.CreateMockDbSet([order]);
         var db = new Mock<IAppDbContext>();
         db.Setup(d => d.ServiceOrders).Returns(mockOrders.Object);
 

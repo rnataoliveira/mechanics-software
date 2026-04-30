@@ -26,7 +26,7 @@ public class ServiceOrderConfigurationTests
         return o;
     }
 
-    private async Task<ServiceOrder> RoundTrip(ServiceOrder order)
+    private static async Task<ServiceOrder> RoundTrip(ServiceOrder order)
     {
         await using var ctx = InMemoryDbContextHelper.Create();
         ctx.ServiceOrders.Add(order);

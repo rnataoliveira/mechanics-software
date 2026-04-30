@@ -52,8 +52,8 @@ public class CompleteServiceOrderUseCaseTests
         order.SendBudget();
         order.Approve();
 
-        var mockOrders = MockDbSetHelper.CreateMockDbSet(new List<ServiceOrder> { order });
-        var mockParts = MockDbSetHelper.CreateMockDbSet(new List<Part> { part });
+        var mockOrders = MockDbSetHelper.CreateMockDbSet([order]);
+        var mockParts = MockDbSetHelper.CreateMockDbSet([part]);
         mockParts.Setup(m => m.FindAsync(It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
                  .Returns(new ValueTask<Part?>(part));
 

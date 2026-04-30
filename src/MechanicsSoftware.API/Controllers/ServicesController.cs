@@ -7,7 +7,7 @@ namespace MechanicsSoftware.API.Controllers;
 [ApiController]
 [Route("api/services")]
 [Authorize]
-public class ServicesController(
+public class ServicesController( // NOSONAR S6960: VSA — each action delegates to a dedicated use case
     CreateServiceUseCase createUseCase,
     GetServiceUseCase getUseCase,
     ListServicesUseCase listUseCase,

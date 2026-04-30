@@ -7,7 +7,7 @@ namespace MechanicsSoftware.API.Controllers;
 [ApiController]
 [Route("api/service-orders")]
 [Authorize]
-public class ServiceOrdersController(
+public class ServiceOrdersController( // NOSONAR S6960 S107: VSA without MediatR — use cases injected directly; param count is by design
     CreateServiceOrderUseCase createUseCase,
     GetServiceOrderUseCase getUseCase,
     GetServiceOrderStatusUseCase getStatusUseCase,

@@ -18,7 +18,7 @@ public class GetPartUseCaseTests
     private static Mock<IAppDbContext> BuildContext(Part? part)
     {
         var db = new Mock<IAppDbContext>();
-        var list = part is null ? new List<Part>() : new List<Part> { part };
+        List<Part> list = part is null ? [] : [part];
         var mockParts = MockDbSetHelper.CreateMockDbSet(list);
 
         db.Setup(d => d.Parts).Returns(mockParts.Object);

@@ -22,8 +22,8 @@ public class AddPartItemUseCaseTests
         order.StartDiagnosis();
         var part = BuildPart(10);
 
-        var mockOrders = MockDbSetHelper.CreateMockDbSet(new List<ServiceOrder> { order });
-        var mockParts = MockDbSetHelper.CreateMockDbSet(new List<Part> { part });
+        var mockOrders = MockDbSetHelper.CreateMockDbSet([order]);
+        var mockParts = MockDbSetHelper.CreateMockDbSet([part]);
         mockParts.Setup(m => m.FindAsync(It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
                  .Returns(new ValueTask<Part?>(part));
 
@@ -46,8 +46,8 @@ public class AddPartItemUseCaseTests
         order.StartDiagnosis();
         var part = BuildPart(0);
 
-        var mockOrders = MockDbSetHelper.CreateMockDbSet(new List<ServiceOrder> { order });
-        var mockParts = MockDbSetHelper.CreateMockDbSet(new List<Part> { part });
+        var mockOrders = MockDbSetHelper.CreateMockDbSet([order]);
+        var mockParts = MockDbSetHelper.CreateMockDbSet([part]);
         mockParts.Setup(m => m.FindAsync(It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
                  .Returns(new ValueTask<Part?>(part));
 
@@ -79,7 +79,7 @@ public class AddPartItemUseCaseTests
         var order = ServiceOrder.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
         order.StartDiagnosis();
 
-        var mockOrders = MockDbSetHelper.CreateMockDbSet(new List<ServiceOrder> { order });
+        var mockOrders = MockDbSetHelper.CreateMockDbSet([order]);
         var mockParts = MockDbSetHelper.CreateMockDbSet(new List<Part>());
         mockParts.Setup(m => m.FindAsync(It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
                  .Returns(new ValueTask<Part?>((Part?)null));

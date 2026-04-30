@@ -22,8 +22,8 @@ public class AddServiceItemUseCaseTests
         order.StartDiagnosis();
         var service = BuildService();
 
-        var mockOrders = MockDbSetHelper.CreateMockDbSet(new List<ServiceOrder> { order });
-        var mockServices = MockDbSetHelper.CreateMockDbSet(new List<Service> { service });
+        var mockOrders = MockDbSetHelper.CreateMockDbSet([order]);
+        var mockServices = MockDbSetHelper.CreateMockDbSet([service]);
         mockServices.Setup(m => m.FindAsync(It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
                     .Returns(new ValueTask<Service?>(service));
 
@@ -57,7 +57,7 @@ public class AddServiceItemUseCaseTests
         var order = ServiceOrder.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
         order.StartDiagnosis();
 
-        var mockOrders = MockDbSetHelper.CreateMockDbSet(new List<ServiceOrder> { order });
+        var mockOrders = MockDbSetHelper.CreateMockDbSet([order]);
         var mockServices = MockDbSetHelper.CreateMockDbSet(new List<Service>());
         mockServices.Setup(m => m.FindAsync(It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
                     .Returns(new ValueTask<Service?>((Service?)null));
