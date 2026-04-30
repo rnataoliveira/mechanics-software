@@ -114,9 +114,47 @@ async function expand(page: Page, method: string, path: string) {
 }
 
 /**
- * Open "Try it out", optionally fill path param and/or request body,
- * click Execute, wait for the response, scroll to it, and return the
- * raw JSON text from the response body.
+ * Inject a temporary response overlay into the page for path-param operations
+ * where Swagger's Execute button cannot be used (React controlled-input issue).
+ * The overlay mimics a server response panel and disappears after 4 s.
+ */
+async function showResponseOverlay(page: Page, status: number, body: string) {
+  const preview = (() => {
+    try {
+      const d = JSON.parse(body);
+      if (d.id)             return `"id": "${d.id}"`;
+      if (d.status)         return `"status": "${d.status}"`;
+      if (d.averageHours !== undefined) return `"averageHours": ${d.averageHours}`;
+      return body.slice(0, 160);
+    } catch { return body.slice(0, 160); }
+  })();
+
+  await page.evaluate(({ status, preview, fullBody }) => {
+    document.getElementById('demo-resp-overlay')?.remove();
+    const el = document.createElement('div');
+    el.id = 'demo-resp-overlay';
+    el.style.cssText = [
+      'position:fixed', 'bottom:24px', 'right:24px', 'z-index:99999',
+      'background:#1c2c3b', 'color:#e6edf3', 'border-radius:8px',
+      'padding:14px 18px', 'font-family:SFMono-Regular,monospace',
+      'font-size:13px', 'box-shadow:0 6px 20px rgba(0,0,0,.5)',
+      'max-width:460px', 'word-break:break-all', 'line-height:1.6',
+    ].join(';');
+    el.innerHTML = [
+      `<span style="color:${status < 300 ? '#3fb950' : '#f85149'};font-weight:700">`,
+      `${status < 300 ? '✓' : '✗'} ${status} ${status < 300 ? 'OK' : 'Error'}`,
+      `</span><br><span style="color:#8b949e">${preview}</span>`,
+    ].join('');
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 4000);
+  }, { status, preview, fullBody: body });
+}
+
+/**
+ * Open "Try it out", fill path param and/or request body, then:
+ * - For endpoints WITHOUT a path param: click Execute in Swagger (works fine).
+ * - For endpoints WITH a path param: skip Execute (React state blocks it) and
+ *   show a response overlay instead. The actual call always goes via page.request.
  */
 async function runOp(
   page: Page,
@@ -127,21 +165,19 @@ async function runOp(
   const resolvedPath = path.replace('{id}', opts.pathParam ?? '');
   const resolvedUrl  = `${BASE_URL}${resolvedPath}`;
 
-  // ── Visual: show interaction in Swagger UI (for the video) ───────────────
+  // ── Visual: Swagger UI interaction ───────────────────────────────────────
   const op = await expand(page, method, path);
   await op.locator('.try-out__btn').click();
   await pause(700);
 
   if (opts.pathParam) {
-    // Show the UUID in the input field visually.
-    // We don't depend on React reading this value — page.request handles
-    // the actual call below.
+    // Set DOM value so the UUID appears in the input field for the video.
     const input = op.locator('.parameters-container input').first();
     await input.evaluate(
       (el: HTMLInputElement, val: string) => { el.value = val; },
       opts.pathParam,
     );
-    await pause(500);
+    await pause(600);
   }
 
   if (opts.body) {
@@ -153,12 +189,14 @@ async function runOp(
     }
   }
 
-  // Click Execute so it's visible in the video (may show validation error
-  // for path params — that's OK, data comes from page.request below).
-  await op.locator('button.execute.opblock-control__btn').click().catch(() => {});
-  await pause(1000);
+  // For path-param endpoints, React's controlled input blocks Swagger's
+  // "required" validation → skip Execute and use the response overlay instead.
+  if (!opts.pathParam) {
+    await op.locator('button.execute.opblock-control__btn').click();
+    await pause(1000);
+  }
 
-  // ── Data: direct API call — 100% reliable, no React state dependency ─────
+  // ── Data: direct API call — always reliable ───────────────────────────────
   const response = await page.request.fetch(resolvedUrl, {
     method,
     headers: {
@@ -169,9 +207,16 @@ async function runOp(
   });
   const body = await response.text();
 
-  await pause(2000);
+  if (opts.pathParam) {
+    // Show a clean response panel since Swagger won't display one.
+    await showResponseOverlay(page, response.status(), body);
+    await pause(4000);
+  } else {
+    await pause(2000);
+  }
+
   await op.scrollIntoViewIfNeeded();
-  await pause(1500);
+  await pause(1200);
 
   return body;
 }
