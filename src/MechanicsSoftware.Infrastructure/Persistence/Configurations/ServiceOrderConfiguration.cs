@@ -42,6 +42,14 @@ public sealed class ServiceOrderConfiguration : IEntityTypeConfiguration<Service
         builder.Property(so => so.DeliveredAt)
             .HasColumnName("delivered_at");
 
+        builder.Navigation(so => so.ServiceItems)
+            .HasField("_serviceItems")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Navigation(so => so.PartItems)
+            .HasField("_partItems")
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
         builder.OwnsMany(so => so.ServiceItems, si =>
         {
             si.ToTable("service_items");
