@@ -20,26 +20,56 @@ jobs:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
+      - name: Setup Java (required by SonarScanner)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
       - name: Restore dependencies
         run: dotnet restore
+
+      - name: Install .NET global tools
+        run: |
+          dotnet tool install -g dotnet-sonarscanner
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      - name: Begin SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet sonarscanner begin \
+            /k:"rnataoliveira_mechanics-software" \
+            /o:"rnataoliveira" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.cs.opencover.reportsPaths="coverage-results/**/coverage.opencover.xml" \
+            /d:sonar.exclusions="**/Migrations/**,**/obj/**,**/bin/**,**/Persistence/Seeding/**,DELIVERABLES.html,docker-compose*.yml,**/appsettings.Development.json" \
+            /d:sonar.coverage.exclusions="**/Migrations/**,**/obj/**,**/bin/**,**/Persistence/Seeding/DatabaseSeeder.cs"
+
+      - name: Build solution
+        run: dotnet build --no-restore --no-incremental
 
       - name: Run unit tests with coverage
         run: |
           dotnet test tests/MechanicsSoftware.UnitTests/ \
-            --no-restore \
+            --no-build \
             --collect:"XPlat Code Coverage" \
             --settings coverlet.runsettings \
             --results-directory ./coverage-results \
             --logger "trx;LogFileName=test-results.trx"
 
-      - name: Install ReportGenerator
-        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+      - name: End SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner end
 
       - name: Generate HTML coverage report
         if: always()

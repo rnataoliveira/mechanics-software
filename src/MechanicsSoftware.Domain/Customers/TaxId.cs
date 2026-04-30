@@ -9,8 +9,11 @@ public enum PersonType
     COMPANY
 }
 
-public sealed class TaxId : ValueObject
+public sealed partial class TaxId : ValueObject
 {
+    [GeneratedRegex("[^0-9]")]
+    private static partial Regex NonDigits();
+
     public string Value { get; init; } = null!;
     public PersonType PersonType { get; init; }
 
@@ -34,10 +37,7 @@ public sealed class TaxId : ValueObject
 
         Value = digits;
     }
-    private static string OnlyDigits(string input)
-    {
-        return Regex.Replace(input, "[^0-9]", "");
-    }
+    private static string OnlyDigits(string input) => NonDigits().Replace(input, "");
 
     // ================= CPF =================
     private static bool IsValidCpf(string cpf)

@@ -4,6 +4,7 @@
     <DataCollectors>
       <DataCollector friendlyName="XPlat code coverage">
         <Configuration>
+          <Format>opencover,cobertura</Format>
           <ExcludeByFile>
             **/Migrations/**,
             **/obj/**,

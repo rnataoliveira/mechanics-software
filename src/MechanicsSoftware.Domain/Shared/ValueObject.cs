@@ -15,7 +15,7 @@ public abstract class ValueObject
         GetEqualityComponents()
             .Aggregate(0, (hash, component) => HashCode.Combine(hash, component));
 
-    public static bool operator ==(ValueObject? left, ValueObject? right) =>
+    public static bool operator ==(ValueObject? left, ValueObject? right) => // NOSONAR — intentional value equality for DDD value object
         left?.Equals(right) ?? right is null;
 
     public static bool operator !=(ValueObject? left, ValueObject? right) =>

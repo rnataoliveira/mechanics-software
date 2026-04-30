@@ -22,7 +22,7 @@ public abstract class Entity<TId>
     public override int GetHashCode() =>
         HashCode.Combine(GetType(), Id);
 
-    public static bool operator ==(Entity<TId>? left, Entity<TId>? right) =>
+    public static bool operator ==(Entity<TId>? left, Entity<TId>? right) => // NOSONAR — intentional value equality for DDD entity
         left?.Equals(right) ?? right is null;
 
     public static bool operator !=(Entity<TId>? left, Entity<TId>? right) =>
