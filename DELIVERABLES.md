@@ -6,7 +6,7 @@ FIAP POS Tech · 15SOAT · Fase 1
 
 ## Group
 
-**Name:** Pos Tech Fiap - Mechanics Software
+**Name:** TorqueOS
 
 ## Participants
 
