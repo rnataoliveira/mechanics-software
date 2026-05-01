@@ -8,6 +8,10 @@ node_modules/
 # Claude Code (local config)
 .claude/
 
+# Playwright
+test-results/
+playwright-report/
+
 # .NET
 bin/
 obj/
