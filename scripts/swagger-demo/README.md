@@ -25,38 +25,37 @@ Para abrir o relatório HTML com o vídeo incorporado:
 npx playwright show-report
 ```
 
-## Fluxo executado (18 passos)
+## Dados pré-carregados
+
+Na primeira inicialização do container, o `DatabaseSeeder` cria automaticamente:
+
+| Entidade | Nome | ID fixo |
+|----------|------|---------|
+| Cliente | Carlos Silva | `a1000000-0000-0000-0000-000000000001` |
+| Veículo | Toyota Corolla ABC1234 | `b1000000-0000-0000-0000-000000000001` |
+| Serviço | Troca de Óleo | `c1000000-0000-0000-0000-000000000001` |
+| Peça | Óleo Motor 5W30 | `d1000000-0000-0000-0000-000000000001` |
+
+Também são criados mais 2 clientes, 2 veículos, 2 serviços e 2 peças para demonstrar que o sistema já possui dados cadastrados.
+
+## Fluxo executado (14 passos)
 
 | # | Método | Endpoint | O que demonstra |
 |---|--------|----------|-----------------|
 | 1 | POST | `/api/auth/login` | Autenticação, captura JWT |
 | 2 | — | *(Authorize)* | Preenche Bearer token no Swagger |
-| 3 | POST | `/api/customers` | Cadastro de cliente (CPF aleatório) |
-| 4 | POST | `/api/vehicles` | Cadastro de veículo do cliente |
-| 5 | POST | `/api/services` | Criação de serviço no catálogo |
-| 6 | POST | `/api/parts` | Cadastro de peça no estoque |
-| 7 | POST | `/api/service-orders` | Abertura de Ordem de Serviço |
-| 8 | POST | `/api/service-orders/{id}/start-diagnosis` | Início do diagnóstico |
-| 9 | POST | `/api/service-orders/{id}/services` | Adição de serviço à OS |
-| 10 | POST | `/api/service-orders/{id}/parts` | Adição de peça à OS |
-| 11 | POST | `/api/service-orders/{id}/budget` | Geração do orçamento |
-| 12 | POST | `/api/service-orders/{id}/send-budget` | Envio do orçamento ao cliente |
-| 13 | POST | `/api/service-orders/{id}/approve` | Aprovação pelo cliente |
-| 14 | POST | `/api/service-orders/{id}/start-execution` | Início da execução |
-| 15 | POST | `/api/service-orders/{id}/complete` | Conclusão do serviço |
-| 16 | POST | `/api/service-orders/{id}/deliver` | Entrega do veículo |
-| 17 | GET  | `/api/service-orders/{id}` | Estado final da OS |
-| 18 | GET  | `/api/service-orders/metrics/average-execution-time` | Métrica de tempo médio |
-
-## Dados gerados por execução
-
-Cada execução gera dados únicos para evitar conflitos:
-
-| Campo | Estratégia |
-|-------|-----------|
-| CPF do cliente | Gerado matematicamente válido e aleatório |
-| Placa do veículo | Formato legado brasileiro aleatório (ex: `KTR8521`) |
-| Código da peça | Prefixo fixo + timestamp (ex: `OL-5W30-1746012345`) |
+| 3 | POST | `/api/service-orders` | Abertura de OS com cliente e veículo pré-cadastrados |
+| 4 | POST | `/api/service-orders/{id}/start-diagnosis` | Início do diagnóstico |
+| 5 | POST | `/api/service-orders/{id}/services` | Adição de serviço à OS |
+| 6 | POST | `/api/service-orders/{id}/parts` | Adição de peça à OS |
+| 7 | POST | `/api/service-orders/{id}/budget` | Geração do orçamento |
+| 8 | POST | `/api/service-orders/{id}/send-budget` | Envio do orçamento ao cliente |
+| 9 | POST | `/api/service-orders/{id}/approve` | Aprovação pelo cliente |
+| 10 | POST | `/api/service-orders/{id}/start-execution` | Início da execução |
+| 11 | POST | `/api/service-orders/{id}/complete` | Conclusão do serviço |
+| 12 | POST | `/api/service-orders/{id}/deliver` | Entrega do veículo |
+| 13 | GET  | `/api/service-orders/{id}` | Estado final da OS |
+| 14 | GET  | `/api/service-orders/metrics/average-execution-time` | Métrica de tempo médio |
 
 ## Credenciais padrão
 
@@ -70,3 +69,5 @@ Definidas em `DatabaseSeeder.cs` e sobrescrevíveis pelas variáveis de ambiente
 ## Arquitetura do script
 
 A interação com o Swagger UI é **visual** (para o vídeo). As chamadas reais à API são feitas via `page.request` do Playwright com o JWT token, o que garante que o fluxo de dados seja 100% confiável independente do estado interno do React no Swagger UI.
+
+Para endpoints com path param (`{id}`), o Playwright usa `pressSequentially` para digitar o UUID no campo — o que aciona os eventos de teclado que o React espera, tornando o UUID visível no vídeo. O botão Execute é ignorado nesses endpoints (um overlay exibe a resposta real da API no canto inferior direito da tela).
