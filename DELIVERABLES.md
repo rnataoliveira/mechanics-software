@@ -14,7 +14,7 @@ FIAP POS Tech · 15SOAT · Fase 1
 |---|---|---|
 | Diogo | RM371224 | @smilipow |
 | Lucas | RM371615 | @lucaspamponet |
-| Renata | RM371593 | @rnataoliveira |
+| Joelma Renata | RM371593 | @rnataoliveira |
 | Allan | RM373714 | @zer07629 |
 | Daniel | RM370852 | @danielthx23 |
 
@@ -29,7 +29,7 @@ FIAP POS Tech · 15SOAT · Fase 1
 | Coverage Report | https://rnataoliveira.github.io/mechanics-software/ | ready |
 | Vulnerability Report | https://rnataoliveira.github.io/mechanics-software/security/ | ready |
 | SonarCloud Analysis | https://sonarcloud.io/summary/new_code?id=rnataoliveira_mechanics-software | ready |
-| Demo Video | <!-- YouTube or Drive link --> | pending |
+| Demo Video | https://youtu.be/vqERT_zrLpo | ready |
 
 ---
 
@@ -87,7 +87,7 @@ O projeto fornecido `MechanicsSoftware.IntegrationTests` não tem nenhum pacote 
 
 ## Video
 
-Link: <!-- YouTube / Google Drive / etc -->
+Link: https://youtu.be/vqERT_zrLpo
 
 Duration: <!-- X minutes -->
 
