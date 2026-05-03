@@ -29,7 +29,7 @@ FIAP POS Tech · 15SOAT · Fase 1
 | Coverage Report | https://rnataoliveira.github.io/mechanics-software/ | ready |
 | Vulnerability Report | https://rnataoliveira.github.io/mechanics-software/security/ | ready |
 | SonarCloud Analysis | https://sonarcloud.io/summary/new_code?id=rnataoliveira_mechanics-software | ready |
-| Demo Video | https://youtu.be/vqERT_zrLpo | ready |
+| Demo Video | [YouTube](https://youtu.be/vqERT_zrLpo) · [Google Drive (fallback)](https://drive.google.com/drive/folders/1oj1IXAMRfgA8g7ux_z_ZEq06ieYLf0PZ?usp=sharing) | ready |
 
 ---
 
@@ -87,7 +87,7 @@ O projeto fornecido `MechanicsSoftware.IntegrationTests` não tem nenhum pacote 
 
 ## Video
 
-Link: https://youtu.be/vqERT_zrLpo
+Link: https://youtu.be/vqERT_zrLpo (fallback: https://drive.google.com/drive/folders/1oj1IXAMRfgA8g7ux_z_ZEq06ieYLf0PZ?usp=sharing)
 
 Duration: <!-- X minutes -->
 
