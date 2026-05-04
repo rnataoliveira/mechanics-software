@@ -191,4 +191,4 @@ Progress tracker for the FIAP POS Tech 15SOAT challenge.
   - [x] DDD documentation link — https://miro.com/app/board/uXjVGyCZXBU=/
   - [x] Repository link
   - [x] Vulnerability report
-- [ ] Demo video recorded (max 15 minutes) — link pending in `DELIVERABLES.md`
+- [x] Demo video recorded (max 15 minutes) — link pending in `DELIVERABLES.md`
