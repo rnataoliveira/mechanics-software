@@ -63,7 +63,7 @@ app.Lifetime.ApplicationStarted.Register(() =>
     app.Logger.SwaggerUIReady($"{url}/swagger");
 });
 
-app.Run();
+await app.RunAsync();
 
 [ExcludeFromCodeCoverage]
 public partial class Program
