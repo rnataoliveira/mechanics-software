@@ -71,6 +71,18 @@ public class JwtProviderTests
     }
 
     [Fact]
+    public void Generate_NonPositiveExpirationMinutes_DefaultsTo60()
+    {
+        var provider = new JwtProvider(BuildConfig(expirationMinutes: "0"));
+
+        var before = DateTime.UtcNow.AddMinutes(59);
+        var result = provider.Generate(BuildUser());
+        var after = DateTime.UtcNow.AddMinutes(61);
+
+        result.ExpiresAt.Should().BeAfter(before).And.BeBefore(after);
+    }
+
+    [Fact]
     public void Constructor_MissingSecret_ThrowsInvalidOperationException()
     {
         var config = BuildConfig(secret: null);

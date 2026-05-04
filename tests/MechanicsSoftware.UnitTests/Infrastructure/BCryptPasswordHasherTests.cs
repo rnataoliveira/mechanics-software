@@ -45,4 +45,20 @@ public class BCryptPasswordHasherTests
     {
         _hasher.Verify("anyPassword", "not-a-valid-bcrypt-hash").Should().BeFalse();
     }
+
+    [Fact]
+    public void Constructor_ValidSaltRoundsEnvVar_HashesAndVerifies()
+    {
+        Environment.SetEnvironmentVariable("BCRYPT_SALT_ROUNDS", "4");
+        try
+        {
+            var hasher = new BCryptPasswordHasher();
+            var hash = hasher.Hash("test");
+            hasher.Verify("test", hash).Should().BeTrue();
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("BCRYPT_SALT_ROUNDS", null);
+        }
+    }
 }
