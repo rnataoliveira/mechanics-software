@@ -1,36 +1,101 @@
 # Mechanics Software
 
-Backend system for a mechanic shop — built as the Phase 1 Tech Challenge for FIAP POS Tech (15SOAT).
+[![CI](https://github.com/rnataoliveira/mechanics-software/actions/workflows/coverage.yml/badge.svg)](https://github.com/rnataoliveira/mechanics-software/actions/workflows/coverage.yml)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=rnataoliveira_mechanics-software&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=rnataoliveira_mechanics-software)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=rnataoliveira_mechanics-software&metric=coverage)](https://sonarcloud.io/summary/new_code?id=rnataoliveira_mechanics-software)
 
-## Overview
+Backend system for a mechanic shop — built as the Phase 1 Tech Challenge for FIAP POS Tech (15SOAT) by group **TorqueOS**.
 
-A RESTful API that manages the full lifecycle of service orders, customers, vehicles, parts, and inventory for a medium-sized auto repair shop.
-
-**Architecture:** Vertical Slice Architecture + DDD Domain
-**Stack:** C# 12 · ASP.NET Core 8 · PostgreSQL 16 · Entity Framework Core 9
+**Architecture:** Vertical Slice Architecture + DDD Domain  
+**Stack:** C# 12 · ASP.NET Core 8 · PostgreSQL 16 · Entity Framework Core 9  
 **Docs:** [`/docs`](./docs)
 
 ---
 
-## Getting Started
+## Demo
 
-### Prerequisites
+[YouTube](https://youtu.be/vqERT_zrLpo) · [Google Drive (fallback)](https://drive.google.com/drive/folders/1oj1IXAMRfgA8g7ux_z_ZEq06ieYLf0PZ?usp=sharing)
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [Docker](https://www.docker.com/products/docker-desktop) + Docker Compose
+---
 
-### Run with Docker (recommended)
+## Quick Start
 
 ```bash
 docker compose up --build
 ```
 
-API available at: `http://localhost:8080`  
-Swagger UI: `http://localhost:8080/swagger`
+| | |
+|---|---|
+| API | `http://localhost:8080` |
+| Swagger UI | `http://localhost:8080/swagger` |
+| Admin email | `admin@mechanics.local` |
+| Admin password | `Admin@123` |
 
-> Migrations and the default admin user are applied automatically on startup.
+On first startup the application automatically applies all pending migrations and seeds the database (see below). No extra steps needed.
 
-### Run locally (step by step)
+---
+
+## Seed Data
+
+Every startup resets domain data and seeds the following records so the API is ready to use immediately:
+
+**Services**
+
+| Name | Price | Duration |
+|---|---|---|
+| Troca de Óleo | R$ 90,00 | 60 min |
+| Alinhamento e Balanceamento | R$ 150,00 | 90 min |
+| Revisão dos Freios | R$ 250,00 | 120 min |
+
+**Parts**
+
+| Code | Name | Price | Stock |
+|---|---|---|---|
+| OL-5W30 | Óleo Motor 5W30 | R$ 45,00 | 100 |
+| FILT-AR-001 | Filtro de Ar | R$ 35,00 | 80 |
+| PAST-FREIO | Pastilha de Freio Dianteira | R$ 80,00 | 60 |
+
+**Customers & Vehicles**
+
+| Customer | Vehicle |
+|---|---|
+| Carlos Silva | Toyota Corolla 2022 — ABC1234 |
+| Ana Souza | Honda Civic 2021 — DEF5678 |
+| Roberto Mendes | Renault Sandero 2020 — GHI9012 |
+
+**Admin user** — survives restarts (not wiped). Override credentials with `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` env vars.
+
+---
+
+## Authentication
+
+Call `POST /api/auth/login`:
+
+```json
+{
+  "email": "admin@mechanics.local",
+  "password": "Admin@123"
+}
+```
+
+Copy the `token` from the response. In Swagger, click **Authorize** (🔒) and paste it.
+
+---
+
+## Environment Variables
+
+| Variable | Required | Default |
+|---|---|---|
+| `JWT_SECRET` | Yes (production) | pre-configured for local dev |
+| `DATABASE_URL` | No | see `appsettings.Development.json` |
+| `JWT_EXPIRATION_MINUTES` | No | `60` |
+| `BCRYPT_SALT_ROUNDS` | No | `12` |
+| `SEED_ADMIN_EMAIL` | No | `admin@mechanics.local` |
+| `SEED_ADMIN_PASSWORD` | No | `Admin@123` |
+
+---
+
+## Run Locally (without Docker)
 
 **1. Start the database**
 
@@ -38,7 +103,7 @@ Swagger UI: `http://localhost:8080/swagger`
 docker compose up db -d
 ```
 
-PostgreSQL will be available at `localhost:5435`.
+PostgreSQL available at `localhost:5435`.
 
 **2. Run the API**
 
@@ -48,91 +113,11 @@ dotnet run --project src/MechanicsSoftware.API/MechanicsSoftware.API.csproj
 
 Swagger UI: `http://localhost:5066/swagger`
 
-On first startup the application automatically applies all pending migrations and creates a default admin user.
-
----
-
-## Authentication
-
-### Default admin credentials
-
-| Field | Value |
-|---|---|
-| Email | `admin@mechanics.local` |
-| Password | `Admin@123` |
-
-Override with `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` environment variables.
-
-### Getting a token
-
-Call `POST /api/auth/login` with the credentials above:
-
-```json
-{
-  "email": "admin@mechanics.local",
-  "password": "Admin@123"
-}
-```
-
-Copy the `token` from the response.
-
-### Using the token in Swagger
-
-1. Open `http://localhost:5066/swagger`
-2. Click the **Authorize** button (🔒)
-3. Paste the token value and click **Authorize**
-
-All protected endpoints will now work.
-
----
-
-### Environment variables
-
-| Variable | Required | Description | Default |
-|---|---|---|---|
-| `JWT_SECRET` | **Yes** (production) | Secret key for JWT signing (min 32 chars) | pre-configured in `appsettings.Development.json` for local dev |
-| `DATABASE_URL` | No | PostgreSQL connection string | see `appsettings.Development.json` |
-| `JWT_EXPIRATION_MINUTES` | No | Token expiration time in minutes | `60` |
-| `BCRYPT_SALT_ROUNDS` | No | BCrypt cost factor | `12` |
-| `SEED_ADMIN_EMAIL` | No | Default admin email | `admin@mechanics.local` |
-| `SEED_ADMIN_PASSWORD` | No | Default admin password | `Admin@123` |
-
----
-
-## Database Migrations
-
-The project uses a local `dotnet-ef` tool pinned in `.config/dotnet-tools.json`. Run `dotnet tool restore` once to install it, then use `dotnet dotnet-ef` instead of `dotnet ef`.
-
-### Apply existing migrations
-
-```bash
-dotnet dotnet-ef database update \
-  --project src/MechanicsSoftware.Infrastructure/MechanicsSoftware.Infrastructure.csproj \
-  --startup-project src/MechanicsSoftware.API/MechanicsSoftware.API.csproj
-```
-
-### Add a new migration
-
-```bash
-dotnet dotnet-ef migrations add <MigrationName> \
-  --project src/MechanicsSoftware.Infrastructure/MechanicsSoftware.Infrastructure.csproj \
-  --startup-project src/MechanicsSoftware.API/MechanicsSoftware.API.csproj \
-  --output-dir Persistence/Migrations
-```
-
-### Remove the last migration (if not yet applied)
-
-```bash
-dotnet dotnet-ef migrations remove \
-  --project src/MechanicsSoftware.Infrastructure/MechanicsSoftware.Infrastructure.csproj \
-  --startup-project src/MechanicsSoftware.API/MechanicsSoftware.API.csproj
-```
-
 ---
 
 ## API
 
-### Public endpoints (no authentication)
+### Public endpoints
 
 | Method | Endpoint | Description |
 |---|---|---|
@@ -149,7 +134,7 @@ dotnet dotnet-ef migrations remove \
 | Services | `GET/POST /api/services` · `GET/PUT/DELETE /api/services/{id}` |
 | Service Orders | `GET/POST /api/service-orders` · full lifecycle via action endpoints |
 
-Full documentation and request/response schemas available at `/swagger` when running.
+Full schemas available at `/swagger`.
 
 ---
 
@@ -157,8 +142,8 @@ Full documentation and request/response schemas available at `/swagger` when run
 
 ```
 RECEIVED → IN_DIAGNOSIS → AWAITING_APPROVAL → IN_EXECUTION → COMPLETED → DELIVERED
-                                    ↓
-                                CANCELLED
+                                   ↓
+                               CANCELLED
 ```
 
 ---
@@ -167,10 +152,10 @@ RECEIVED → IN_DIAGNOSIS → AWAITING_APPROVAL → IN_EXECUTION → COMPLETED �
 
 ```
 src/
-  MechanicsSoftware.Domain/        # Entities, value objects, business rules
-  MechanicsSoftware.Application/   # Use cases organized by feature (VSA)
-  MechanicsSoftware.Infrastructure/ # EF Core, JWT, BCrypt
-  MechanicsSoftware.API/           # Controllers, middleware, Swagger
+  MechanicsSoftware.Domain/          # Entities, value objects, business rules
+  MechanicsSoftware.Application/     # Use cases organized by feature (VSA)
+  MechanicsSoftware.Infrastructure/  # EF Core, JWT, BCrypt
+  MechanicsSoftware.API/             # Controllers, middleware, Swagger
 
 tests/
   MechanicsSoftware.UnitTests/
@@ -178,6 +163,42 @@ tests/
 ```
 
 See [`docs/architecture/overview.md`](./docs/architecture/overview.md) for full details.
+
+---
+
+## Running Tests
+
+```bash
+# Unit tests
+dotnet test tests/MechanicsSoftware.UnitTests
+
+# With coverage report
+dotnet test tests/MechanicsSoftware.UnitTests \
+  --collect:"XPlat Code Coverage" \
+  --settings coverlet.runsettings \
+  --results-directory ./coverage-results
+```
+
+Interactive coverage report: [rnataoliveira.github.io/mechanics-software](https://rnataoliveira.github.io/mechanics-software/)
+
+---
+
+## Database Migrations
+
+The project uses a local `dotnet-ef` tool pinned in `.config/dotnet-tools.json`. Run `dotnet tool restore` once, then use `dotnet dotnet-ef`.
+
+```bash
+# Apply existing migrations
+dotnet dotnet-ef database update \
+  --project src/MechanicsSoftware.Infrastructure/MechanicsSoftware.Infrastructure.csproj \
+  --startup-project src/MechanicsSoftware.API/MechanicsSoftware.API.csproj
+
+# Add a new migration
+dotnet dotnet-ef migrations add <MigrationName> \
+  --project src/MechanicsSoftware.Infrastructure/MechanicsSoftware.Infrastructure.csproj \
+  --startup-project src/MechanicsSoftware.API/MechanicsSoftware.API.csproj \
+  --output-dir Persistence/Migrations
+```
 
 ---
 
@@ -194,23 +215,6 @@ See [`docs/architecture/overview.md`](./docs/architecture/overview.md) for full 
 | ADR-002 Architecture | [`docs/decisions/ADR-002-architecture.md`](./docs/decisions/ADR-002-architecture.md) |
 | ADR-003 Database | [`docs/decisions/ADR-003-database.md`](./docs/decisions/ADR-003-database.md) |
 | ADR-004 Application Layer | [`docs/decisions/ADR-004-application-layer-conventions.md`](./docs/decisions/ADR-004-application-layer-conventions.md) |
-
----
-
-## Running Tests
-
-```bash
-# Unit tests
-dotnet test tests/MechanicsSoftware.UnitTests
-
-# Unit tests with coverage report
-dotnet test tests/MechanicsSoftware.UnitTests \
-  --collect:"XPlat Code Coverage" \
-  --settings coverlet.runsettings \
-  --results-directory ./coverage-results
-```
-
-Coverage report (HTML): [rnataoliveira.github.io/mechanics-software](https://rnataoliveira.github.io/mechanics-software/)
 
 ---
 
