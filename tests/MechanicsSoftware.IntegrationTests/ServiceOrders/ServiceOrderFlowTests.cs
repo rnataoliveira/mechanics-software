@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MechanicsSoftware.IntegrationTests.ServiceOrders;
 
-public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory>
+public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory>, IAsyncLifetime
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -37,6 +37,9 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
     {
         _factory = factory;
     }
+
+    public Task InitializeAsync() => _factory.ResetDomainDataAsync();
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task ApprovalFlow_EndToEnd_ShouldTransitionStatusesAndMoveStock()

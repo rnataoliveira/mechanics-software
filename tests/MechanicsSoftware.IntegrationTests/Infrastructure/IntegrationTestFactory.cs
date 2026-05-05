@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using MechanicsSoftware.Infrastructure.Persistence;
 using Npgsql;
 
 namespace MechanicsSoftware.IntegrationTests.Infrastructure;
@@ -26,6 +29,29 @@ public sealed class IntegrationTestFactory : WebApplicationFactory<Program>, IAs
         await base.DisposeAsync();
         await ExecuteAdminCommandAsync(
             $"DROP DATABASE IF EXISTS \"{_testDatabaseName}\" WITH (FORCE)");
+    }
+
+    /// <summary>
+    /// Truncates all domain tables while preserving the users/admin seed.
+    /// Call this in IAsyncLifetime.InitializeAsync() to isolate tests that share this factory.
+    /// </summary>
+    public async Task ResetDomainDataAsync()
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await db.Database.ExecuteSqlRawAsync("""
+            TRUNCATE TABLE
+                stock_movements,
+                part_items,
+                service_items,
+                budgets,
+                service_orders,
+                vehicles,
+                customers,
+                services,
+                parts
+            CASCADE
+            """);
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
