@@ -1,6 +1,6 @@
 # ADR-005: Migração para Classic Clean Architecture
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Date:** 2026-05-04  
 **Autores:** Lucas Pamponet
 
