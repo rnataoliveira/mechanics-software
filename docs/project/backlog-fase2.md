@@ -31,7 +31,6 @@
 
 ### F2-00a — Migrar `Domain/` para organização por tipo técnico
 
-**Responsável sugerido:** Lucas  
 **Esforço:** M  
 **Depende de:** —
 
@@ -70,7 +69,6 @@ Domain/
 
 ### F2-00b — Migrar `Application/` para Clean Architecture com CQRS explícito
 
-**Responsável sugerido:** Joelma  
 **Esforço:** G  
 **Depende de:** F2-00a
 
@@ -133,7 +131,6 @@ Convenção de nomenclatura:
 
 ### F2-00c — Migrar `Infrastructure/` para nova estrutura de pastas
 
-**Responsável sugerido:** Daniel  
 **Esforço:** M  
 **Depende de:** F2-00b
 
@@ -157,7 +154,6 @@ Mudanças principais:
 
 ### F2-00d — Migrar `API/` — criar `Transport/` e atualizar referências
 
-**Responsável sugerido:** Diogo  
 **Esforço:** M  
 **Depende de:** F2-00b, F2-00c
 
@@ -180,7 +176,6 @@ Mudanças principais:
 
 ### F2-00e — Atualizar projetos de testes para a nova estrutura
 
-**Responsável sugerido:** Allan  
 **Esforço:** M  
 **Depende de:** F2-00a, F2-00b, F2-00c, F2-00d
 
@@ -204,7 +199,6 @@ Atualizar todos os `using` e namespaces nos projetos de testes unitários e de i
 
 ### F2-01 — Fix: listagem de OS com ordenação por prioridade e exclusão de finalizadas
 
-**Responsável sugerido:** Joelma  
 **Esforço:** P  
 **Depende de:** F2-00e
 
@@ -236,7 +230,6 @@ OS com status `Completed` ou `Delivered` **não devem aparecer** na listagem.
 
 ### F2-02 — Refatorar: endpoint único de decisão de orçamento
 
-**Responsável sugerido:** Joelma  
 **Esforço:** P  
 **Depende de:** F2-00e
 
@@ -266,7 +259,6 @@ Body: { "decision": "approve" | "reject" }
 
 ### F2-03 — Criar: interface `IEmailNotifier` na camada Application
 
-**Responsável sugerido:** Lucas  
 **Esforço:** P  
 **Depende de:** F2-00e
 
@@ -296,7 +288,6 @@ public interface IEmailNotifier
 
 ### F2-04 — Criar: implementação `SmtpEmailNotifier` na Infrastructure
 
-**Responsável sugerido:** Lucas  
 **Esforço:** M  
 **Depende de:** F2-03
 
@@ -329,7 +320,6 @@ Configuração via variáveis de ambiente:
 
 ### F2-05 — Injetar `IEmailNotifier` nos handlers de mudança de status
 
-**Responsável sugerido:** Joelma  
 **Esforço:** M  
 **Depende de:** F2-03, F2-04
 
@@ -362,7 +352,6 @@ O e-mail do cliente vem de `serviceOrder.Customer.Email`.
 
 ### F2-06 — Testes unitários para notificação por e-mail
 
-**Responsável sugerido:** Joelma  
 **Esforço:** P  
 **Depende de:** F2-03, F2-05
 
@@ -384,7 +373,6 @@ Adicionar testes unitários para validar o comportamento de notificação por e-
 
 ### F2-07 — Testes de integração para correções de API
 
-**Responsável sugerido:** Joelma  
 **Esforço:** P  
 **Depende de:** F2-01, F2-02
 
@@ -418,7 +406,6 @@ Adicionar ou atualizar testes de integração (Testcontainers + PostgreSQL real)
 
 ### F2-08 — Namespace e ConfigMap
 
-**Responsável sugerido:** Allan  
 **Esforço:** P  
 **Depende de:** —
 
@@ -445,7 +432,6 @@ Variáveis no ConfigMap:
 
 ### F2-09 — Secrets
 
-**Responsável sugerido:** Allan  
 **Esforço:** P  
 **Depende de:** F2-08
 
@@ -476,7 +462,6 @@ O arquivo commitado deve conter valores placeholder (`<base64-encoded-placeholde
 
 ### F2-10 — Deployment e Service da API
 
-**Responsável sugerido:** Allan  
 **Esforço:** M  
 **Depende de:** F2-08, F2-09
 
@@ -507,7 +492,6 @@ Especificações do Service:
 
 ### F2-11 — Deployment, Service e PVC do banco de dados
 
-**Responsável sugerido:** Allan  
 **Esforço:** M  
 **Depende de:** F2-08, F2-09
 
@@ -532,7 +516,6 @@ Especificações:
 
 ### F2-12 — Horizontal Pod Autoscaler (HPA)
 
-**Responsável sugerido:** Allan  
 **Esforço:** P  
 **Depende de:** F2-10
 
@@ -555,7 +538,6 @@ targetCPUUtilizationPercentage: 70
 
 ### F2-13 — Validação local do cluster completo
 
-**Responsável sugerido:** Allan  
 **Esforço:** M  
 **Depende de:** F2-08 a F2-12
 
@@ -580,7 +562,6 @@ Subir o cluster localmente com `kind` ou `minikube` e validar que todos os compo
 
 ### F2-14 — Estrutura base do Terraform
 
-**Responsável sugerido:** Daniel  
 **Esforço:** P  
 **Depende de:** —
 
@@ -608,7 +589,6 @@ infra/
 
 ### F2-15 — Módulo Terraform: cluster Kubernetes (Kind local)
 
-**Responsável sugerido:** Daniel  
 **Esforço:** M  
 **Depende de:** F2-14
 
@@ -631,7 +611,6 @@ Arquivos novos em `infra/modules/kubernetes/`:
 
 ### F2-16 — Módulo Terraform: banco de dados PostgreSQL
 
-**Responsável sugerido:** Daniel  
 **Esforço:** M  
 **Depende de:** F2-14, F2-15
 
@@ -652,7 +631,6 @@ Arquivos novos em `infra/modules/database/`:
 
 ### F2-17 — Documentação do Terraform (`infra/README.md`)
 
-**Responsável sugerido:** Daniel  
 **Esforço:** P  
 **Depende de:** F2-15, F2-16
 
@@ -683,7 +661,6 @@ Conteúdo obrigatório:
 
 ### F2-18 — Workflow: build e push da imagem Docker no GHCR
 
-**Responsável sugerido:** Diogo  
 **Esforço:** M  
 **Depende de:** F2-10
 
@@ -709,7 +686,6 @@ GitHub Secrets necessários: nenhum além do `GITHUB_TOKEN` automático.
 
 ### F2-19 — Workflow: deploy dos manifestos K8s
 
-**Responsável sugerido:** Diogo  
 **Esforço:** M  
 **Depende de:** F2-13, F2-18
 
@@ -734,7 +710,6 @@ GitHub Secrets necessários:
 
 ### F2-20 — Workflow: migration do banco de dados
 
-**Responsável sugerido:** Diogo  
 **Esforço:** M  
 **Depende de:** F2-18, F2-19
 
@@ -768,7 +743,6 @@ O job `deploy` deve depender de `migrate` (`needs: [build-and-push, migrate]`).
 
 ### F2-21 — Atualizar `README.md` com seção Fase 2
 
-**Responsável sugerido:** Lucas  
 **Esforço:** M  
 **Depende de:** M1 completo, M2 validado, M4 rodando
 
@@ -796,7 +770,6 @@ Conteúdo obrigatório:
 
 ### F2-22 — Vídeo demonstrativo (até 15 minutos)
 
-**Responsável sugerido:** Time  
 **Esforço:** G  
 **Depende de:** F2-21, M4 funcionando
 
@@ -825,7 +798,6 @@ Publicar no YouTube ou Vimeo (público ou não listado).
 
 ### F2-23 — Submissão no portal do aluno
 
-**Responsável sugerido:** Joelma  
 **Esforço:** P  
 **Depende de:** F2-21, F2-22
 
@@ -875,12 +847,3 @@ F2-10 ─ F2-18 ─┬─ F2-19 ─ F2-20
 M1 + M2 ─ F2-21 ─ F2-22 ─ F2-23
 ```
 
-## Distribuição sugerida por membro
-
-| Membro | PBIs | Foco |
-|---|---|---|
-| **Joelma** | F2-00b, F2-01, F2-02, F2-05, F2-06, F2-07, F2-23 | Application layer + correções de API |
-| **Lucas** | F2-00a, F2-03, F2-04, F2-21 | Domain + e-mail + documentação |
-| **Allan** | F2-00e, F2-08, F2-09, F2-10, F2-11, F2-12, F2-13 | Testes + Kubernetes |
-| **Daniel** | F2-00c, F2-14, F2-15, F2-16, F2-17 | Infrastructure + Terraform |
-| **Diogo** | F2-00d, F2-18, F2-19, F2-20 | API layer + CI/CD |
