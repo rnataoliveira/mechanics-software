@@ -701,19 +701,6 @@ Checklist completo antes de submeter:
 
 ---
 
-## Sugestão de distribuição por membro
-
-| Membro | Tarefas sugeridas |
-|---|---|
-| **Joelma** | F2-01, F2-02, F2-05, F2-06, F2-07 (Application/domain) |
-| **Allan** | F2-08, F2-09, F2-10, F2-11, F2-12, F2-13 (Kubernetes) |
-| **Daniel** | F2-14, F2-15, F2-16, F2-17 (Terraform) |
-| **Diogo** | F2-18, F2-19, F2-20 (CI/CD) |
-| **Lucas** | F2-03, F2-04 (e-mail) + F2-21, F2-23 (documentação) |
-
-> A distribuição é sugestão — ajustar conforme disponibilidade do time.
-
----
 
 ## Resumo de tarefas
 
