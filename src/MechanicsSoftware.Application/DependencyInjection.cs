@@ -55,6 +55,7 @@ public static class DependencyInjection
         services.AddScoped<SendBudgetHandler>();
         services.AddScoped<ApproveServiceOrderHandler>();
         services.AddScoped<RejectServiceOrderHandler>();
+        services.AddScoped<BudgetDecisionHandler>();
         services.AddScoped<StartExecutionHandler>();
         services.AddScoped<CompleteServiceOrderHandler>();
         services.AddScoped<DeliverServiceOrderHandler>();
