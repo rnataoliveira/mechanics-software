@@ -4,7 +4,7 @@ using MechanicsSoftware.Domain.ValueObjects;
 using MechanicsSoftware.Domain.Enums;
 using MechanicsSoftware.Domain.Exceptions;
 
-namespace MechanicsSoftware.UnitTests.ServiceOrders;
+namespace MechanicsSoftware.UnitTests.Domain.ServiceOrders;
 
 public class BudgetStatusTests
 {
