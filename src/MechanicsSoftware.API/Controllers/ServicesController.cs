@@ -1,3 +1,4 @@
+using MechanicsSoftware.API.Transport.Services;
 using MechanicsSoftware.Application.UseCases.Services.Commands;
 using MechanicsSoftware.Application.UseCases.Services.Handlers;
 using MechanicsSoftware.Application.UseCases.Services.Queries;
@@ -17,9 +18,11 @@ public class ServicesController( // NOSONAR S6960: Clean Architecture — each a
     DeleteServiceHandler deleteHandler) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> Create(CreateServiceCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(CreateServiceRequest request, CancellationToken cancellationToken)
     {
-        var result = await createHandler.ExecuteAsync(command, cancellationToken);
+        var result = await createHandler.ExecuteAsync(
+            new CreateServiceCommand(request.Name, request.Description, request.BasePriceInCents, request.EstimatedMinutes),
+            cancellationToken);
         return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
     }
 
@@ -38,9 +41,9 @@ public class ServicesController( // NOSONAR S6960: Clean Architecture — each a
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, UpdateServiceCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(Guid id, UpdateServiceRequest request, CancellationToken cancellationToken)
     {
-        var result = await updateHandler.ExecuteAsync(id, command, cancellationToken);
+        var result = await updateHandler.ExecuteAsync(id, new UpdateServiceCommand(request.Name, request.Description, request.BasePriceInCents, request.EstimatedMinutes), cancellationToken);
         return Ok(result);
     }
 

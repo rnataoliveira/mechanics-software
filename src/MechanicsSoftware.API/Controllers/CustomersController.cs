@@ -1,3 +1,4 @@
+using MechanicsSoftware.API.Transport.Customers;
 using MechanicsSoftware.Application.UseCases.Customers.Commands;
 using MechanicsSoftware.Application.UseCases.Customers.Handlers;
 using MechanicsSoftware.Application.UseCases.Customers.Queries;
@@ -17,9 +18,11 @@ public class CustomersController( // NOSONAR S6960: Clean Architecture — each 
     UpdateCustomerHandler updateHandler) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> Create(CreateCustomerCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(CreateCustomerRequest request, CancellationToken cancellationToken)
     {
-        var result = await createHandler.ExecuteAsync(command, cancellationToken);
+        var result = await createHandler.ExecuteAsync(
+            new CreateCustomerCommand(request.Name, request.DocumentValue, request.PersonType, request.Email, request.Phone),
+            cancellationToken);
         return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
     }
 
@@ -45,9 +48,9 @@ public class CustomersController( // NOSONAR S6960: Clean Architecture — each 
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, UpdateCustomerCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(Guid id, UpdateCustomerRequest request, CancellationToken cancellationToken)
     {
-        var result = await updateHandler.ExecuteAsync(id, command, cancellationToken);
+        var result = await updateHandler.ExecuteAsync(id, new UpdateCustomerCommand(request.Name, request.Email, request.Phone), cancellationToken);
         return Ok(result);
     }
 }
