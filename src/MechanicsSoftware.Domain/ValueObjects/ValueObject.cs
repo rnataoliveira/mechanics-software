@@ -1,6 +1,4 @@
-#pragma warning disable CA1716 // "Shared" is an intentional DDD namespace segment, not a VB.NET keyword collision
-namespace MechanicsSoftware.Domain.Shared;
-#pragma warning restore CA1716
+namespace MechanicsSoftware.Domain.ValueObjects;
 
 public abstract class ValueObject
 {

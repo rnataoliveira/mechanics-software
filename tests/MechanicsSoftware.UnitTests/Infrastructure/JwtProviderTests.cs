@@ -1,8 +1,11 @@
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using FluentAssertions;
-using MechanicsSoftware.Domain.Auth;
 using MechanicsSoftware.Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
 namespace MechanicsSoftware.UnitTests.Infrastructure;
 

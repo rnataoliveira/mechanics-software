@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
-using MechanicsSoftware.Domain.Shared;
+using MechanicsSoftware.Domain.Exceptions;
 
-namespace MechanicsSoftware.Domain.Customers;
+namespace MechanicsSoftware.Domain.ValueObjects;
 
 public sealed partial class Email : ValueObject
 {

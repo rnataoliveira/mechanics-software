@@ -1,5 +1,8 @@
-using FluentAssertions;
-using MechanicsSoftware.Domain.ServiceOrders;
+﻿using FluentAssertions;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
 namespace MechanicsSoftware.UnitTests.ServiceOrders;
 

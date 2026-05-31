@@ -24,7 +24,7 @@ public class CustomersIntegrationTests : IntegrationTestBase
         var request = new CreateCustomerRequest(
             Name: "John Doe",
             DocumentValue: "11222333000181",
-            PersonType: MechanicsSoftware.Domain.Customers.PersonType.COMPANY,
+            PersonType: MechanicsSoftware.Domain.Enums.PersonType.COMPANY,
             Email: "john@example.com",
             Phone: "11999999999"
         );
@@ -171,7 +171,7 @@ public class CustomersIntegrationTests : IntegrationTestBase
         var request = new CreateCustomerRequest(
             Name: "Another Customer",
             DocumentValue: "11222333000181",
-            PersonType: MechanicsSoftware.Domain.Customers.PersonType.COMPANY,
+            PersonType: MechanicsSoftware.Domain.Enums.PersonType.COMPANY,
             Email: "another@example.com",
             Phone: "11988888888"
         );

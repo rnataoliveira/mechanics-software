@@ -1,6 +1,7 @@
-using MechanicsSoftware.Domain.Shared;
+using MechanicsSoftware.Domain.Exceptions;
+using MechanicsSoftware.Domain.ValueObjects;
 
-namespace MechanicsSoftware.Domain.ServiceOrders;
+namespace MechanicsSoftware.Domain.Entities;
 
 public sealed class Budget : Entity<Guid>
 {

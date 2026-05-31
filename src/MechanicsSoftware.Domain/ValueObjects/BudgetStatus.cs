@@ -1,6 +1,6 @@
-using MechanicsSoftware.Domain.Shared;
+using MechanicsSoftware.Domain.Exceptions;
 
-namespace MechanicsSoftware.Domain.ServiceOrders;
+namespace MechanicsSoftware.Domain.ValueObjects;
 
 public sealed class BudgetStatus(BudgetStatus.Status value) : ValueObject
 {
@@ -12,7 +12,7 @@ public sealed class BudgetStatus(BudgetStatus.Status value) : ValueObject
     }
 
     public Status Value => value;
-        
+
     public BudgetStatus TransitionTo(Status newStatus)
     {
         if (Value == newStatus)
@@ -40,6 +40,6 @@ public sealed class BudgetStatus(BudgetStatus.Status value) : ValueObject
         Status.Rejected => "REJECTED",
         _ => Value.ToString()
     };
-        
+
     public static BudgetStatus CreatePending() => new(Status.Pending);
 }

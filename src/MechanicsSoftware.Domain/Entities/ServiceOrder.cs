@@ -1,6 +1,8 @@
-using MechanicsSoftware.Domain.Shared;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
+using MechanicsSoftware.Domain.ValueObjects;
 
-namespace MechanicsSoftware.Domain.ServiceOrders;
+namespace MechanicsSoftware.Domain.Entities;
 
 public sealed class ServiceOrder : Entity<Guid>
 {
@@ -136,7 +138,7 @@ public sealed class ServiceOrder : Entity<Guid>
 
         var total = servicesTotal.Add(partsTotal);
 
-        Budget = ServiceOrders.Budget.Create(Id, total);
+        Budget = Budget.Create(Id, total);
         return Budget;
     }
 

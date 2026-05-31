@@ -1,6 +1,6 @@
 using MechanicsSoftware.Application.Common;
 using MechanicsSoftware.Application.Common.Exceptions;
-using Service = MechanicsSoftware.Domain.Services.Service;
+using MechanicsSoftware.Domain.Entities;
 
 namespace MechanicsSoftware.Application.Features.ServiceOrders;
 

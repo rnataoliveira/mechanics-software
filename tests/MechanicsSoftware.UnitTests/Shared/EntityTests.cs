@@ -1,5 +1,8 @@
-using FluentAssertions;
-using MechanicsSoftware.Domain.Shared;
+﻿using FluentAssertions;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
 #pragma warning disable CA1716 // "Shared" is an intentional test namespace segment, not a VB.NET keyword collision
 namespace MechanicsSoftware.UnitTests.Shared;

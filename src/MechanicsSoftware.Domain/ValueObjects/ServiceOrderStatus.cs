@@ -1,18 +1,18 @@
-using MechanicsSoftware.Domain.Shared;
+using MechanicsSoftware.Domain.Exceptions;
 
-namespace MechanicsSoftware.Domain.ServiceOrders;
+namespace MechanicsSoftware.Domain.ValueObjects;
 
-public sealed class ServiceOrderStatus(ServiceOrderStatus.Status value): ValueObject
+public sealed class ServiceOrderStatus(ServiceOrderStatus.Status value) : ValueObject
 {
     public Status Value => value;
     public enum Status
     {
         Received,
-        InDiagnosis, 
+        InDiagnosis,
         AwaitingApproval,
-        InExecution, 
-        Completed, 
-        Delivered, 
+        InExecution,
+        Completed,
+        Delivered,
         Cancelled
     }
 
@@ -54,5 +54,4 @@ public sealed class ServiceOrderStatus(ServiceOrderStatus.Status value): ValueOb
     public bool Is(Status s) => Value == s;
 
     public static ServiceOrderStatus CreateReceived() => new(Status.Received);
-
 }

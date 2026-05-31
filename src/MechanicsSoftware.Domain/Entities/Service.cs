@@ -1,6 +1,7 @@
-using MechanicsSoftware.Domain.Shared;
+using MechanicsSoftware.Domain.Exceptions;
+using MechanicsSoftware.Domain.ValueObjects;
 
-namespace MechanicsSoftware.Domain.Services;
+namespace MechanicsSoftware.Domain.Entities;
 
 public sealed class Service : Entity<Guid>
 {
@@ -57,4 +58,3 @@ public sealed class Service : Entity<Guid>
         EstimatedMinutes = estimatedMinutes;
     }
 }
-

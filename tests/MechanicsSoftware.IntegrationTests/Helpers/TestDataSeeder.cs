@@ -1,10 +1,10 @@
-using Microsoft.EntityFrameworkCore;
-using MechanicsSoftware.Domain.Auth;
-using MechanicsSoftware.Domain.Customers;
-using MechanicsSoftware.Domain.Inventory;
-using MechanicsSoftware.Domain.Shared;
+﻿using Microsoft.EntityFrameworkCore;
 using MechanicsSoftware.Infrastructure.Persistence;
 using MechanicsSoftware.Infrastructure.Security;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
 namespace MechanicsSoftware.IntegrationTests.Helpers;
 

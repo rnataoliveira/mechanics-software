@@ -1,8 +1,10 @@
-using FluentAssertions;
-using MechanicsSoftware.Domain.ServiceOrders;
-using MechanicsSoftware.Domain.Shared;
+﻿using FluentAssertions;
 using MechanicsSoftware.Infrastructure.Persistence.Configurations;
 using MechanicsSoftware.UnitTests.Helpers;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
 namespace MechanicsSoftware.UnitTests.Infrastructure;
 

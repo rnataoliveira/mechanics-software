@@ -1,6 +1,8 @@
-using FluentAssertions;
-using MechanicsSoftware.Domain.Services;
-using MechanicsSoftware.Domain.Shared;
+﻿using FluentAssertions;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
 namespace MechanicsSoftware.UnitTests.Services;
 

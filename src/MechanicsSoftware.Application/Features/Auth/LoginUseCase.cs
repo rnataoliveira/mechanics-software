@@ -1,6 +1,7 @@
 using MechanicsSoftware.Application.Common;
 using MechanicsSoftware.Application.Common.Auth;
 using MechanicsSoftware.Application.Common.Exceptions;
+using MechanicsSoftware.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace MechanicsSoftware.Application.Features.Auth;
@@ -13,7 +14,7 @@ public sealed class LoginUseCase(IAppDbContext context, IPasswordHasher hasher, 
 {
     public async Task<LoginResponse> ExecuteAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
-        var emailVo = new Domain.Customers.Email(request.Email);
+        var emailVo = new Email(request.Email);
         var user = await context.Users
             .FirstOrDefaultAsync(u => u.Email == emailVo, cancellationToken)
             ?? throw new NotFoundException("User", request.Email);

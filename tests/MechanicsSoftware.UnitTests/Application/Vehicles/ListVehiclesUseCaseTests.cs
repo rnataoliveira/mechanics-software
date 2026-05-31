@@ -1,9 +1,10 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using MechanicsSoftware.Application.Features.Vehicles;
-using MechanicsSoftware.Domain.Customers;
-using MechanicsSoftware.Domain.Shared;
-using MechanicsSoftware.Domain.Vehicles;
 using MechanicsSoftware.UnitTests.Helpers;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
 namespace MechanicsSoftware.UnitTests.Application.Vehicles;
 

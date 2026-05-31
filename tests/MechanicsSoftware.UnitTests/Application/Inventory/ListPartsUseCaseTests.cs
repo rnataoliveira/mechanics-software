@@ -1,8 +1,10 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using MechanicsSoftware.Application.Features.Inventory;
-using MechanicsSoftware.Domain.Inventory;
-using MechanicsSoftware.Domain.Shared;
 using MechanicsSoftware.UnitTests.Helpers;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
 namespace MechanicsSoftware.UnitTests.Application.Inventory;
 

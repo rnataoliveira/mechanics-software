@@ -1,10 +1,13 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using MechanicsSoftware.Application.Common;
 using MechanicsSoftware.Application.Common.Exceptions;
 using MechanicsSoftware.Application.Features.Vehicles;
-using MechanicsSoftware.Domain.Vehicles;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
 namespace MechanicsSoftware.UnitTests.Application.Vehicles;
 

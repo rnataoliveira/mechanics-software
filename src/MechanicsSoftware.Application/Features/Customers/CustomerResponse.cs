@@ -1,4 +1,7 @@
-using MechanicsSoftware.Domain.Customers;
+﻿using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
 namespace MechanicsSoftware.Application.Features.Customers;
 

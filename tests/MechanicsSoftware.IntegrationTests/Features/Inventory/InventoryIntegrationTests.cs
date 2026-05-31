@@ -97,7 +97,7 @@ public class InventoryIntegrationTests : IntegrationTestBase
             .FirstAsync(p => p.Id == partId);
 
         part.Movements.Should().HaveCountGreaterThanOrEqualTo(2); // Initial + replenish
-        part.Movements.Where(m => m.Type == MechanicsSoftware.Domain.Inventory.StockMovementType.Inbound)
+        part.Movements.Where(m => m.Type == MechanicsSoftware.Domain.Enums.StockMovementType.Inbound)
             .Last().Quantity.Should().Be(20);
     }
 

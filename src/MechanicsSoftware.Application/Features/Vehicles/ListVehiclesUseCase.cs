@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MechanicsSoftware.Application.Common;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
 
 namespace MechanicsSoftware.Application.Features.Vehicles;
 
@@ -14,14 +16,14 @@ public sealed class ListVehiclesUseCase(IAppDbContext db)
         ListVehiclesQuery query,
         CancellationToken cancellationToken = default)
     {
-        IQueryable<Domain.Vehicles.Vehicle> vehicles = db.Vehicles;
+        IQueryable<Vehicle> vehicles = db.Vehicles;
 
         if (query.CustomerId.HasValue)
             vehicles = vehicles.Where(v => v.CustomerId == query.CustomerId.Value);
 
         if (!string.IsNullOrWhiteSpace(query.LicensePlate))
         {
-            var plateVo = new Domain.Vehicles.LicensePlate(query.LicensePlate);
+            var plateVo = new LicensePlate(query.LicensePlate);
             vehicles = vehicles.Where(v => v.LicensePlate == plateVo);
         }
 

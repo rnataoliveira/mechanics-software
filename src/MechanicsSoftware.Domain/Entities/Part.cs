@@ -1,6 +1,8 @@
-using MechanicsSoftware.Domain.Shared;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
+using MechanicsSoftware.Domain.ValueObjects;
 
-namespace MechanicsSoftware.Domain.Inventory;
+namespace MechanicsSoftware.Domain.Entities;
 
 public sealed class Part : Entity<Guid>
 {
