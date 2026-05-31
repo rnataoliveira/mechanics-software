@@ -1,7 +1,10 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.ServiceOrders;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.ServiceOrders;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Commands;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Handlers;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -31,7 +34,7 @@ public class RejectServiceOrderUseCaseTests
         db.ServiceOrders.Add(order);
         await db.SaveChangesAsync();
 
-        var result = await new RejectServiceOrderUseCase(db).ExecuteAsync(order.Id);
+        var result = await new RejectServiceOrderHandler(db).ExecuteAsync(order.Id);
 
         result.Status.Should().Be("CANCELLED");
         result.Budget!.Status.Should().Be("REJECTED");
@@ -63,7 +66,7 @@ public class RejectServiceOrderUseCaseTests
         db.Setup(d => d.Parts).Returns(mockParts.Object);
         db.Setup(d => d.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
-        await new RejectServiceOrderUseCase(db.Object).ExecuteAsync(orderWithPart.Id);
+        await new RejectServiceOrderHandler(db.Object).ExecuteAsync(orderWithPart.Id);
 
         part.AvailableQuantity.Should().Be(10); // reservation released: reserved 0, stock 10
     }
@@ -73,7 +76,7 @@ public class RejectServiceOrderUseCaseTests
     {
         await using var db = InMemoryDbContextHelper.Create();
 
-        var act = async () => await new RejectServiceOrderUseCase(db).ExecuteAsync(Guid.NewGuid());
+        var act = async () => await new RejectServiceOrderHandler(db).ExecuteAsync(Guid.NewGuid());
 
         await act.Should().ThrowAsync<NotFoundException>();
     }
@@ -86,7 +89,7 @@ public class RejectServiceOrderUseCaseTests
         db.ServiceOrders.Add(order);
         await db.SaveChangesAsync();
 
-        var act = async () => await new RejectServiceOrderUseCase(db).ExecuteAsync(order.Id);
+        var act = async () => await new RejectServiceOrderHandler(db).ExecuteAsync(order.Id);
 
         await act.Should().ThrowAsync<DomainException>();
     }

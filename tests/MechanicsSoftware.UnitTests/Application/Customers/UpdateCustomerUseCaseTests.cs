@@ -1,7 +1,10 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.Customers;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.Customers;
+using MechanicsSoftware.Application.UseCases.Customers.Commands;
+using MechanicsSoftware.Application.UseCases.Customers.Handlers;
+using MechanicsSoftware.Application.UseCases.Customers.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -33,9 +36,9 @@ public class UpdateCustomerUseCaseTests
         var customerId = Guid.NewGuid();
         var customer = BuildCustomer(customerId);
         var db = BuildContext([customer]);
-        var request = new UpdateCustomerRequest("New Name", "new@email.com", "11888888888");
+        var request = new UpdateCustomerCommand("New Name", "new@email.com", "11888888888");
 
-        var result = await new UpdateCustomerUseCase(db.Object).ExecuteAsync(customerId, request);
+        var result = await new UpdateCustomerHandler(db.Object).ExecuteAsync(customerId, request);
 
         result.Name.Should().Be("New Name");
         result.Email.Should().Be("new@email.com");
@@ -47,9 +50,9 @@ public class UpdateCustomerUseCaseTests
     public async Task ExecuteAsync_CustomerNotFound_ThrowsNotFoundException()
     {
         var db = BuildContext();
-        var request = new UpdateCustomerRequest("New Name", "new@email.com", ValidPhone);
+        var request = new UpdateCustomerCommand("New Name", "new@email.com", ValidPhone);
 
-        var act = async () => await new UpdateCustomerUseCase(db.Object).ExecuteAsync(Guid.NewGuid(), request);
+        var act = async () => await new UpdateCustomerHandler(db.Object).ExecuteAsync(Guid.NewGuid(), request);
 
         await act.Should().ThrowAsync<NotFoundException>();
     }
@@ -60,9 +63,9 @@ public class UpdateCustomerUseCaseTests
         var customerId = Guid.NewGuid();
         var customer = BuildCustomer(customerId);
         var db = BuildContext([customer]);
-        var request = new UpdateCustomerRequest("New Name", "not-an-email", ValidPhone);
+        var request = new UpdateCustomerCommand("New Name", "not-an-email", ValidPhone);
 
-        var act = async () => await new UpdateCustomerUseCase(db.Object).ExecuteAsync(customerId, request);
+        var act = async () => await new UpdateCustomerHandler(db.Object).ExecuteAsync(customerId, request);
 
         await act.Should().ThrowAsync<DomainException>();
     }

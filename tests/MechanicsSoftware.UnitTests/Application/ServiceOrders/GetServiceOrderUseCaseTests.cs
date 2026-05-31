@@ -1,7 +1,10 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.ServiceOrders;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.ServiceOrders;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Commands;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Handlers;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -22,7 +25,7 @@ public class GetServiceOrderUseCaseTests
         var db = new Mock<IAppDbContext>();
         db.Setup(d => d.ServiceOrders).Returns(mockOrders.Object);
 
-        var result = await new GetServiceOrderUseCase(db.Object).ExecuteAsync(order.Id);
+        var result = await new GetServiceOrderHandler(db.Object).ExecuteAsync(order.Id);
 
         result.Id.Should().Be(order.Id);
         result.Status.Should().Be("RECEIVED");
@@ -33,7 +36,7 @@ public class GetServiceOrderUseCaseTests
     {
         await using var db = InMemoryDbContextHelper.Create();
 
-        var act = async () => await new GetServiceOrderUseCase(db).ExecuteAsync(Guid.NewGuid());
+        var act = async () => await new GetServiceOrderHandler(db).ExecuteAsync(Guid.NewGuid());
 
         await act.Should().ThrowAsync<NotFoundException>();
     }

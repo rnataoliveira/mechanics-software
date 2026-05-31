@@ -1,7 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Json;
 using System.Text.Json;
-using MechanicsSoftware.Application.Features.Auth;
+using MechanicsSoftware.Application.UseCases.Auth.Commands;
+using MechanicsSoftware.Application.UseCases.Auth.Handlers;
 using MechanicsSoftware.IntegrationTests.Fixtures;
 using MechanicsSoftware.IntegrationTests.Helpers;
 using MechanicsSoftware.Infrastructure.Persistence;
@@ -45,8 +46,8 @@ public abstract class IntegrationTestBase : IAsyncLifetime
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var seeded = await TestDataSeeder.SeedTestUserAsync(context, email, password);
 
-        var loginRequest = new LoginRequest(seeded.Email, seeded.Password);
-        var response = await loginClient.PostAsJsonAsync("/api/auth/login", loginRequest);
+        var LoginCommand = new LoginCommand(seeded.Email, seeded.Password);
+        var response = await loginClient.PostAsJsonAsync("/api/auth/login", LoginCommand);
 
         if (!response.IsSuccessStatusCode)
         {

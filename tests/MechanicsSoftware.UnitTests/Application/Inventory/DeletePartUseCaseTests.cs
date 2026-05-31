@@ -1,8 +1,11 @@
 ﻿using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.Inventory;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.Inventory;
+using MechanicsSoftware.Application.UseCases.Inventory.Commands;
+using MechanicsSoftware.Application.UseCases.Inventory.Handlers;
+using MechanicsSoftware.Application.UseCases.Inventory.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -38,7 +41,7 @@ public class DeletePartUseCaseTests
         var part = BuildPart(partId);
         var (db, mockParts) = BuildContext(part);
 
-        await new DeletePartUseCase(db.Object).ExecuteAsync(partId);
+        await new DeletePartHandler(db.Object).ExecuteAsync(partId);
 
         mockParts.Verify(m => m.Remove(part), Times.Once);
         db.Verify(d => d.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -49,7 +52,7 @@ public class DeletePartUseCaseTests
     {
         var (db, _) = BuildContext(null);
 
-        var act = async () => await new DeletePartUseCase(db.Object).ExecuteAsync(Guid.NewGuid());
+        var act = async () => await new DeletePartHandler(db.Object).ExecuteAsync(Guid.NewGuid());
 
         await act.Should().ThrowAsync<NotFoundException>();
     }
@@ -62,7 +65,7 @@ public class DeletePartUseCaseTests
         part.Reserve(3, Guid.NewGuid());
         var (db, _) = BuildContext(part);
 
-        var act = async () => await new DeletePartUseCase(db.Object).ExecuteAsync(partId);
+        var act = async () => await new DeletePartHandler(db.Object).ExecuteAsync(partId);
 
         await act.Should().ThrowAsync<DomainException>().WithMessage("*pending reservations*");
     }

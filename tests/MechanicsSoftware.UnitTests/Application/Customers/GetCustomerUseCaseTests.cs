@@ -1,8 +1,11 @@
 ﻿using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.Customers;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.Customers;
+using MechanicsSoftware.Application.UseCases.Customers.Commands;
+using MechanicsSoftware.Application.UseCases.Customers.Handlers;
+using MechanicsSoftware.Application.UseCases.Customers.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -39,7 +42,7 @@ public class GetCustomerUseCaseTests
         var customer = BuildCustomer(customerId);
         var db = BuildContext(customers: [customer]);
 
-        var useCase = new GetCustomerUseCase(db.Object);
+        var useCase = new GetCustomerHandler(db.Object);
 
         var result = await useCase.ExecuteAsync(customerId);
 
@@ -55,7 +58,7 @@ public class GetCustomerUseCaseTests
         var nonExistentId = Guid.NewGuid();
         var db = BuildContext();
 
-        var useCase = new GetCustomerUseCase(db.Object);
+        var useCase = new GetCustomerHandler(db.Object);
 
         var act = async () => await useCase.ExecuteAsync(nonExistentId);
 

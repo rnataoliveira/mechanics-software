@@ -1,7 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using MechanicsSoftware.Application.Common.Auth;
+using MechanicsSoftware.Application.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using MechanicsSoftware.Domain.Entities;

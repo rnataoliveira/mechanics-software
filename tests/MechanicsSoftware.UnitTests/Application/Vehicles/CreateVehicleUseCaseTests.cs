@@ -1,8 +1,11 @@
 ﻿using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.Vehicles;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.Vehicles;
+using MechanicsSoftware.Application.UseCases.Vehicles.Commands;
+using MechanicsSoftware.Application.UseCases.Vehicles.Handlers;
+using MechanicsSoftware.Application.UseCases.Vehicles.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -47,8 +50,8 @@ public class CreateVehicleUseCaseTests
         var customer = BuildCustomer();
         var (db, _, mockVehicles) = BuildContext(customers: [customer]);
 
-        var useCase = new CreateVehicleUseCase(db.Object);
-        var request = new CreateVehicleRequest(ValidPlate, ValidMake, ValidModel, ValidYear, CustomerId);
+        var useCase = new CreateVehicleHandler(db.Object);
+        var request = new CreateVehicleCommand(ValidPlate, ValidMake, ValidModel, ValidYear, CustomerId);
 
         var result = await useCase.ExecuteAsync(request);
 
@@ -66,8 +69,8 @@ public class CreateVehicleUseCaseTests
     {
         var (db, _, _) = BuildContext();
 
-        var useCase = new CreateVehicleUseCase(db.Object);
-        var request = new CreateVehicleRequest(ValidPlate, ValidMake, ValidModel, ValidYear, CustomerId);
+        var useCase = new CreateVehicleHandler(db.Object);
+        var request = new CreateVehicleCommand(ValidPlate, ValidMake, ValidModel, ValidYear, CustomerId);
 
         var act = async () => await useCase.ExecuteAsync(request);
 
@@ -81,8 +84,8 @@ public class CreateVehicleUseCaseTests
         var existingVehicle = Vehicle.Create(Guid.NewGuid(), new LicensePlate(ValidPlate), "Honda", "Civic", 2019, CustomerId);
         var (db, _, _) = BuildContext(customers: [customer], vehicles: [existingVehicle]);
 
-        var useCase = new CreateVehicleUseCase(db.Object);
-        var request = new CreateVehicleRequest(ValidPlate, ValidMake, ValidModel, ValidYear, CustomerId);
+        var useCase = new CreateVehicleHandler(db.Object);
+        var request = new CreateVehicleCommand(ValidPlate, ValidMake, ValidModel, ValidYear, CustomerId);
 
         var act = async () => await useCase.ExecuteAsync(request);
 
@@ -95,8 +98,8 @@ public class CreateVehicleUseCaseTests
         var customer = BuildCustomer();
         var (db, _, _) = BuildContext(customers: [customer]);
 
-        var useCase = new CreateVehicleUseCase(db.Object);
-        var request = new CreateVehicleRequest("abc1A23", ValidMake, ValidModel, ValidYear, CustomerId);
+        var useCase = new CreateVehicleHandler(db.Object);
+        var request = new CreateVehicleCommand("abc1A23", ValidMake, ValidModel, ValidYear, CustomerId);
 
         var result = await useCase.ExecuteAsync(request);
 
@@ -109,8 +112,8 @@ public class CreateVehicleUseCaseTests
         var customer = BuildCustomer();
         var (db, _, _) = BuildContext(customers: [customer]);
 
-        var useCase = new CreateVehicleUseCase(db.Object);
-        var request = new CreateVehicleRequest("INVALID", ValidMake, ValidModel, ValidYear, CustomerId);
+        var useCase = new CreateVehicleHandler(db.Object);
+        var request = new CreateVehicleCommand("INVALID", ValidMake, ValidModel, ValidYear, CustomerId);
 
         var act = async () => await useCase.ExecuteAsync(request);
 

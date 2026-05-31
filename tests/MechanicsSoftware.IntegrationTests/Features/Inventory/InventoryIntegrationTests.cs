@@ -1,7 +1,10 @@
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
-using MechanicsSoftware.Application.Features.Inventory;
+using MechanicsSoftware.Application.UseCases.Inventory;
+using MechanicsSoftware.Application.UseCases.Inventory.Commands;
+using MechanicsSoftware.Application.UseCases.Inventory.Handlers;
+using MechanicsSoftware.Application.UseCases.Inventory.Queries;
 using MechanicsSoftware.IntegrationTests.Base;
 using MechanicsSoftware.IntegrationTests.Helpers;
 using MechanicsSoftware.Infrastructure.Persistence;
@@ -22,7 +25,7 @@ public class InventoryIntegrationTests : IntegrationTestBase
     public async Task CreatePart_WithValidData_Returns201Created()
     {
         // Arrange
-        var request = new CreatePartRequest(
+        var request = new CreatePartCommand(
             Code: "OIL-002",
             Name: "Synthetic Engine Oil",
             Description: "High-quality synthetic oil",
@@ -58,7 +61,7 @@ public class InventoryIntegrationTests : IntegrationTestBase
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var partId = await TestDataSeeder.SeedTestPartAsync(context, initialStock: 10);
 
-        var replenishRequest = new UpdateStockRequest(Quantity: 15);
+        var replenishRequest = new UpdateStockCommand(Quantity: 15);
 
         // Act
         var response = await Client.PatchAsJsonAsync($"/api/parts/{partId}/stock", replenishRequest);
@@ -81,7 +84,7 @@ public class InventoryIntegrationTests : IntegrationTestBase
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var partId = await TestDataSeeder.SeedTestPartAsync(context, initialStock: 10);
 
-        var replenishRequest = new UpdateStockRequest(Quantity: 20);
+        var replenishRequest = new UpdateStockCommand(Quantity: 20);
 
         // Act
         var response = await Client.PatchAsJsonAsync($"/api/parts/{partId}/stock", replenishRequest);
@@ -106,7 +109,7 @@ public class InventoryIntegrationTests : IntegrationTestBase
     {
         // Arrange
         var nonExistentPartId = Guid.NewGuid();
-        var replenishRequest = new UpdateStockRequest(Quantity: 10);
+        var replenishRequest = new UpdateStockCommand(Quantity: 10);
 
         // Act
         var response = await Client.PatchAsJsonAsync($"/api/parts/{nonExistentPartId}/stock", replenishRequest);
@@ -123,7 +126,7 @@ public class InventoryIntegrationTests : IntegrationTestBase
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var partId = await TestDataSeeder.SeedTestPartAsync(context);
 
-        var replenishRequest = new UpdateStockRequest(Quantity: 0);
+        var replenishRequest = new UpdateStockCommand(Quantity: 0);
 
         // Act
         var response = await Client.PatchAsJsonAsync($"/api/parts/{partId}/stock", replenishRequest);
@@ -140,7 +143,7 @@ public class InventoryIntegrationTests : IntegrationTestBase
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var partId = await TestDataSeeder.SeedTestPartAsync(context);
 
-        var replenishRequest = new UpdateStockRequest(Quantity: -5);
+        var replenishRequest = new UpdateStockCommand(Quantity: -5);
 
         // Act
         var response = await Client.PatchAsJsonAsync($"/api/parts/{partId}/stock", replenishRequest);
@@ -157,7 +160,7 @@ public class InventoryIntegrationTests : IntegrationTestBase
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await TestDataSeeder.SeedTestPartAsync(context, code: "SPARK-001");
 
-        var request = new CreatePartRequest(
+        var request = new CreatePartCommand(
             Code: "SPARK-001",
             Name: "Different Spark Plug",
             Description: "Test",
@@ -176,7 +179,7 @@ public class InventoryIntegrationTests : IntegrationTestBase
     public async Task CreatePart_WithZeroInitialStock_Returns201Created()
     {
         // Arrange
-        var request = new CreatePartRequest(
+        var request = new CreatePartCommand(
             Code: "EMPTY-001",
             Name: "Empty Part",
             Description: "Part with zero initial stock",
@@ -206,11 +209,11 @@ public class InventoryIntegrationTests : IntegrationTestBase
         var partId = await TestDataSeeder.SeedTestPartAsync(context, initialStock: 10);
 
         // Act - First replenishment
-        var response1 = await Client.PatchAsJsonAsync($"/api/parts/{partId}/stock", new UpdateStockRequest(5));
+        var response1 = await Client.PatchAsJsonAsync($"/api/parts/{partId}/stock", new UpdateStockCommand(5));
         response1.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
 
         // Act - Second replenishment
-        var response2 = await Client.PatchAsJsonAsync($"/api/parts/{partId}/stock", new UpdateStockRequest(3));
+        var response2 = await Client.PatchAsJsonAsync($"/api/parts/{partId}/stock", new UpdateStockCommand(3));
         response2.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
 
         // Verify database records

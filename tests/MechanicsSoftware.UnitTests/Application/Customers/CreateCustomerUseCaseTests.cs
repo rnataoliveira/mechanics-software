@@ -1,8 +1,11 @@
 ﻿using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.Customers;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.Customers;
+using MechanicsSoftware.Application.UseCases.Customers.Commands;
+using MechanicsSoftware.Application.UseCases.Customers.Handlers;
+using MechanicsSoftware.Application.UseCases.Customers.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -36,8 +39,8 @@ public class CreateCustomerUseCaseTests
     {
         var (db, mockCustomers) = BuildContext();
 
-        var useCase = new CreateCustomerUseCase(db.Object);
-        var request = new CreateCustomerRequest(ValidName, ValidCpf, PersonType.INDIVIDUAL, ValidEmail, ValidPhone);
+        var useCase = new CreateCustomerHandler(db.Object);
+        var request = new CreateCustomerCommand(ValidName, ValidCpf, PersonType.INDIVIDUAL, ValidEmail, ValidPhone);
 
         var result = await useCase.ExecuteAsync(request);
 
@@ -57,8 +60,8 @@ public class CreateCustomerUseCaseTests
             Guid.NewGuid(), ValidName, ValidCpf, PersonType.INDIVIDUAL, ValidEmail, ValidPhone);
         var (db, _) = BuildContext(customers: [existingCustomer]);
 
-        var useCase = new CreateCustomerUseCase(db.Object);
-        var request = new CreateCustomerRequest("Outro Cliente", ValidCpf, PersonType.INDIVIDUAL, "outro@email.com", "11888888888");
+        var useCase = new CreateCustomerHandler(db.Object);
+        var request = new CreateCustomerCommand("Outro Cliente", ValidCpf, PersonType.INDIVIDUAL, "outro@email.com", "11888888888");
 
         var act = async () => await useCase.ExecuteAsync(request);
 

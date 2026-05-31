@@ -1,7 +1,10 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.ServiceOrders;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.ServiceOrders;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Commands;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Handlers;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -33,7 +36,7 @@ public class AddPartItemUseCaseTests
         db.Setup(d => d.Parts).Returns(mockParts.Object);
         db.Setup(d => d.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
-        var result = await new AddPartItemUseCase(db.Object).ExecuteAsync(order.Id, new AddPartItemRequest(part.Id, 3));
+        var result = await new AddPartItemHandler(db.Object).ExecuteAsync(order.Id, new AddPartItemCommand(part.Id, 3));
 
         result.Availability.Should().Be("AVAILABLE");
         result.Quantity.Should().Be(3);
@@ -57,7 +60,7 @@ public class AddPartItemUseCaseTests
         db.Setup(d => d.Parts).Returns(mockParts.Object);
         db.Setup(d => d.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
-        var result = await new AddPartItemUseCase(db.Object).ExecuteAsync(order.Id, new AddPartItemRequest(part.Id, 5));
+        var result = await new AddPartItemHandler(db.Object).ExecuteAsync(order.Id, new AddPartItemCommand(part.Id, 5));
 
         result.Availability.Should().Be("UNAVAILABLE");
         result.Warning.Should().NotBeNull();
@@ -68,8 +71,8 @@ public class AddPartItemUseCaseTests
     {
         await using var db = InMemoryDbContextHelper.Create();
 
-        var act = async () => await new AddPartItemUseCase(db).ExecuteAsync(
-            Guid.NewGuid(), new AddPartItemRequest(Guid.NewGuid(), 1));
+        var act = async () => await new AddPartItemHandler(db).ExecuteAsync(
+            Guid.NewGuid(), new AddPartItemCommand(Guid.NewGuid(), 1));
 
         await act.Should().ThrowAsync<NotFoundException>();
     }
@@ -89,8 +92,8 @@ public class AddPartItemUseCaseTests
         db.Setup(d => d.ServiceOrders).Returns(mockOrders.Object);
         db.Setup(d => d.Parts).Returns(mockParts.Object);
 
-        var act = async () => await new AddPartItemUseCase(db.Object).ExecuteAsync(
-            order.Id, new AddPartItemRequest(Guid.NewGuid(), 1));
+        var act = async () => await new AddPartItemHandler(db.Object).ExecuteAsync(
+            order.Id, new AddPartItemCommand(Guid.NewGuid(), 1));
 
         await act.Should().ThrowAsync<NotFoundException>();
     }

@@ -1,6 +1,9 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.ServiceOrders;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.ServiceOrders;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Commands;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Handlers;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using MechanicsSoftware.Domain.Entities;
 using MechanicsSoftware.Domain.ValueObjects;
@@ -28,8 +31,8 @@ public class CreateServiceOrderUseCaseTests
         db.Vehicles.Add(BuildVehicle());
         await db.SaveChangesAsync();
 
-        var useCase = new CreateServiceOrderUseCase(db);
-        var result = await useCase.ExecuteAsync(new CreateServiceOrderRequest(CustomerId, VehicleId));
+        var useCase = new CreateServiceOrderHandler(db);
+        var result = await useCase.ExecuteAsync(new CreateServiceOrderCommand(CustomerId, VehicleId));
 
         result.Id.Should().NotBeEmpty();
         result.CustomerId.Should().Be(CustomerId);
@@ -44,8 +47,8 @@ public class CreateServiceOrderUseCaseTests
         db.Vehicles.Add(BuildVehicle());
         await db.SaveChangesAsync();
 
-        var useCase = new CreateServiceOrderUseCase(db);
-        var act = async () => await useCase.ExecuteAsync(new CreateServiceOrderRequest(CustomerId, VehicleId));
+        var useCase = new CreateServiceOrderHandler(db);
+        var act = async () => await useCase.ExecuteAsync(new CreateServiceOrderCommand(CustomerId, VehicleId));
 
         await act.Should().ThrowAsync<NotFoundException>().WithMessage($"*{CustomerId}*");
     }
@@ -57,8 +60,8 @@ public class CreateServiceOrderUseCaseTests
         db.Customers.Add(BuildCustomer());
         await db.SaveChangesAsync();
 
-        var useCase = new CreateServiceOrderUseCase(db);
-        var act = async () => await useCase.ExecuteAsync(new CreateServiceOrderRequest(CustomerId, VehicleId));
+        var useCase = new CreateServiceOrderHandler(db);
+        var act = async () => await useCase.ExecuteAsync(new CreateServiceOrderCommand(CustomerId, VehicleId));
 
         await act.Should().ThrowAsync<NotFoundException>().WithMessage($"*{VehicleId}*");
     }

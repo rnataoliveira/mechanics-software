@@ -1,7 +1,10 @@
 ﻿using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Features.Inventory;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.UseCases.Inventory;
+using MechanicsSoftware.Application.UseCases.Inventory.Commands;
+using MechanicsSoftware.Application.UseCases.Inventory.Handlers;
+using MechanicsSoftware.Application.UseCases.Inventory.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -29,9 +32,9 @@ public class CreatePartUseCaseTests
     public async Task ExecuteAsync_ValidInput_CreatesAndReturnsPart()
     {
         var (db, mockParts) = BuildContext();
-        var input = new CreatePartRequest("OIL-001", "Engine Oil", "5W-30", 2500, 10);
+        var input = new CreatePartCommand("OIL-001", "Engine Oil", "5W-30", 2500, 10);
 
-        var result = await new CreatePartUseCase(db.Object).ExecuteAsync(input);
+        var result = await new CreatePartHandler(db.Object).ExecuteAsync(input);
 
         result.Code.Should().Be("OIL-001");
         result.Name.Should().Be("Engine Oil");
@@ -47,9 +50,9 @@ public class CreatePartUseCaseTests
     {
         var existing = Part.Create(Guid.NewGuid(), "OIL-001", "Engine Oil", null, new Money(2500), 5);
         var (db, _) = BuildContext([existing]);
-        var input = new CreatePartRequest("OIL-001", "Another Oil", null, 1000, 0);
+        var input = new CreatePartCommand("OIL-001", "Another Oil", null, 1000, 0);
 
-        var act = async () => await new CreatePartUseCase(db.Object).ExecuteAsync(input);
+        var act = async () => await new CreatePartHandler(db.Object).ExecuteAsync(input);
 
         await act.Should().ThrowAsync<DomainException>().WithMessage("*OIL-001*");
     }
@@ -58,9 +61,9 @@ public class CreatePartUseCaseTests
     public async Task ExecuteAsync_ZeroInitialStock_CreatesWithoutMovement()
     {
         var (db, _) = BuildContext();
-        var input = new CreatePartRequest("BOLT-001", "Hex Bolt", null, 50, 0);
+        var input = new CreatePartCommand("BOLT-001", "Hex Bolt", null, 50, 0);
 
-        var result = await new CreatePartUseCase(db.Object).ExecuteAsync(input);
+        var result = await new CreatePartHandler(db.Object).ExecuteAsync(input);
 
         result.StockQuantity.Should().Be(0);
     }

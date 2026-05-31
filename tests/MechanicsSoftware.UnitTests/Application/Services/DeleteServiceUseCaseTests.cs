@@ -1,6 +1,9 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.Services;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.Services;
+using MechanicsSoftware.Application.UseCases.Services.Commands;
+using MechanicsSoftware.Application.UseCases.Services.Handlers;
+using MechanicsSoftware.Application.UseCases.Services.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using MechanicsSoftware.Domain.Entities;
 using MechanicsSoftware.Domain.ValueObjects;
@@ -19,7 +22,7 @@ public class DeleteServiceUseCaseTests
         db.Services.Add(service);
         await db.SaveChangesAsync();
 
-        await new DeleteServiceUseCase(db).ExecuteAsync(service.Id);
+        await new DeleteServiceHandler(db).ExecuteAsync(service.Id);
 
         db.Services.Should().BeEmpty();
     }
@@ -29,7 +32,7 @@ public class DeleteServiceUseCaseTests
     {
         await using var db = InMemoryDbContextHelper.Create();
 
-        var act = async () => await new DeleteServiceUseCase(db).ExecuteAsync(Guid.NewGuid());
+        var act = async () => await new DeleteServiceHandler(db).ExecuteAsync(Guid.NewGuid());
 
         await act.Should().ThrowAsync<NotFoundException>();
     }

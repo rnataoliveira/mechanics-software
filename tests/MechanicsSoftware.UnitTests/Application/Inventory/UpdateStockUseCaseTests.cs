@@ -1,7 +1,10 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.Inventory;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.Inventory;
+using MechanicsSoftware.Application.UseCases.Inventory.Commands;
+using MechanicsSoftware.Application.UseCases.Inventory.Handlers;
+using MechanicsSoftware.Application.UseCases.Inventory.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -37,7 +40,7 @@ public class UpdateStockUseCaseTests
         var part = BuildPart(partId);
         var db = BuildContext(part);
 
-        var result = await new UpdateStockUseCase(db.Object).ExecuteAsync(partId, new UpdateStockRequest(10));
+        var result = await new UpdateStockHandler(db.Object).ExecuteAsync(partId, new UpdateStockCommand(10));
 
         result.StockQuantity.Should().Be(15);
         db.Verify(d => d.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -48,7 +51,7 @@ public class UpdateStockUseCaseTests
     {
         var db = BuildContext(null);
 
-        var act = async () => await new UpdateStockUseCase(db.Object).ExecuteAsync(Guid.NewGuid(), new UpdateStockRequest(5));
+        var act = async () => await new UpdateStockHandler(db.Object).ExecuteAsync(Guid.NewGuid(), new UpdateStockCommand(5));
 
         await act.Should().ThrowAsync<NotFoundException>();
     }
@@ -60,7 +63,7 @@ public class UpdateStockUseCaseTests
         var part = BuildPart(partId);
         var db = BuildContext(part);
 
-        var act = async () => await new UpdateStockUseCase(db.Object).ExecuteAsync(partId, new UpdateStockRequest(0));
+        var act = async () => await new UpdateStockHandler(db.Object).ExecuteAsync(partId, new UpdateStockCommand(0));
 
         await act.Should().ThrowAsync<DomainException>().WithMessage("*greater than zero*");
     }

@@ -1,6 +1,9 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.Services;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.Services;
+using MechanicsSoftware.Application.UseCases.Services.Commands;
+using MechanicsSoftware.Application.UseCases.Services.Handlers;
+using MechanicsSoftware.Application.UseCases.Services.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using MechanicsSoftware.Domain.Entities;
 using MechanicsSoftware.Domain.ValueObjects;
@@ -19,8 +22,8 @@ public class UpdateServiceUseCaseTests
         db.Services.Add(service);
         await db.SaveChangesAsync();
 
-        var request = new UpdateServiceRequest("Oil Change Pro", "Full synthetic", 7500, 45);
-        var result = await new UpdateServiceUseCase(db).ExecuteAsync(service.Id, request);
+        var request = new UpdateServiceCommand("Oil Change Pro", "Full synthetic", 7500, 45);
+        var result = await new UpdateServiceHandler(db).ExecuteAsync(service.Id, request);
 
         result.Name.Should().Be("Oil Change Pro");
         result.BasePriceInCents.Should().Be(7500);
@@ -32,8 +35,8 @@ public class UpdateServiceUseCaseTests
     {
         await using var db = InMemoryDbContextHelper.Create();
 
-        var act = async () => await new UpdateServiceUseCase(db).ExecuteAsync(
-            Guid.NewGuid(), new UpdateServiceRequest("X", null, 1000, 30));
+        var act = async () => await new UpdateServiceHandler(db).ExecuteAsync(
+            Guid.NewGuid(), new UpdateServiceCommand("X", null, 1000, 30));
 
         await act.Should().ThrowAsync<NotFoundException>();
     }
@@ -48,8 +51,8 @@ public class UpdateServiceUseCaseTests
         db.Services.Add(target);
         await db.SaveChangesAsync();
 
-        var act = async () => await new UpdateServiceUseCase(db).ExecuteAsync(
-            target.Id, new UpdateServiceRequest("Tire Rotation", null, 5000, 30));
+        var act = async () => await new UpdateServiceHandler(db).ExecuteAsync(
+            target.Id, new UpdateServiceCommand("Tire Rotation", null, 5000, 30));
 
         await act.Should().ThrowAsync<DomainException>().WithMessage("*Tire Rotation*");
     }

@@ -1,8 +1,8 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Auth;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.Auth;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.Auth.Commands;
+using MechanicsSoftware.Application.UseCases.Auth.Handlers;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -47,8 +47,8 @@ public class LoginUseCaseTests
         var (db, hasher, jwt) = BuildDeps(users: [user]);
         hasher.Setup(h => h.Verify(ValidPassword, ValidHash)).Returns(true);
 
-        var useCase = new LoginUseCase(db.Object, hasher.Object, jwt.Object);
-        var result  = await useCase.ExecuteAsync(new LoginRequest(ValidEmail, ValidPassword));
+        var useCase = new LoginHandler(db.Object, hasher.Object, jwt.Object);
+        var result  = await useCase.ExecuteAsync(new LoginCommand(ValidEmail, ValidPassword));
 
         result.Token.Should().Be(ValidToken);
         result.ExpiresAt.Should().Be(ValidExpiresAt);
@@ -61,8 +61,8 @@ public class LoginUseCaseTests
         var (db, hasher, jwt) = BuildDeps(users: [user]);
         hasher.Setup(h => h.Verify(ValidPassword, ValidHash)).Returns(true);
 
-        var useCase = new LoginUseCase(db.Object, hasher.Object, jwt.Object);
-        var result  = await useCase.ExecuteAsync(new LoginRequest(ValidEmail.ToUpperInvariant(), ValidPassword));
+        var useCase = new LoginHandler(db.Object, hasher.Object, jwt.Object);
+        var result  = await useCase.ExecuteAsync(new LoginCommand(ValidEmail.ToUpperInvariant(), ValidPassword));
 
         result.Token.Should().Be(ValidToken);
     }
@@ -72,8 +72,8 @@ public class LoginUseCaseTests
     {
         var (db, hasher, jwt) = BuildDeps();
 
-        var useCase = new LoginUseCase(db.Object, hasher.Object, jwt.Object);
-        var act     = async () => await useCase.ExecuteAsync(new LoginRequest(ValidEmail, ValidPassword));
+        var useCase = new LoginHandler(db.Object, hasher.Object, jwt.Object);
+        var act     = async () => await useCase.ExecuteAsync(new LoginCommand(ValidEmail, ValidPassword));
 
         await act.Should().ThrowAsync<NotFoundException>();
     }
@@ -85,8 +85,8 @@ public class LoginUseCaseTests
         var (db, hasher, jwt) = BuildDeps(users: [user]);
         hasher.Setup(h => h.Verify(ValidPassword, ValidHash)).Returns(false);
 
-        var useCase = new LoginUseCase(db.Object, hasher.Object, jwt.Object);
-        var act     = async () => await useCase.ExecuteAsync(new LoginRequest(ValidEmail, ValidPassword));
+        var useCase = new LoginHandler(db.Object, hasher.Object, jwt.Object);
+        var act     = async () => await useCase.ExecuteAsync(new LoginCommand(ValidEmail, ValidPassword));
 
         await act.Should().ThrowAsync<UnauthorizedException>();
     }
@@ -98,8 +98,8 @@ public class LoginUseCaseTests
         var (db, hasher, jwt) = BuildDeps(users: [user]);
         hasher.Setup(h => h.Verify(ValidPassword, ValidHash)).Returns(false);
 
-        var useCase = new LoginUseCase(db.Object, hasher.Object, jwt.Object);
-        var act     = async () => await useCase.ExecuteAsync(new LoginRequest(ValidEmail, ValidPassword));
+        var useCase = new LoginHandler(db.Object, hasher.Object, jwt.Object);
+        var act     = async () => await useCase.ExecuteAsync(new LoginCommand(ValidEmail, ValidPassword));
 
         await act.Should().ThrowAsync<UnauthorizedException>();
         jwt.Verify(j => j.Generate(It.IsAny<User>()), Times.Never);

@@ -1,7 +1,10 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.Vehicles;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.Vehicles;
+using MechanicsSoftware.Application.UseCases.Vehicles.Commands;
+using MechanicsSoftware.Application.UseCases.Vehicles.Handlers;
+using MechanicsSoftware.Application.UseCases.Vehicles.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -32,7 +35,7 @@ public class GetVehicleUseCaseTests
         var vehicle = BuildVehicle(vehicleId);
         var db = BuildContext([vehicle]);
 
-        var result = await new GetVehicleUseCase(db.Object).ExecuteAsync(vehicleId);
+        var result = await new GetVehicleHandler(db.Object).ExecuteAsync(vehicleId);
 
         result.Id.Should().Be(vehicleId);
         result.LicensePlate.Should().Be("ABC1234");
@@ -47,7 +50,7 @@ public class GetVehicleUseCaseTests
         var nonExistentId = Guid.NewGuid();
         var db = BuildContext();
 
-        var act = async () => await new GetVehicleUseCase(db.Object).ExecuteAsync(nonExistentId);
+        var act = async () => await new GetVehicleHandler(db.Object).ExecuteAsync(nonExistentId);
 
         await act.Should().ThrowAsync<NotFoundException>().WithMessage($"*{nonExistentId}*");
     }

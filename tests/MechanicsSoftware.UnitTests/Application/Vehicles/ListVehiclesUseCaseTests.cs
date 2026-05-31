@@ -1,5 +1,8 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Features.Vehicles;
+using MechanicsSoftware.Application.UseCases.Vehicles;
+using MechanicsSoftware.Application.UseCases.Vehicles.Commands;
+using MechanicsSoftware.Application.UseCases.Vehicles.Handlers;
+using MechanicsSoftware.Application.UseCases.Vehicles.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using MechanicsSoftware.Domain.Entities;
 using MechanicsSoftware.Domain.ValueObjects;
@@ -25,7 +28,7 @@ public class ListVehiclesUseCaseTests
             BuildVehicle("XYZ5678", CustomerB));
         await db.SaveChangesAsync();
 
-        var result = await new ListVehiclesUseCase(db).ExecuteAsync(new ListVehiclesQuery());
+        var result = await new ListVehiclesHandler(db).ExecuteAsync(new ListVehiclesQuery());
 
         result.Should().HaveCount(2);
     }
@@ -40,7 +43,7 @@ public class ListVehiclesUseCaseTests
             BuildVehicle("XYZ5678", CustomerB));
         await db.SaveChangesAsync();
 
-        var result = await new ListVehiclesUseCase(db).ExecuteAsync(new ListVehiclesQuery(CustomerId: CustomerA));
+        var result = await new ListVehiclesHandler(db).ExecuteAsync(new ListVehiclesQuery(CustomerId: CustomerA));
 
         result.Should().HaveCount(2);
         result.Should().AllSatisfy(v => v.CustomerId.Should().Be(CustomerA));
@@ -55,7 +58,7 @@ public class ListVehiclesUseCaseTests
             BuildVehicle("XYZ5678", CustomerB));
         await db.SaveChangesAsync();
 
-        var result = await new ListVehiclesUseCase(db).ExecuteAsync(new ListVehiclesQuery(LicensePlate: "abc1234"));
+        var result = await new ListVehiclesHandler(db).ExecuteAsync(new ListVehiclesQuery(LicensePlate: "abc1234"));
 
         result.Should().HaveCount(1);
         result[0].LicensePlate.Should().Be("ABC1234");
@@ -66,7 +69,7 @@ public class ListVehiclesUseCaseTests
     {
         await using var db = InMemoryDbContextHelper.Create();
 
-        var result = await new ListVehiclesUseCase(db).ExecuteAsync(new ListVehiclesQuery());
+        var result = await new ListVehiclesHandler(db).ExecuteAsync(new ListVehiclesQuery());
 
         result.Should().BeEmpty();
     }

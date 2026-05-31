@@ -1,4 +1,6 @@
-﻿using MechanicsSoftware.Application.Features.Inventory;
+using MechanicsSoftware.Application.UseCases.Inventory.Commands;
+using MechanicsSoftware.Application.UseCases.Inventory.Handlers;
+using MechanicsSoftware.Application.UseCases.Inventory.Queries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,18 +9,17 @@ namespace MechanicsSoftware.API.Controllers;
 [ApiController]
 [Route("api/parts")]
 [Authorize]
-public class PartsController(CreatePartUseCase createPart, // NOSONAR S6960: VSA — each action delegates to a dedicated use case
-    DeletePartUseCase deletePart,
-    GetPartUseCase getPart,
-    ListPartsUseCase listParts,
-    UpdatePartUseCase updatePart,
-    UpdateStockUseCase updateStock) : ControllerBase
+public class PartsController(CreatePartHandler createPart, // NOSONAR S6960: Clean Architecture — each action delegates to a dedicated handler
+    DeletePartHandler deletePart,
+    GetPartHandler getPart,
+    ListPartsHandler listParts,
+    UpdatePartHandler updatePart,
+    UpdateStockHandler updateStock) : ControllerBase
 {
-
     [HttpPost]
-    public async Task<IActionResult> Create(CreatePartRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(CreatePartCommand command, CancellationToken cancellationToken)
     {
-        var result = await createPart.ExecuteAsync(request, cancellationToken);
+        var result = await createPart.ExecuteAsync(command, cancellationToken);
         return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
     }
 
@@ -44,16 +45,16 @@ public class PartsController(CreatePartUseCase createPart, // NOSONAR S6960: VSA
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, UpdatePartRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(Guid id, UpdatePartCommand command, CancellationToken cancellationToken)
     {
-        var result = await updatePart.ExecuteAsync(id, request, cancellationToken);
+        var result = await updatePart.ExecuteAsync(id, command, cancellationToken);
         return Ok(result);
     }
 
     [HttpPatch("{id:guid}/stock")]
-    public async Task<IActionResult> UpdateStock(Guid id, UpdateStockRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateStock(Guid id, UpdateStockCommand command, CancellationToken cancellationToken)
     {
-        var result = await updateStock.ExecuteAsync(id, request, cancellationToken);
+        var result = await updateStock.ExecuteAsync(id, command, cancellationToken);
         return Ok(result);
     }
 }

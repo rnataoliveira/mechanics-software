@@ -1,4 +1,4 @@
-using MechanicsSoftware.Application.Common;
+﻿using MechanicsSoftware.Application.Abstractions;
 
 namespace MechanicsSoftware.Infrastructure.Security;
 

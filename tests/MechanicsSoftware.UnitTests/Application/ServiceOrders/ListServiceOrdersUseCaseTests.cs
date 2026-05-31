@@ -1,5 +1,8 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Features.ServiceOrders;
+using MechanicsSoftware.Application.UseCases.ServiceOrders;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Commands;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Handlers;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using MechanicsSoftware.Domain.Entities;
 using MechanicsSoftware.Domain.ValueObjects;
@@ -18,7 +21,7 @@ public class ListServiceOrdersUseCaseTests
         db.ServiceOrders.Add(ServiceOrder.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()));
         await db.SaveChangesAsync();
 
-        var result = await new ListServiceOrdersUseCase(db).ExecuteAsync(new ListServiceOrdersQuery());
+        var result = await new ListServiceOrdersHandler(db).ExecuteAsync(new ListServiceOrdersQuery());
 
         result.Should().HaveCount(2);
     }
@@ -34,7 +37,7 @@ public class ListServiceOrdersUseCaseTests
         db.ServiceOrders.Add(inDiagnosis);
         await db.SaveChangesAsync();
 
-        var result = await new ListServiceOrdersUseCase(db).ExecuteAsync(
+        var result = await new ListServiceOrdersHandler(db).ExecuteAsync(
             new ListServiceOrdersQuery(Status: "RECEIVED"));
 
         result.Should().HaveCount(1);
@@ -48,7 +51,7 @@ public class ListServiceOrdersUseCaseTests
         db.ServiceOrders.Add(ServiceOrder.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()));
         await db.SaveChangesAsync();
 
-        var result = await new ListServiceOrdersUseCase(db).ExecuteAsync(
+        var result = await new ListServiceOrdersHandler(db).ExecuteAsync(
             new ListServiceOrdersQuery(Status: "UNKNOWN_STATUS"));
 
         result.Should().HaveCount(1);
