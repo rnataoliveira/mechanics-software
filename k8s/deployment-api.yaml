@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mechanics-software-api
+  namespace: mechanics-software
+  labels:
+    app: mechanics-software
+    tier: api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mechanics-software
+      tier: api
+  template:
+    metadata:
+      labels:
+        app: mechanics-software
+        tier: api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/rnataoliveira/mechanics-software:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: mechanics-config
+            - secretRef:
+                name: mechanics-secrets
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2

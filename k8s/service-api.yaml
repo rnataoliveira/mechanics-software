@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mechanics-software-api
+  namespace: mechanics-software
+  labels:
+    app: mechanics-software
+    tier: api
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: mechanics-software
+    tier: api
