@@ -92,9 +92,10 @@ public class ServiceOrdersController( // NOSONAR S6960 S107: Clean Architecture 
 
     [HttpPost("{id:guid}/budget-decision")]
     [AllowAnonymous]
-    public async Task<IActionResult> BudgetDecision(Guid id, BudgetDecisionRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> HandleBudgetDecision(Guid id, BudgetDecisionRequest request, CancellationToken cancellationToken)
     {
-        var result = await budgetDecisionHandler.ExecuteAsync(id, request.Decision == BudgetDecision.Approve, cancellationToken);
+        var approve = request.Decision == BudgetDecision.Approve;
+        var result = await budgetDecisionHandler.ExecuteAsync(id, approve, cancellationToken);
         return Ok(result);
     }
 

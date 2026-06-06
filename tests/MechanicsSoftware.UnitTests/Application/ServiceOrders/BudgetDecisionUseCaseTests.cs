@@ -1,12 +1,12 @@
 using FluentAssertions;
-using MechanicsSoftware.Application.Features.ServiceOrders;
-using MechanicsSoftware.Domain.ServiceOrders;
-using MechanicsSoftware.Domain.Shared;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Handlers;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
 using MechanicsSoftware.UnitTests.Helpers;
 
 namespace MechanicsSoftware.UnitTests.Application.ServiceOrders;
 
-public class BudgetDecisionUseCaseTests
+public class BudgetDecisionHandlerTests
 {
     private static ServiceOrder BuildOrderAwaitingApproval()
     {
@@ -18,9 +18,9 @@ public class BudgetDecisionUseCaseTests
         return order;
     }
 
-    private static BudgetDecisionUseCase BuildUseCase(
+    private static BudgetDecisionHandler BuildHandler(
         MechanicsSoftware.Infrastructure.Persistence.AppDbContext db) =>
-        new(new ApproveServiceOrderUseCase(db), new RejectServiceOrderUseCase(db));
+        new(new ApproveServiceOrderHandler(db), new RejectServiceOrderHandler(db));
 
     [Fact]
     public async Task ExecuteAsync_ApproveDecision_TransitionsToInExecution()
@@ -30,8 +30,7 @@ public class BudgetDecisionUseCaseTests
         db.ServiceOrders.Add(order);
         await db.SaveChangesAsync();
 
-        var result = await BuildUseCase(db).ExecuteAsync(
-            order.Id, new BudgetDecisionRequest(BudgetDecision.Approve), default);
+        var result = await BuildHandler(db).ExecuteAsync(order.Id, approve: true, default);
 
         result.Status.Should().Be("IN_EXECUTION");
         result.Budget!.Status.Should().Be("APPROVED");
@@ -45,8 +44,7 @@ public class BudgetDecisionUseCaseTests
         db.ServiceOrders.Add(order);
         await db.SaveChangesAsync();
 
-        var result = await BuildUseCase(db).ExecuteAsync(
-            order.Id, new BudgetDecisionRequest(BudgetDecision.Reject), default);
+        var result = await BuildHandler(db).ExecuteAsync(order.Id, approve: false, default);
 
         result.Status.Should().Be("CANCELLED");
         result.Budget!.Status.Should().Be("REJECTED");
