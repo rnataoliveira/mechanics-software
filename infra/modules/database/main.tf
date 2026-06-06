@@ -10,6 +10,9 @@ resource "kubernetes_persistent_volume_claim" "postgres" {
     namespace = kubernetes_namespace.mechanics.metadata[0].name
   }
 
+  # Kind uses WaitForFirstConsumer — PVC only binds when a Pod mounts it
+  wait_until_bound = false
+
   spec {
     access_modes = ["ReadWriteOnce"]
 
