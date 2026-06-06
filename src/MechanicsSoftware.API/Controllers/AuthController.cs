@@ -1,3 +1,4 @@
+using MechanicsSoftware.API.Transport.Auth;
 using MechanicsSoftware.Application.UseCases.Auth.Commands;
 using MechanicsSoftware.Application.UseCases.Auth.Handlers;
 using Microsoft.AspNetCore.Authorization;
@@ -11,9 +12,9 @@ public class AuthController(LoginHandler loginHandler) : ControllerBase
 {
     [HttpPost("login")]
     [AllowAnonymous]
-    public async Task<IActionResult> Login(LoginCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> Login(LoginRequest request, CancellationToken cancellationToken)
     {
-        var result = await loginHandler.ExecuteAsync(command, cancellationToken);
+        var result = await loginHandler.ExecuteAsync(new LoginCommand(request.Email, request.Password), cancellationToken);
         return Ok(result);
     }
 }

@@ -1,3 +1,4 @@
+using MechanicsSoftware.API.Transport.Vehicles;
 using MechanicsSoftware.Application.UseCases.Vehicles.Commands;
 using MechanicsSoftware.Application.UseCases.Vehicles.Handlers;
 using MechanicsSoftware.Application.UseCases.Vehicles.Queries;
@@ -16,9 +17,11 @@ public class VehiclesController(CreateVehicleHandler createVehicle, // NOSONAR S
     UpdateVehicleHandler updateVehicle) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> Create(CreateVehicleCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(CreateVehicleRequest request, CancellationToken cancellationToken)
     {
-        var result = await createVehicle.ExecuteAsync(command, cancellationToken);
+        var result = await createVehicle.ExecuteAsync(
+            new CreateVehicleCommand(request.LicensePlate, request.Make, request.Model, request.Year, request.CustomerId),
+            cancellationToken);
         return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
     }
 
@@ -44,9 +47,9 @@ public class VehiclesController(CreateVehicleHandler createVehicle, // NOSONAR S
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, UpdateVehicleCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(Guid id, UpdateVehicleRequest request, CancellationToken cancellationToken)
     {
-        var result = await updateVehicle.ExecuteAsync(command with { Id = id }, cancellationToken);
+        var result = await updateVehicle.ExecuteAsync(new UpdateVehicleCommand(id, request.Make, request.Model, request.Year), cancellationToken);
         return Ok(result);
     }
 }

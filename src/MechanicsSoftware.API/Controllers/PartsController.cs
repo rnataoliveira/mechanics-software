@@ -1,3 +1,4 @@
+using MechanicsSoftware.API.Transport.Inventory;
 using MechanicsSoftware.Application.UseCases.Inventory.Commands;
 using MechanicsSoftware.Application.UseCases.Inventory.Handlers;
 using MechanicsSoftware.Application.UseCases.Inventory.Queries;
@@ -17,9 +18,11 @@ public class PartsController(CreatePartHandler createPart, // NOSONAR S6960: Cle
     UpdateStockHandler updateStock) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> Create(CreatePartCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(CreatePartRequest request, CancellationToken cancellationToken)
     {
-        var result = await createPart.ExecuteAsync(command, cancellationToken);
+        var result = await createPart.ExecuteAsync(
+            new CreatePartCommand(request.Code, request.Name, request.Description, request.UnitPriceInCents, request.InitialStock),
+            cancellationToken);
         return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
     }
 
@@ -45,16 +48,16 @@ public class PartsController(CreatePartHandler createPart, // NOSONAR S6960: Cle
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, UpdatePartCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(Guid id, UpdatePartRequest request, CancellationToken cancellationToken)
     {
-        var result = await updatePart.ExecuteAsync(id, command, cancellationToken);
+        var result = await updatePart.ExecuteAsync(id, new UpdatePartCommand(request.Name, request.Description, request.UnitPriceInCents), cancellationToken);
         return Ok(result);
     }
 
     [HttpPatch("{id:guid}/stock")]
-    public async Task<IActionResult> UpdateStock(Guid id, UpdateStockCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateStock(Guid id, UpdateStockRequest request, CancellationToken cancellationToken)
     {
-        var result = await updateStock.ExecuteAsync(id, command, cancellationToken);
+        var result = await updateStock.ExecuteAsync(id, new UpdateStockCommand(request.Quantity), cancellationToken);
         return Ok(result);
     }
 }

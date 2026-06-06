@@ -1,3 +1,4 @@
+using MechanicsSoftware.API.Transport.ServiceOrders;
 using MechanicsSoftware.Application.UseCases.ServiceOrders.Commands;
 using MechanicsSoftware.Application.UseCases.ServiceOrders.Handlers;
 using MechanicsSoftware.Application.UseCases.ServiceOrders.Queries;
@@ -27,9 +28,9 @@ public class ServiceOrdersController( // NOSONAR S6960 S107: Clean Architecture 
     GetAverageExecutionTimeHandler averageExecutionTimeHandler) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> Create(CreateServiceOrderCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(CreateServiceOrderRequest request, CancellationToken cancellationToken)
     {
-        var result = await createHandler.ExecuteAsync(command, cancellationToken);
+        var result = await createHandler.ExecuteAsync(new CreateServiceOrderCommand(request.CustomerId, request.VehicleId), cancellationToken);
         return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
     }
 
@@ -63,16 +64,16 @@ public class ServiceOrdersController( // NOSONAR S6960 S107: Clean Architecture 
     }
 
     [HttpPost("{id:guid}/services")]
-    public async Task<IActionResult> AddService(Guid id, AddServiceItemCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> AddService(Guid id, AddServiceItemRequest request, CancellationToken cancellationToken)
     {
-        var result = await addServiceItemHandler.ExecuteAsync(id, command, cancellationToken);
+        var result = await addServiceItemHandler.ExecuteAsync(id, new AddServiceItemCommand(request.ServiceId, request.Quantity), cancellationToken);
         return Ok(result);
     }
 
     [HttpPost("{id:guid}/parts")]
-    public async Task<IActionResult> AddPart(Guid id, AddPartItemCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> AddPart(Guid id, AddPartItemRequest request, CancellationToken cancellationToken)
     {
-        var result = await addPartItemHandler.ExecuteAsync(id, command, cancellationToken);
+        var result = await addPartItemHandler.ExecuteAsync(id, new AddPartItemCommand(request.PartId, request.Quantity), cancellationToken);
         return Ok(result);
     }
 
