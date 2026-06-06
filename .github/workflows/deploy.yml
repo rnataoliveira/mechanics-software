@@ -1,0 +1,116 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["Coverage Report"]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  build-and-push:
+    name: Build & Push Docker image to GHCR
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      sha_tag: ${{ steps.sha.outputs.short }}
+
+    steps:
+      - name: Checkout source at triggering commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Compute short SHA
+        id: sha
+        run: echo "short=$(echo '${{ github.event.workflow_run.head_sha }}' | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:sha-${{ steps.sha.outputs.short }}
+            ghcr.io/${{ github.repository }}:latest
+
+  migrate:
+    name: Apply EF Core migrations (Init Container)
+    needs: [build-and-push]
+    runs-on: ubuntu-latest
+    # Migrations are applied by an initContainer in deployment-api.yaml before the API starts.
+    # This job configures kubectl and patches the deployment image so the initContainer
+    # picks up the correct version on the upcoming rollout.
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout source at triggering commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        run: echo "${{ secrets.KUBECONFIG }}" | base64 -d > ${{ runner.temp }}/kubeconfig.yaml
+
+      - name: Patch API deployment image
+        run: |
+          kubectl set image deployment/mechanics-software-api \
+            api=ghcr.io/${{ github.repository }}:sha-${{ needs.build-and-push.outputs.sha_tag }} \
+            --namespace mechanics-software \
+            --kubeconfig ${{ runner.temp }}/kubeconfig.yaml
+
+      - name: Wait for migration initContainer to complete
+        run: |
+          kubectl rollout status deployment/mechanics-software-api \
+            --namespace mechanics-software \
+            --timeout=180s \
+            --kubeconfig ${{ runner.temp }}/kubeconfig.yaml
+
+  deploy:
+    name: Apply K8s manifests
+    needs: [build-and-push, migrate]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout source at triggering commit
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        run: echo "${{ secrets.KUBECONFIG }}" | base64 -d > ${{ runner.temp }}/kubeconfig.yaml
+
+      - name: Pin image tag in deployment manifest
+        run: |
+          sed -i "s|ghcr.io/${{ github.repository }}:latest|ghcr.io/${{ github.repository }}:sha-${{ needs.build-and-push.outputs.sha_tag }}|g" \
+            k8s/deployment-api.yaml
+
+      - name: Apply all K8s manifests
+        run: |
+          kubectl apply -f k8s/ \
+            --kubeconfig ${{ runner.temp }}/kubeconfig.yaml
+
+      - name: Wait for rollout to complete
+        run: |
+          kubectl rollout status deployment/mechanics-software-api \
+            --namespace mechanics-software \
+            --timeout=120s \
+            --kubeconfig ${{ runner.temp }}/kubeconfig.yaml
