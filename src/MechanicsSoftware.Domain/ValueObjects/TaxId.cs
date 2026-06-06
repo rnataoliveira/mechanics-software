@@ -1,13 +1,8 @@
 using System.Text.RegularExpressions;
-using MechanicsSoftware.Domain.Shared;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
-namespace MechanicsSoftware.Domain.Customers;
-
-public enum PersonType
-{
-    INDIVIDUAL,
-    COMPANY
-}
+namespace MechanicsSoftware.Domain.ValueObjects;
 
 public sealed partial class TaxId : ValueObject
 {
@@ -85,8 +80,8 @@ public sealed partial class TaxId : ValueObject
     private static int CalculateCnpjDigit(string baseDigits)
     {
         int[] weights = baseDigits.Length == 12
-            ? new[] { 5,4,3,2,9,8,7,6,5,4,3,2 }
-            : new[] { 6,5,4,3,2,9,8,7,6,5,4,3,2 };
+            ? new[] { 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 }
+            : new[] { 6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 };
 
         var sum = 0;
 

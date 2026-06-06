@@ -1,4 +1,4 @@
-namespace MechanicsSoftware.Domain.Inventory;
+namespace MechanicsSoftware.Domain.Enums;
 
 public enum StockMovementType
 {

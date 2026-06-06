@@ -1,7 +1,9 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using MechanicsSoftware.Domain.Auth;
-using MechanicsSoftware.Domain.Customers;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
 namespace MechanicsSoftware.Infrastructure.Persistence.Configurations;
 

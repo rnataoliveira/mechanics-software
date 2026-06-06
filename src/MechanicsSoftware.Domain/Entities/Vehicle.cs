@@ -1,6 +1,7 @@
-using MechanicsSoftware.Domain.Shared;
+using MechanicsSoftware.Domain.Exceptions;
+using MechanicsSoftware.Domain.ValueObjects;
 
-namespace MechanicsSoftware.Domain.Vehicles;
+namespace MechanicsSoftware.Domain.Entities;
 
 public sealed class Vehicle : Entity<Guid>
 {
@@ -70,4 +71,3 @@ public sealed class Vehicle : Entity<Guid>
         LicensePlate = newLicensePlate;
     }
 }
-

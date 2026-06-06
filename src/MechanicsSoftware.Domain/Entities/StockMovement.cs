@@ -1,6 +1,6 @@
-using MechanicsSoftware.Domain.Shared;
+using MechanicsSoftware.Domain.Enums;
 
-namespace MechanicsSoftware.Domain.Inventory;
+namespace MechanicsSoftware.Domain.Entities;
 
 public sealed class StockMovement : Entity<Guid>
 {

@@ -1,6 +1,9 @@
-using MechanicsSoftware.Application.Common;
+﻿using MechanicsSoftware.Application.Common;
 using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Domain.Inventory;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
 namespace MechanicsSoftware.Application.Features.Inventory;
 

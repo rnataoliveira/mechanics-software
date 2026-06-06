@@ -1,10 +1,13 @@
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using MechanicsSoftware.Application.Common.Auth;
-using MechanicsSoftware.Domain.Auth;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
 namespace MechanicsSoftware.Infrastructure.Security;
 

@@ -1,10 +1,12 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using MechanicsSoftware.Application.Common;
 using MechanicsSoftware.Application.Features.ServiceOrders;
-using MechanicsSoftware.Domain.ServiceOrders;
-using MechanicsSoftware.Domain.Shared;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
 namespace MechanicsSoftware.UnitTests.Application.ServiceOrders;
 

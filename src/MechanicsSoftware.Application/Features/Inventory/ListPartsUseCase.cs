@@ -1,4 +1,5 @@
 using MechanicsSoftware.Application.Common;
+using MechanicsSoftware.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace MechanicsSoftware.Application.Features.Inventory;
@@ -9,7 +10,7 @@ public sealed class ListPartsUseCase(IAppDbContext context)
 {
     public async Task<IEnumerable<PartOutput>> ExecuteAsync(ListPartsQuery query, CancellationToken cancellationToken = default)
     {
-        IQueryable<Domain.Inventory.Part> queryParts = context.Parts;
+        IQueryable<Part> queryParts = context.Parts;
 
         if (!string.IsNullOrWhiteSpace(query.Code))
             queryParts = queryParts.Where(p => p.Code.Contains(query.Code));

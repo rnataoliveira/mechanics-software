@@ -1,6 +1,6 @@
-#pragma warning disable CA1716 // "Shared" is an intentional DDD namespace segment, not a VB.NET keyword collision
-namespace MechanicsSoftware.Domain.Shared;
-#pragma warning restore CA1716
+using MechanicsSoftware.Domain.Exceptions;
+
+namespace MechanicsSoftware.Domain.ValueObjects;
 
 public sealed class Money : ValueObject
 {

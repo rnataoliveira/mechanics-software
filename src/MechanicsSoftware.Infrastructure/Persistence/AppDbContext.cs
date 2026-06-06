@@ -1,13 +1,11 @@
-using System.Reflection;
+﻿using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Domain.Auth;
-using MechanicsSoftware.Domain.Customers;
-using MechanicsSoftware.Domain.Inventory;
-using MechanicsSoftware.Domain.ServiceOrders;
-using MechanicsSoftware.Domain.Services;
-using MechanicsSoftware.Domain.Vehicles;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
 namespace MechanicsSoftware.Infrastructure.Persistence;
 

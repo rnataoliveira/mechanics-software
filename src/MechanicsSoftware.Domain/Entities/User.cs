@@ -1,7 +1,7 @@
-using MechanicsSoftware.Domain.Customers;
-using MechanicsSoftware.Domain.Shared;
+using MechanicsSoftware.Domain.Exceptions;
+using MechanicsSoftware.Domain.ValueObjects;
 
-namespace MechanicsSoftware.Domain.Auth;
+namespace MechanicsSoftware.Domain.Entities;
 
 public sealed class User : Entity<Guid>
 {

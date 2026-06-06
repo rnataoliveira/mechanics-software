@@ -1,12 +1,8 @@
-using MechanicsSoftware.Domain.Shared;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
+using MechanicsSoftware.Domain.ValueObjects;
 
-namespace MechanicsSoftware.Domain.ServiceOrders;
-
-public enum PartAvailability
-{
-    Available,
-    Unavailable
-}
+namespace MechanicsSoftware.Domain.Entities;
 
 public sealed class PartItem : Entity<Guid>
 {

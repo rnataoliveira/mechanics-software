@@ -1,7 +1,9 @@
-using FluentAssertions;
-using MechanicsSoftware.Domain.Customers;
-using MechanicsSoftware.Domain.Shared;
+﻿using FluentAssertions;
 using Xunit;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
 namespace MechanicsSoftware.UnitTests.Domain.Customers;
 

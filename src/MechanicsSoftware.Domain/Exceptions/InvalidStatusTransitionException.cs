@@ -1,6 +1,6 @@
-using MechanicsSoftware.Domain.Shared;
+using MechanicsSoftware.Domain.ValueObjects;
 
-namespace MechanicsSoftware.Domain.ServiceOrders;
+namespace MechanicsSoftware.Domain.Exceptions;
 
 public class InvalidStatusTransitionException : ConflictException
 {

@@ -1,9 +1,10 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MechanicsSoftware.Application.Common;
 using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Domain.Customers;
-using MechanicsSoftware.Domain.Shared;
-using MechanicsSoftware.Domain.Vehicles;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
 namespace MechanicsSoftware.Application.Features.Vehicles;
 

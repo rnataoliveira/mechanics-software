@@ -1,14 +1,16 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
 using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Domain.Customers;
-using MechanicsSoftware.Domain.Inventory;
 using MechanicsSoftware.IntegrationTests.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using MechanicsSoftware.Domain.Entities;
+using MechanicsSoftware.Domain.ValueObjects;
+using MechanicsSoftware.Domain.Enums;
+using MechanicsSoftware.Domain.Exceptions;
 
 namespace MechanicsSoftware.IntegrationTests.ServiceOrders;
 
