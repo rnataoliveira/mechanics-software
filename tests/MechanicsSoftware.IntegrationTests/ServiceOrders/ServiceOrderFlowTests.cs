@@ -130,8 +130,8 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
         await SendBudgetAsync(client, orderId);
         await AssertOrderStatusAsync(client, orderId, "AWAITING_APPROVAL");
 
-        var rejectResponse = await client.PostAsync(
-            $"/api/service-orders/{orderId}/reject", content: null);
+        var rejectResponse = await client.PostAsJsonAsync(
+            $"/api/service-orders/{orderId}/budget-decision", new { decision = "reject" });
         rejectResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
         await AssertOrderStatusAsync(client, orderId, "CANCELLED");
@@ -194,6 +194,29 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
         orders[1].Status.Should().Be("AWAITING_APPROVAL");
         orders[2].Status.Should().Be("IN_DIAGNOSIS");
         orders[3].Status.Should().Be("RECEIVED");
+    }
+
+    [Fact]
+    public async Task BudgetDecision_WithInvalidDecision_ShouldReturn400()
+    {
+        var client = await AuthenticatedClientAsync();
+
+        var customerId = await CreateCustomerAsync(
+            client, document: "87748024043", email: "invalid@example.com", phone: "11977776666");
+        var vehicleId = await CreateVehicleAsync(client, customerId, plate: "GHI3F45");
+        var serviceId = await CreateServiceAsync(client, name: "Balanceamento");
+        var partId = await CreatePartAsync(client, code: "OIL-003", name: "Oleo de motor");
+
+        var orderId = await CreateServiceOrderAsync(client, customerId, vehicleId);
+        await StartDiagnosisAsync(client, orderId);
+        await AddServiceItemAsync(client, orderId, serviceId);
+        await AddPartItemAsync(client, orderId, partId);
+        await GenerateBudgetAsync(client, orderId);
+        await SendBudgetAsync(client, orderId);
+
+        var response = await client.PostAsJsonAsync(
+            $"/api/service-orders/{orderId}/budget-decision", new { decision = "invalid" });
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     // --------------------------------------------------------------------
@@ -344,8 +367,8 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
 
     private static async Task ApproveAsync(HttpClient client, Guid orderId)
     {
-        var response = await client.PostAsync(
-            $"/api/service-orders/{orderId}/approve", content: null);
+        var response = await client.PostAsJsonAsync(
+            $"/api/service-orders/{orderId}/budget-decision", new { decision = "approve" });
         await EnsureSuccess(response);
     }
 

@@ -20,8 +20,7 @@ public class ServiceOrdersController( // NOSONAR S6960 S107: Clean Architecture 
     AddPartItemHandler addPartItemHandler,
     GenerateBudgetHandler generateBudgetHandler,
     SendBudgetHandler sendBudgetHandler,
-    ApproveServiceOrderHandler approveHandler,
-    RejectServiceOrderHandler rejectHandler,
+    BudgetDecisionHandler budgetDecisionHandler,
     StartExecutionHandler startExecutionHandler,
     CompleteServiceOrderHandler completeHandler,
     DeliverServiceOrderHandler deliverHandler,
@@ -91,17 +90,12 @@ public class ServiceOrdersController( // NOSONAR S6960 S107: Clean Architecture 
         return Ok(result);
     }
 
-    [HttpPost("{id:guid}/approve")]
-    public async Task<IActionResult> Approve(Guid id, CancellationToken cancellationToken)
+    [HttpPost("{id:guid}/budget-decision")]
+    [AllowAnonymous]
+    public async Task<IActionResult> HandleBudgetDecision(Guid id, BudgetDecisionRequest request, CancellationToken cancellationToken)
     {
-        var result = await approveHandler.ExecuteAsync(id, cancellationToken);
-        return Ok(result);
-    }
-
-    [HttpPost("{id:guid}/reject")]
-    public async Task<IActionResult> Reject(Guid id, CancellationToken cancellationToken)
-    {
-        var result = await rejectHandler.ExecuteAsync(id, cancellationToken);
+        var approve = request.Decision == BudgetDecision.Approve;
+        var result = await budgetDecisionHandler.ExecuteAsync(id, approve, cancellationToken);
         return Ok(result);
     }
 
