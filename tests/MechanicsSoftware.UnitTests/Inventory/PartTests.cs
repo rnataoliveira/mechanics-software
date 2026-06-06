@@ -4,7 +4,7 @@ using MechanicsSoftware.Domain.ValueObjects;
 using MechanicsSoftware.Domain.Enums;
 using MechanicsSoftware.Domain.Exceptions;
 
-namespace MechanicsSoftware.UnitTests.Inventory;
+namespace MechanicsSoftware.UnitTests.Domain.Inventory;
 
 public class PartTests
 {

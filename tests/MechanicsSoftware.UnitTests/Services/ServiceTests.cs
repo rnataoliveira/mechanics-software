@@ -4,7 +4,7 @@ using MechanicsSoftware.Domain.ValueObjects;
 using MechanicsSoftware.Domain.Enums;
 using MechanicsSoftware.Domain.Exceptions;
 
-namespace MechanicsSoftware.UnitTests.Services;
+namespace MechanicsSoftware.UnitTests.Domain.Services;
 
 public class ServiceTests
 {

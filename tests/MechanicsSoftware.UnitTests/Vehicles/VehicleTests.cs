@@ -4,7 +4,7 @@ using MechanicsSoftware.Domain.ValueObjects;
 using MechanicsSoftware.Domain.Enums;
 using MechanicsSoftware.Domain.Exceptions;
 
-namespace MechanicsSoftware.UnitTests.Vehicles;
+namespace MechanicsSoftware.UnitTests.Domain.Vehicles;
 
 public class VehicleTests
 {

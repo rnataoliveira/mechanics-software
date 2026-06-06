@@ -1,8 +1,7 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
-using MechanicsSoftware.Application.UseCases.Customers;
-using MechanicsSoftware.Application.UseCases.Customers.Commands;
+using MechanicsSoftware.API.Transport.Customers;
 using MechanicsSoftware.Application.UseCases.Customers.Handlers;
 using MechanicsSoftware.Application.UseCases.Customers.Queries;
 using MechanicsSoftware.IntegrationTests.Base;
@@ -24,7 +23,7 @@ public class CustomersIntegrationTests : IntegrationTestBase
     public async Task CreateCustomer_WithValidData_Returns201Created()
     {
         // Arrange
-        var request = new CreateCustomerCommand(
+        var request = new CreateCustomerRequest(
             Name: "John Doe",
             DocumentValue: "11222333000181",
             PersonType: MechanicsSoftware.Domain.Enums.PersonType.COMPANY,
@@ -94,7 +93,7 @@ public class CustomersIntegrationTests : IntegrationTestBase
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var customerId = await TestDataSeeder.SeedTestCustomerAsync(context);
 
-        var updateRequest = new UpdateCustomerCommand(
+        var updateRequest = new UpdateCustomerRequest(
             Name: "Jane Doe Updated",
             Email: "jane@example.com",
             Phone: "11988888888"
@@ -122,7 +121,7 @@ public class CustomersIntegrationTests : IntegrationTestBase
     {
         // Arrange
         var nonExistentId = Guid.NewGuid();
-        var updateRequest = new UpdateCustomerCommand("Updated Name", "updated@example.com", "11988888888");
+        var updateRequest = new UpdateCustomerRequest("Updated Name", "updated@example.com", "11988888888");
 
         // Act
         var response = await Client.PutAsJsonAsync($"/api/customers/{nonExistentId}", updateRequest);
@@ -171,7 +170,7 @@ public class CustomersIntegrationTests : IntegrationTestBase
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await TestDataSeeder.SeedTestCustomerAsync(context, documentValue: "11222333000181");
 
-        var request = new CreateCustomerCommand(
+        var request = new CreateCustomerRequest(
             Name: "Another Customer",
             DocumentValue: "11222333000181",
             PersonType: MechanicsSoftware.Domain.Enums.PersonType.COMPANY,

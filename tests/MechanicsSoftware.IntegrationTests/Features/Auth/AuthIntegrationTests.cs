@@ -1,7 +1,7 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
-using MechanicsSoftware.Application.UseCases.Auth.Commands;
+using MechanicsSoftware.API.Transport.Auth;
 using MechanicsSoftware.Application.UseCases.Auth.Handlers;
 using MechanicsSoftware.IntegrationTests.Base;
 using MechanicsSoftware.IntegrationTests.Helpers;
@@ -32,7 +32,7 @@ public class AuthIntegrationTests : IntegrationTestBase
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await TestDataSeeder.SeedTestUserAsync(context, ValidEmail, ValidPassword);
 
-        var request = new LoginCommand(ValidEmail, ValidPassword);
+        var request = new LoginRequest(ValidEmail, ValidPassword);
 
         // Act
         var response = await client.PostAsJsonAsync("/api/auth/login", request);
@@ -58,7 +58,7 @@ public class AuthIntegrationTests : IntegrationTestBase
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await TestDataSeeder.SeedTestUserAsync(context, ValidEmail, ValidPassword);
 
-        var request = new LoginCommand(ValidEmail, InvalidPassword);
+        var request = new LoginRequest(ValidEmail, InvalidPassword);
 
         // Act
         var response = await client.PostAsJsonAsync("/api/auth/login", request);
@@ -72,7 +72,7 @@ public class AuthIntegrationTests : IntegrationTestBase
     {
         // Arrange
         var client = GetUnauthenticatedClient();
-        var request = new LoginCommand("nonexistent@example.com", ValidPassword);
+        var request = new LoginRequest("nonexistent@example.com", ValidPassword);
 
         // Act
         var response = await client.PostAsJsonAsync("/api/auth/login", request);
