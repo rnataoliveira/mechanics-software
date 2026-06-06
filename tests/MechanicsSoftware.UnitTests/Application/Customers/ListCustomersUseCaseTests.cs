@@ -1,5 +1,8 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Features.Customers;
+using MechanicsSoftware.Application.UseCases.Customers;
+using MechanicsSoftware.Application.UseCases.Customers.Commands;
+using MechanicsSoftware.Application.UseCases.Customers.Handlers;
+using MechanicsSoftware.Application.UseCases.Customers.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using MechanicsSoftware.Domain.Entities;
 using MechanicsSoftware.Domain.ValueObjects;
@@ -22,7 +25,7 @@ public class ListCustomersUseCaseTests
             BuildCustomer("Bruno Costa", "111.444.777-35", "bruno@email.com"));
         await db.SaveChangesAsync();
 
-        var result = await new ListCustomersUseCase(db).ExecuteAsync(new ListCustomersQuery());
+        var result = await new ListCustomersHandler(db).ExecuteAsync(new ListCustomersQuery());
 
         result.Should().HaveCount(2);
     }
@@ -36,7 +39,7 @@ public class ListCustomersUseCaseTests
             BuildCustomer("Bruno Costa", "111.444.777-35", "bruno@email.com"));
         await db.SaveChangesAsync();
 
-        var result = await new ListCustomersUseCase(db).ExecuteAsync(new ListCustomersQuery(Name: "Ana"));
+        var result = await new ListCustomersHandler(db).ExecuteAsync(new ListCustomersQuery(Name: "Ana"));
 
         result.Should().HaveCount(1);
         result[0].Name.Should().Be("Ana Silva");
@@ -51,7 +54,7 @@ public class ListCustomersUseCaseTests
             BuildCustomer("Bruno Costa", "111.444.777-35", "bruno@email.com"));
         await db.SaveChangesAsync();
 
-        var result = await new ListCustomersUseCase(db).ExecuteAsync(new ListCustomersQuery(Document: "52998224725"));
+        var result = await new ListCustomersHandler(db).ExecuteAsync(new ListCustomersQuery(Document: "52998224725"));
 
         result.Should().HaveCount(1);
         result[0].Name.Should().Be("Ana Silva");
@@ -62,7 +65,7 @@ public class ListCustomersUseCaseTests
     {
         await using var db = InMemoryDbContextHelper.Create();
 
-        var result = await new ListCustomersUseCase(db).ExecuteAsync(new ListCustomersQuery());
+        var result = await new ListCustomersHandler(db).ExecuteAsync(new ListCustomersQuery());
 
         result.Should().BeEmpty();
     }

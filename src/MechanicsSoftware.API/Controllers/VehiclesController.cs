@@ -1,4 +1,6 @@
-﻿using MechanicsSoftware.Application.Features.Vehicles;
+using MechanicsSoftware.Application.UseCases.Vehicles.Commands;
+using MechanicsSoftware.Application.UseCases.Vehicles.Handlers;
+using MechanicsSoftware.Application.UseCases.Vehicles.Queries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,17 +9,16 @@ namespace MechanicsSoftware.API.Controllers;
 [ApiController]
 [Route("api/vehicles")]
 [Authorize]
-public class VehiclesController(CreateVehicleUseCase createVehicle, // NOSONAR S6960: VSA — each action delegates to a dedicated use case
-    DeleteVehicleUseCase deleteVehicle,
-    GetVehicleUseCase getVehicle,
-    ListVehiclesUseCase listVehicles,
-    UpdateVehicleUseCase updateVehicle) : ControllerBase
+public class VehiclesController(CreateVehicleHandler createVehicle, // NOSONAR S6960: Clean Architecture — each action delegates to a dedicated handler
+    DeleteVehicleHandler deleteVehicle,
+    GetVehicleHandler getVehicle,
+    ListVehiclesHandler listVehicles,
+    UpdateVehicleHandler updateVehicle) : ControllerBase
 {
-
     [HttpPost]
-    public async Task<IActionResult> Create(CreateVehicleRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(CreateVehicleCommand command, CancellationToken cancellationToken)
     {
-        var result = await createVehicle.ExecuteAsync(request, cancellationToken);
+        var result = await createVehicle.ExecuteAsync(command, cancellationToken);
         return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
     }
 
@@ -43,9 +44,9 @@ public class VehiclesController(CreateVehicleUseCase createVehicle, // NOSONAR S
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, UpdateVehicleRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(Guid id, UpdateVehicleCommand command, CancellationToken cancellationToken)
     {
-        var result = await updateVehicle.ExecuteAsync(request with { Id = id}, cancellationToken);
+        var result = await updateVehicle.ExecuteAsync(command with { Id = id }, cancellationToken);
         return Ok(result);
     }
 }

@@ -1,7 +1,10 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.Vehicles;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.Vehicles;
+using MechanicsSoftware.Application.UseCases.Vehicles.Commands;
+using MechanicsSoftware.Application.UseCases.Vehicles.Handlers;
+using MechanicsSoftware.Application.UseCases.Vehicles.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -32,9 +35,9 @@ public class UpdateVehicleUseCaseTests
         var vehicleId = Guid.NewGuid();
         var vehicle = BuildVehicle(vehicleId);
         var db = BuildContext([vehicle]);
-        var request = new UpdateVehicleRequest(vehicleId, "Honda", "Civic", 2022);
+        var request = new UpdateVehicleCommand(vehicleId, "Honda", "Civic", 2022);
 
-        var result = await new UpdateVehicleUseCase(db.Object).ExecuteAsync(request);
+        var result = await new UpdateVehicleHandler(db.Object).ExecuteAsync(request);
 
         result.Make.Should().Be("Honda");
         result.Model.Should().Be("Civic");
@@ -46,9 +49,9 @@ public class UpdateVehicleUseCaseTests
     public async Task ExecuteAsync_VehicleNotFound_ThrowsNotFoundException()
     {
         var db = BuildContext();
-        var request = new UpdateVehicleRequest(Guid.NewGuid(), "Honda", "Civic", 2022);
+        var request = new UpdateVehicleCommand(Guid.NewGuid(), "Honda", "Civic", 2022);
 
-        var act = async () => await new UpdateVehicleUseCase(db.Object).ExecuteAsync(request);
+        var act = async () => await new UpdateVehicleHandler(db.Object).ExecuteAsync(request);
 
         await act.Should().ThrowAsync<NotFoundException>();
     }

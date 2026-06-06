@@ -1,6 +1,9 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.Services;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.Services;
+using MechanicsSoftware.Application.UseCases.Services.Commands;
+using MechanicsSoftware.Application.UseCases.Services.Handlers;
+using MechanicsSoftware.Application.UseCases.Services.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using MechanicsSoftware.Domain.Entities;
 using MechanicsSoftware.Domain.ValueObjects;
@@ -19,7 +22,7 @@ public class GetServiceUseCaseTests
         db.Services.Add(service);
         await db.SaveChangesAsync();
 
-        var result = await new GetServiceUseCase(db).ExecuteAsync(service.Id);
+        var result = await new GetServiceHandler(db).ExecuteAsync(service.Id);
 
         result.Id.Should().Be(service.Id);
         result.Name.Should().Be("Oil Change");
@@ -31,7 +34,7 @@ public class GetServiceUseCaseTests
     {
         await using var db = InMemoryDbContextHelper.Create();
 
-        var act = async () => await new GetServiceUseCase(db).ExecuteAsync(Guid.NewGuid());
+        var act = async () => await new GetServiceHandler(db).ExecuteAsync(Guid.NewGuid());
 
         await act.Should().ThrowAsync<NotFoundException>();
     }

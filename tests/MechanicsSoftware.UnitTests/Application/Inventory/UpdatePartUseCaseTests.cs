@@ -1,8 +1,11 @@
 ﻿using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.Inventory;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.Inventory;
+using MechanicsSoftware.Application.UseCases.Inventory.Commands;
+using MechanicsSoftware.Application.UseCases.Inventory.Handlers;
+using MechanicsSoftware.Application.UseCases.Inventory.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -37,9 +40,9 @@ public class UpdatePartUseCaseTests
         var partId = Guid.NewGuid();
         var part = BuildPart(partId);
         var db = BuildContext(part);
-        var input = new UpdatePartRequest("Synthetic Oil", "Full synthetic", 3500);
+        var input = new UpdatePartCommand("Synthetic Oil", "Full synthetic", 3500);
 
-        var result = await new UpdatePartUseCase(db.Object).ExecuteAsync(partId, input);
+        var result = await new UpdatePartHandler(db.Object).ExecuteAsync(partId, input);
 
         result.Name.Should().Be("Synthetic Oil");
         result.Description.Should().Be("Full synthetic");
@@ -51,9 +54,9 @@ public class UpdatePartUseCaseTests
     public async Task ExecuteAsync_PartNotFound_ThrowsNotFoundException()
     {
         var db = BuildContext(null);
-        var input = new UpdatePartRequest("Synthetic Oil", null, 3500);
+        var input = new UpdatePartCommand("Synthetic Oil", null, 3500);
 
-        var act = async () => await new UpdatePartUseCase(db.Object).ExecuteAsync(Guid.NewGuid(), input);
+        var act = async () => await new UpdatePartHandler(db.Object).ExecuteAsync(Guid.NewGuid(), input);
 
         await act.Should().ThrowAsync<NotFoundException>();
     }

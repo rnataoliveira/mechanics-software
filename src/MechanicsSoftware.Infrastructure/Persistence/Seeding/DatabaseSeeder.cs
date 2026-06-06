@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
-using MechanicsSoftware.Application.Common;
+using MechanicsSoftware.Application.Abstractions;
 using MechanicsSoftware.Domain.Entities;
 using MechanicsSoftware.Domain.ValueObjects;
 using MechanicsSoftware.Domain.Enums;

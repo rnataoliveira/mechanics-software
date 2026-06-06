@@ -1,12 +1,11 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Auth;
+using MechanicsSoftware.Application.Abstractions;
 using MechanicsSoftware.Infrastructure.Persistence;
 using MechanicsSoftware.Infrastructure.Persistence.Seeding;
 using MechanicsSoftware.Infrastructure.Security;

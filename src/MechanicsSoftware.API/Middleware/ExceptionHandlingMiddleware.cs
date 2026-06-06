@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using MechanicsSoftware.Application.Common.Exceptions;
+using MechanicsSoftware.Application.Exceptions;
 using MechanicsSoftware.Domain.Entities;
 using MechanicsSoftware.Domain.ValueObjects;
 using MechanicsSoftware.Domain.Enums;

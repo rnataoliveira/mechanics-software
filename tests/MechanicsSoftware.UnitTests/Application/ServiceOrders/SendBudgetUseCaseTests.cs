@@ -1,6 +1,9 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.ServiceOrders;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.ServiceOrders;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Commands;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Handlers;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using MechanicsSoftware.Domain.Entities;
 using MechanicsSoftware.Domain.ValueObjects;
@@ -28,7 +31,7 @@ public class SendBudgetUseCaseTests
         db.ServiceOrders.Add(order);
         await db.SaveChangesAsync();
 
-        var result = await new SendBudgetUseCase(db).ExecuteAsync(order.Id);
+        var result = await new SendBudgetHandler(db).ExecuteAsync(order.Id);
 
         result.Status.Should().Be("AWAITING_APPROVAL");
     }
@@ -38,7 +41,7 @@ public class SendBudgetUseCaseTests
     {
         await using var db = InMemoryDbContextHelper.Create();
 
-        var act = async () => await new SendBudgetUseCase(db).ExecuteAsync(Guid.NewGuid());
+        var act = async () => await new SendBudgetHandler(db).ExecuteAsync(Guid.NewGuid());
 
         await act.Should().ThrowAsync<NotFoundException>();
     }
@@ -52,7 +55,7 @@ public class SendBudgetUseCaseTests
         db.ServiceOrders.Add(order);
         await db.SaveChangesAsync();
 
-        var act = async () => await new SendBudgetUseCase(db).ExecuteAsync(order.Id);
+        var act = async () => await new SendBudgetHandler(db).ExecuteAsync(order.Id);
 
         await act.Should().ThrowAsync<DomainException>();
     }

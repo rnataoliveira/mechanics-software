@@ -1,8 +1,11 @@
 ﻿using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.Customers;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.Customers;
+using MechanicsSoftware.Application.UseCases.Customers.Commands;
+using MechanicsSoftware.Application.UseCases.Customers.Handlers;
+using MechanicsSoftware.Application.UseCases.Customers.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -41,7 +44,7 @@ public class DeleteCustomerUseCaseTests
         var customer = BuildCustomer(customerId);
         var (db, mockCustomers) = BuildContext(customers: [customer]);
 
-        var useCase = new DeleteCustomerUseCase(db.Object);
+        var useCase = new DeleteCustomerHandler(db.Object);
 
         await useCase.ExecuteAsync(customerId);
 
@@ -55,7 +58,7 @@ public class DeleteCustomerUseCaseTests
         var nonExistentId = Guid.NewGuid();
         var (db, _) = BuildContext();
 
-        var useCase = new DeleteCustomerUseCase(db.Object);
+        var useCase = new DeleteCustomerHandler(db.Object);
 
         var act = async () => await useCase.ExecuteAsync(nonExistentId);
 

@@ -1,8 +1,11 @@
 ﻿using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.Inventory;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.Inventory;
+using MechanicsSoftware.Application.UseCases.Inventory.Commands;
+using MechanicsSoftware.Application.UseCases.Inventory.Handlers;
+using MechanicsSoftware.Application.UseCases.Inventory.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -37,7 +40,7 @@ public class GetPartUseCaseTests
         var part = BuildPart(partId);
         var db = BuildContext(part);
 
-        var result = await new GetPartUseCase(db.Object).ExecuteAsync(partId);
+        var result = await new GetPartHandler(db.Object).ExecuteAsync(partId);
 
         result.Id.Should().Be(partId);
         result.Code.Should().Be("OIL-001");
@@ -52,7 +55,7 @@ public class GetPartUseCaseTests
         var nonExistentId = Guid.NewGuid();
         var db = BuildContext(null);
 
-        var act = async () => await new GetPartUseCase(db.Object).ExecuteAsync(nonExistentId);
+        var act = async () => await new GetPartHandler(db.Object).ExecuteAsync(nonExistentId);
 
         await act.Should().ThrowAsync<NotFoundException>().WithMessage($"*{nonExistentId}*");
     }

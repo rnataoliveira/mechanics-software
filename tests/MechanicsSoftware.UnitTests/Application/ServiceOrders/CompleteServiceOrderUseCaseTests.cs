@@ -1,7 +1,10 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.ServiceOrders;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.ServiceOrders;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Commands;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Handlers;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -32,7 +35,7 @@ public class CompleteServiceOrderUseCaseTests
         db.ServiceOrders.Add(order);
         await db.SaveChangesAsync();
 
-        var result = await new CompleteServiceOrderUseCase(db).ExecuteAsync(order.Id);
+        var result = await new CompleteServiceOrderHandler(db).ExecuteAsync(order.Id);
 
         result.Status.Should().Be("COMPLETED");
     }
@@ -63,7 +66,7 @@ public class CompleteServiceOrderUseCaseTests
         db.Setup(d => d.Parts).Returns(mockParts.Object);
         db.Setup(d => d.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
-        var result = await new CompleteServiceOrderUseCase(db.Object).ExecuteAsync(order.Id);
+        var result = await new CompleteServiceOrderHandler(db.Object).ExecuteAsync(order.Id);
 
         result.Status.Should().Be("COMPLETED");
         part.ReservedQuantity.Should().Be(0);
@@ -74,7 +77,7 @@ public class CompleteServiceOrderUseCaseTests
     {
         await using var db = InMemoryDbContextHelper.Create();
 
-        var act = async () => await new CompleteServiceOrderUseCase(db).ExecuteAsync(Guid.NewGuid());
+        var act = async () => await new CompleteServiceOrderHandler(db).ExecuteAsync(Guid.NewGuid());
 
         await act.Should().ThrowAsync<NotFoundException>();
     }
@@ -87,7 +90,7 @@ public class CompleteServiceOrderUseCaseTests
         db.ServiceOrders.Add(order);
         await db.SaveChangesAsync();
 
-        var act = async () => await new CompleteServiceOrderUseCase(db).ExecuteAsync(order.Id);
+        var act = async () => await new CompleteServiceOrderHandler(db).ExecuteAsync(order.Id);
 
         await act.Should().ThrowAsync<DomainException>();
     }

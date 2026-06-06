@@ -1,5 +1,8 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Features.Services;
+using MechanicsSoftware.Application.UseCases.Services;
+using MechanicsSoftware.Application.UseCases.Services.Commands;
+using MechanicsSoftware.Application.UseCases.Services.Handlers;
+using MechanicsSoftware.Application.UseCases.Services.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using MechanicsSoftware.Domain.Entities;
 using MechanicsSoftware.Domain.ValueObjects;
@@ -18,7 +21,7 @@ public class ListServicesUseCaseTests
         db.Services.Add(Service.Create(Guid.NewGuid(), "Oil Change", null, new Money(5000), 30));
         await db.SaveChangesAsync();
 
-        var result = await new ListServicesUseCase(db).ExecuteAsync(new ListServicesQuery());
+        var result = await new ListServicesHandler(db).ExecuteAsync(new ListServicesQuery());
 
         result.Should().HaveCount(2);
         result[0].Name.Should().Be("Oil Change");
@@ -33,7 +36,7 @@ public class ListServicesUseCaseTests
         db.Services.Add(Service.Create(Guid.NewGuid(), "Tire Rotation", null, new Money(3000), 45));
         await db.SaveChangesAsync();
 
-        var result = await new ListServicesUseCase(db).ExecuteAsync(new ListServicesQuery(Name: "Oil"));
+        var result = await new ListServicesHandler(db).ExecuteAsync(new ListServicesQuery(Name: "Oil"));
 
         result.Should().HaveCount(1);
         result[0].Name.Should().Be("Oil Change");
@@ -46,7 +49,7 @@ public class ListServicesUseCaseTests
         db.Services.Add(Service.Create(Guid.NewGuid(), "Oil Change", null, new Money(5000), 30));
         await db.SaveChangesAsync();
 
-        var result = await new ListServicesUseCase(db).ExecuteAsync(new ListServicesQuery(Name: "  "));
+        var result = await new ListServicesHandler(db).ExecuteAsync(new ListServicesQuery(Name: "  "));
 
         result.Should().HaveCount(1);
     }

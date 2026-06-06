@@ -1,7 +1,10 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.ServiceOrders;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.ServiceOrders;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Commands;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Handlers;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -33,8 +36,8 @@ public class AddServiceItemUseCaseTests
         db.Setup(d => d.Services).Returns(mockServices.Object);
         db.Setup(d => d.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
-        var request = new AddServiceItemRequest(service.Id, 2);
-        var result = await new AddServiceItemUseCase(db.Object).ExecuteAsync(order.Id, request);
+        var request = new AddServiceItemCommand(service.Id, 2);
+        var result = await new AddServiceItemHandler(db.Object).ExecuteAsync(order.Id, request);
 
         result.ServiceId.Should().Be(service.Id);
         result.Quantity.Should().Be(2);
@@ -46,8 +49,8 @@ public class AddServiceItemUseCaseTests
     {
         await using var db = InMemoryDbContextHelper.Create();
 
-        var act = async () => await new AddServiceItemUseCase(db).ExecuteAsync(
-            Guid.NewGuid(), new AddServiceItemRequest(Guid.NewGuid(), 1));
+        var act = async () => await new AddServiceItemHandler(db).ExecuteAsync(
+            Guid.NewGuid(), new AddServiceItemCommand(Guid.NewGuid(), 1));
 
         await act.Should().ThrowAsync<NotFoundException>();
     }
@@ -67,8 +70,8 @@ public class AddServiceItemUseCaseTests
         db.Setup(d => d.ServiceOrders).Returns(mockOrders.Object);
         db.Setup(d => d.Services).Returns(mockServices.Object);
 
-        var act = async () => await new AddServiceItemUseCase(db.Object).ExecuteAsync(
-            order.Id, new AddServiceItemRequest(Guid.NewGuid(), 1));
+        var act = async () => await new AddServiceItemHandler(db.Object).ExecuteAsync(
+            order.Id, new AddServiceItemCommand(Guid.NewGuid(), 1));
 
         await act.Should().ThrowAsync<NotFoundException>();
     }

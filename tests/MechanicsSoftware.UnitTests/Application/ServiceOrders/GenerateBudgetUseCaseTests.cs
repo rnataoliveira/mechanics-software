@@ -1,7 +1,10 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.ServiceOrders;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.ServiceOrders;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Commands;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Handlers;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -35,7 +38,7 @@ public class GenerateBudgetUseCaseTests
         db.Setup(d => d.ServiceOrders).Returns(mockOrders.Object);
         db.Setup(d => d.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
-        var result = await new GenerateBudgetUseCase(db.Object).ExecuteAsync(order.Id);
+        var result = await new GenerateBudgetHandler(db.Object).ExecuteAsync(order.Id);
 
         result.TotalInCents.Should().Be(5000);
         result.Status.Should().Be("PENDING");
@@ -46,7 +49,7 @@ public class GenerateBudgetUseCaseTests
     {
         await using var db = InMemoryDbContextHelper.Create();
 
-        var act = async () => await new GenerateBudgetUseCase(db).ExecuteAsync(Guid.NewGuid());
+        var act = async () => await new GenerateBudgetHandler(db).ExecuteAsync(Guid.NewGuid());
 
         await act.Should().ThrowAsync<NotFoundException>();
     }
@@ -59,7 +62,7 @@ public class GenerateBudgetUseCaseTests
         db.ServiceOrders.Add(order);
         await db.SaveChangesAsync();
 
-        var act = async () => await new GenerateBudgetUseCase(db).ExecuteAsync(order.Id);
+        var act = async () => await new GenerateBudgetHandler(db).ExecuteAsync(order.Id);
 
         await act.Should().ThrowAsync<DomainException>().WithMessage("*service item*");
     }
@@ -74,7 +77,7 @@ public class GenerateBudgetUseCaseTests
         db.ServiceOrders.Add(order);
         await db.SaveChangesAsync();
 
-        var act = async () => await new GenerateBudgetUseCase(db).ExecuteAsync(order.Id);
+        var act = async () => await new GenerateBudgetHandler(db).ExecuteAsync(order.Id);
 
         await act.Should().ThrowAsync<DomainException>().WithMessage("*already generated*");
     }

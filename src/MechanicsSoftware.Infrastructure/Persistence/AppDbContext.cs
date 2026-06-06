@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using MechanicsSoftware.Application.Common;
+using MechanicsSoftware.Application.Abstractions;
 using MechanicsSoftware.Domain.Entities;
 using MechanicsSoftware.Domain.ValueObjects;
 using MechanicsSoftware.Domain.Enums;

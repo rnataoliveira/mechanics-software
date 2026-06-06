@@ -1,10 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
-using MechanicsSoftware.Application.Features.Auth;
-using MechanicsSoftware.Application.Features.Customers;
-using MechanicsSoftware.Application.Features.Inventory;
-using MechanicsSoftware.Application.Features.ServiceOrders;
-using MechanicsSoftware.Application.Features.Services;
-using MechanicsSoftware.Application.Features.Vehicles;
+using MechanicsSoftware.Application.UseCases.Auth.Handlers;
+using MechanicsSoftware.Application.UseCases.Customers.Handlers;
+using MechanicsSoftware.Application.UseCases.Inventory.Handlers;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Handlers;
+using MechanicsSoftware.Application.UseCases.Services.Handlers;
+using MechanicsSoftware.Application.UseCases.Vehicles.Handlers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MechanicsSoftware.Application;
@@ -15,53 +15,53 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         // Auth
-        services.AddScoped<LoginUseCase>();
+        services.AddScoped<LoginHandler>();
 
         // Customers
-        services.AddScoped<CreateCustomerUseCase>();
-        services.AddScoped<GetCustomerUseCase>();
-        services.AddScoped<ListCustomersUseCase>();
-        services.AddScoped<UpdateCustomerUseCase>();
-        services.AddScoped<DeleteCustomerUseCase>();
+        services.AddScoped<CreateCustomerHandler>();
+        services.AddScoped<GetCustomerHandler>();
+        services.AddScoped<ListCustomersHandler>();
+        services.AddScoped<UpdateCustomerHandler>();
+        services.AddScoped<DeleteCustomerHandler>();
 
         // Vehicles
-        services.AddScoped<CreateVehicleUseCase>();
-        services.AddScoped<GetVehicleUseCase>();
-        services.AddScoped<ListVehiclesUseCase>();
-        services.AddScoped<UpdateVehicleUseCase>();
-        services.AddScoped<DeleteVehicleUseCase>();
+        services.AddScoped<CreateVehicleHandler>();
+        services.AddScoped<GetVehicleHandler>();
+        services.AddScoped<ListVehiclesHandler>();
+        services.AddScoped<UpdateVehicleHandler>();
+        services.AddScoped<DeleteVehicleHandler>();
 
         // Inventory
-        services.AddScoped<CreatePartUseCase>();
-        services.AddScoped<GetPartUseCase>();
-        services.AddScoped<ListPartsUseCase>();
-        services.AddScoped<UpdatePartUseCase>();
-        services.AddScoped<DeletePartUseCase>();
-        services.AddScoped<UpdateStockUseCase>();
+        services.AddScoped<CreatePartHandler>();
+        services.AddScoped<GetPartHandler>();
+        services.AddScoped<ListPartsHandler>();
+        services.AddScoped<UpdatePartHandler>();
+        services.AddScoped<DeletePartHandler>();
+        services.AddScoped<UpdateStockHandler>();
 
         // Services catalogue
-        services.AddScoped<CreateServiceUseCase>();
-        services.AddScoped<GetServiceUseCase>();
-        services.AddScoped<ListServicesUseCase>();
-        services.AddScoped<UpdateServiceUseCase>();
-        services.AddScoped<DeleteServiceUseCase>();
+        services.AddScoped<CreateServiceHandler>();
+        services.AddScoped<GetServiceHandler>();
+        services.AddScoped<ListServicesHandler>();
+        services.AddScoped<UpdateServiceHandler>();
+        services.AddScoped<DeleteServiceHandler>();
 
         // Service Orders
-        services.AddScoped<CreateServiceOrderUseCase>();
-        services.AddScoped<StartDiagnosisUseCase>();
-        services.AddScoped<AddServiceItemUseCase>();
-        services.AddScoped<AddPartItemUseCase>();
-        services.AddScoped<GenerateBudgetUseCase>();
-        services.AddScoped<SendBudgetUseCase>();
-        services.AddScoped<ApproveServiceOrderUseCase>();
-        services.AddScoped<RejectServiceOrderUseCase>();
-        services.AddScoped<StartExecutionUseCase>();
-        services.AddScoped<CompleteServiceOrderUseCase>();
-        services.AddScoped<DeliverServiceOrderUseCase>();
-        services.AddScoped<GetServiceOrderStatusUseCase>();
-        services.AddScoped<GetServiceOrderUseCase>();
-        services.AddScoped<ListServiceOrdersUseCase>();
-        services.AddScoped<GetAverageExecutionTimeUseCase>();
+        services.AddScoped<CreateServiceOrderHandler>();
+        services.AddScoped<StartDiagnosisHandler>();
+        services.AddScoped<AddServiceItemHandler>();
+        services.AddScoped<AddPartItemHandler>();
+        services.AddScoped<GenerateBudgetHandler>();
+        services.AddScoped<SendBudgetHandler>();
+        services.AddScoped<ApproveServiceOrderHandler>();
+        services.AddScoped<RejectServiceOrderHandler>();
+        services.AddScoped<StartExecutionHandler>();
+        services.AddScoped<CompleteServiceOrderHandler>();
+        services.AddScoped<DeliverServiceOrderHandler>();
+        services.AddScoped<GetServiceOrderStatusHandler>();
+        services.AddScoped<GetServiceOrderHandler>();
+        services.AddScoped<ListServiceOrdersHandler>();
+        services.AddScoped<GetAverageExecutionTimeHandler>();
 
         return services;
     }

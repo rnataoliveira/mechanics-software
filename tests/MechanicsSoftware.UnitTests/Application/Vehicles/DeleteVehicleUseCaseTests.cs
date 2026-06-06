@@ -1,8 +1,11 @@
 ﻿using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Common.Exceptions;
-using MechanicsSoftware.Application.Features.Vehicles;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.Exceptions;
+using MechanicsSoftware.Application.UseCases.Vehicles;
+using MechanicsSoftware.Application.UseCases.Vehicles.Commands;
+using MechanicsSoftware.Application.UseCases.Vehicles.Handlers;
+using MechanicsSoftware.Application.UseCases.Vehicles.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -38,7 +41,7 @@ public class DeleteVehicleUseCaseTests
         var vehicle = BuildVehicle(vehicleId);
         var (db, mockVehicles) = BuildContext([vehicle]);
 
-        await new DeleteVehicleUseCase(db.Object).ExecuteAsync(vehicleId);
+        await new DeleteVehicleHandler(db.Object).ExecuteAsync(vehicleId);
 
         mockVehicles.Verify(m => m.Remove(vehicle), Times.Once);
         db.Verify(d => d.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -50,7 +53,7 @@ public class DeleteVehicleUseCaseTests
         var nonExistentId = Guid.NewGuid();
         var (db, _) = BuildContext();
 
-        var act = async () => await new DeleteVehicleUseCase(db.Object).ExecuteAsync(nonExistentId);
+        var act = async () => await new DeleteVehicleHandler(db.Object).ExecuteAsync(nonExistentId);
 
         await act.Should().ThrowAsync<NotFoundException>().WithMessage($"*{nonExistentId}*");
     }

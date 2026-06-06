@@ -1,6 +1,9 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Common;
-using MechanicsSoftware.Application.Features.ServiceOrders;
+using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Application.UseCases.ServiceOrders;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Commands;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Handlers;
+using MechanicsSoftware.Application.UseCases.ServiceOrders.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using Moq;
 using MechanicsSoftware.Domain.Entities;
@@ -24,7 +27,7 @@ public class GetAverageExecutionTimeUseCaseTests
         var db = new Mock<IAppDbContext>();
         db.Setup(d => d.ServiceOrders).Returns(mockOrders.Object);
 
-        var result = await new GetAverageExecutionTimeUseCase(db.Object).ExecuteAsync();
+        var result = await new GetAverageExecutionTimeHandler(db.Object).ExecuteAsync();
 
         result.AverageHours.Should().Be(0);
         result.OrderCount.Should().Be(0);
@@ -45,7 +48,7 @@ public class GetAverageExecutionTimeUseCaseTests
         var db = new Mock<IAppDbContext>();
         db.Setup(d => d.ServiceOrders).Returns(mockOrders.Object);
 
-        var result = await new GetAverageExecutionTimeUseCase(db.Object).ExecuteAsync();
+        var result = await new GetAverageExecutionTimeHandler(db.Object).ExecuteAsync();
 
         result.OrderCount.Should().Be(1);
         result.AverageHours.Should().BeGreaterThanOrEqualTo(0);

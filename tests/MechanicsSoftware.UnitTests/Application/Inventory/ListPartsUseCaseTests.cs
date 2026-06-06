@@ -1,5 +1,8 @@
 ﻿using FluentAssertions;
-using MechanicsSoftware.Application.Features.Inventory;
+using MechanicsSoftware.Application.UseCases.Inventory;
+using MechanicsSoftware.Application.UseCases.Inventory.Commands;
+using MechanicsSoftware.Application.UseCases.Inventory.Handlers;
+using MechanicsSoftware.Application.UseCases.Inventory.Queries;
 using MechanicsSoftware.UnitTests.Helpers;
 using MechanicsSoftware.Domain.Entities;
 using MechanicsSoftware.Domain.ValueObjects;
@@ -22,7 +25,7 @@ public class ListPartsUseCaseTests
             BuildPart("BOLT-001", "Hex Bolt"));
         await db.SaveChangesAsync();
 
-        var result = await new ListPartsUseCase(db).ExecuteAsync(new ListPartsQuery());
+        var result = await new ListPartsHandler(db).ExecuteAsync(new ListPartsQuery());
 
         result.Should().HaveCount(2);
     }
@@ -36,7 +39,7 @@ public class ListPartsUseCaseTests
             BuildPart("BOLT-001", "Hex Bolt"));
         await db.SaveChangesAsync();
 
-        var result = await new ListPartsUseCase(db).ExecuteAsync(new ListPartsQuery(Code: "OIL"));
+        var result = await new ListPartsHandler(db).ExecuteAsync(new ListPartsQuery(Code: "OIL"));
 
         result.Should().HaveCount(1);
         result.First().Code.Should().Be("OIL-001");
@@ -51,7 +54,7 @@ public class ListPartsUseCaseTests
             BuildPart("BOLT-001", "Hex Bolt"));
         await db.SaveChangesAsync();
 
-        var result = await new ListPartsUseCase(db).ExecuteAsync(new ListPartsQuery(Name: "Bolt"));
+        var result = await new ListPartsHandler(db).ExecuteAsync(new ListPartsQuery(Name: "Bolt"));
 
         result.Should().HaveCount(1);
         result.First().Name.Should().Be("Hex Bolt");
@@ -62,7 +65,7 @@ public class ListPartsUseCaseTests
     {
         await using var db = InMemoryDbContextHelper.Create();
 
-        var result = await new ListPartsUseCase(db).ExecuteAsync(new ListPartsQuery());
+        var result = await new ListPartsHandler(db).ExecuteAsync(new ListPartsQuery());
 
         result.Should().BeEmpty();
     }
