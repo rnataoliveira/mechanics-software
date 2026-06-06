@@ -10,7 +10,14 @@ public sealed class ListServiceOrdersHandler(IAppDbContext db)
     public async Task<IReadOnlyList<ServiceOrderSummaryResponse>> ExecuteAsync(
         ListServiceOrdersQuery query, CancellationToken cancellationToken = default)
     {
-        var orders = db.ServiceOrders.AsQueryable();
+        var completed = new ServiceOrderStatus(ServiceOrderStatus.Status.Completed);
+        var delivered = new ServiceOrderStatus(ServiceOrderStatus.Status.Delivered);
+        var inExecution = new ServiceOrderStatus(ServiceOrderStatus.Status.InExecution);
+        var awaitingApproval = new ServiceOrderStatus(ServiceOrderStatus.Status.AwaitingApproval);
+        var inDiagnosis = new ServiceOrderStatus(ServiceOrderStatus.Status.InDiagnosis);
+
+        var orders = db.ServiceOrders
+            .Where(o => o.Status != completed && o.Status != delivered);
 
         if (!string.IsNullOrWhiteSpace(query.Status))
         {
@@ -23,7 +30,10 @@ public sealed class ListServiceOrdersHandler(IAppDbContext db)
         }
 
         return await orders
-            .OrderByDescending(o => o.CreatedAt)
+            .OrderBy(o => o.Status == inExecution ? 1
+                : o.Status == awaitingApproval ? 2
+                : o.Status == inDiagnosis ? 3 : 4)
+            .ThenBy(o => o.CreatedAt)
             .Select(o => new ServiceOrderSummaryResponse(
                 o.Id,
                 o.CustomerId,

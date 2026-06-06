@@ -146,6 +146,56 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
         await AssertMovementDoesNotExistAsync(partId, StockMovementType.Outbound);
     }
 
+    [Fact]
+    public async Task List_ReturnsActiveOrdersOrderedByStatusPriority()
+    {
+        var client = await AuthenticatedClientAsync();
+
+        var customerId = await CreateCustomerAsync(
+            client, document: "98765432100", email: "list@example.com", phone: "11911112222");
+        var vehicleId = await CreateVehicleAsync(client, customerId, plate: "LST1T01");
+        var serviceId = await CreateServiceAsync(client, name: "Teste de listagem");
+
+        var receivedId = await CreateServiceOrderAsync(client, customerId, vehicleId);
+
+        var inDiagnosisId = await CreateServiceOrderAsync(client, customerId, vehicleId);
+        await StartDiagnosisAsync(client, inDiagnosisId);
+
+        var awaitingId = await CreateServiceOrderAsync(client, customerId, vehicleId);
+        await StartDiagnosisAsync(client, awaitingId);
+        await AddServiceItemAsync(client, awaitingId, serviceId);
+        await GenerateBudgetAsync(client, awaitingId);
+        await SendBudgetAsync(client, awaitingId);
+
+        var inExecutionId = await CreateServiceOrderAsync(client, customerId, vehicleId);
+        await StartDiagnosisAsync(client, inExecutionId);
+        await AddServiceItemAsync(client, inExecutionId, serviceId);
+        await GenerateBudgetAsync(client, inExecutionId);
+        await SendBudgetAsync(client, inExecutionId);
+        await ApproveAsync(client, inExecutionId);
+
+        var deliveredId = await CreateServiceOrderAsync(client, customerId, vehicleId);
+        await StartDiagnosisAsync(client, deliveredId);
+        await AddServiceItemAsync(client, deliveredId, serviceId);
+        await GenerateBudgetAsync(client, deliveredId);
+        await SendBudgetAsync(client, deliveredId);
+        await ApproveAsync(client, deliveredId);
+        await StartExecutionAsync(client, deliveredId);
+        await CompleteAsync(client, deliveredId);
+        await DeliverAsync(client, deliveredId);
+
+        var response = await client.GetAsync("/api/service-orders");
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var orders = await ReadAsync<List<ServiceOrderSummaryDto>>(response);
+
+        orders.Should().HaveCount(4);
+        orders.Should().NotContain(o => o.Id == deliveredId);
+        orders[0].Status.Should().Be("IN_EXECUTION");
+        orders[1].Status.Should().Be("AWAITING_APPROVAL");
+        orders[2].Status.Should().Be("IN_DIAGNOSIS");
+        orders[3].Status.Should().Be("RECEIVED");
+    }
+
     // --------------------------------------------------------------------
     // HTTP helpers
     // --------------------------------------------------------------------
@@ -393,6 +443,7 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
     private sealed record ServiceDto(Guid Id);
     private sealed record PartDto(Guid Id, int StockQuantity, int ReservedQuantity);
     private sealed record ServiceOrderDto(Guid Id, string Status);
+    private sealed record ServiceOrderSummaryDto(Guid Id, string Status);
     private sealed record BudgetDto(Guid Id, int TotalInCents, string Status);
     private sealed record AddPartItemDto(Guid Id, string Availability, string? Warning);
     private sealed record ServiceOrderStatusDto(Guid Id, string Status, DateTime? DeliveredAt);
