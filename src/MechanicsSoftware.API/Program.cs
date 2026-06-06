@@ -1,10 +1,10 @@
 using MechanicsSoftware.API.Extensions;
-using MechanicsSoftware.API.Logging;
 using MechanicsSoftware.API.Middleware;
 using MechanicsSoftware.Application;
 using MechanicsSoftware.Infrastructure;
+using MechanicsSoftware.Infrastructure.Logging;
 using MechanicsSoftware.Infrastructure.Persistence;
-using MechanicsSoftware.Infrastructure.Persistence.Seeding;
+using MechanicsSoftware.Infrastructure.Persistence.SQL;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using MechanicsSoftware.Application.Abstractions;
 using MechanicsSoftware.Domain.Entities;
@@ -6,7 +6,7 @@ using MechanicsSoftware.Domain.ValueObjects;
 using MechanicsSoftware.Domain.Enums;
 using MechanicsSoftware.Domain.Exceptions;
 
-namespace MechanicsSoftware.Infrastructure.Persistence.Seeding;
+namespace MechanicsSoftware.Infrastructure.Persistence.SQL;
 
 [ExcludeFromCodeCoverage]
 public sealed class DatabaseSeeder(AppDbContext db, IPasswordHasher hasher)

@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using MechanicsSoftware.Application.Abstractions;
 using MechanicsSoftware.Infrastructure.Persistence;
-using MechanicsSoftware.Infrastructure.Persistence.Seeding;
+using MechanicsSoftware.Infrastructure.Persistence.SQL;
 using MechanicsSoftware.Infrastructure.Security;
 
 namespace MechanicsSoftware.Infrastructure;
