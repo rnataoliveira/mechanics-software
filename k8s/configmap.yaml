@@ -3,6 +3,8 @@ kind: ConfigMap
 metadata:
   name: mechanics-config
   namespace: mechanics-software
+  labels:
+    app: mechanics-software
 data:
   ASPNETCORE_ENVIRONMENT: "Production"
   ASPNETCORE_URLS: "http://+:8080"
