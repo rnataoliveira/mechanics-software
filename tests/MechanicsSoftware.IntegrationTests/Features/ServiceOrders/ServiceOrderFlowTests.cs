@@ -153,7 +153,7 @@ public sealed class ServiceOrderFlowTests : IntegrationTestBase
         var customerId = await CreateCustomerAsync(
             client, document: "98765432100", email: "list@example.com", phone: "11911112222");
         var vehicleId = await CreateVehicleAsync(client, customerId, plate: "LST1T01");
-        var serviceId = await CreateServiceAsync(client, name: "Teste de listagem");
+        var serviceId = await CreateServiceAsync(client, name: "Servico de listagem");
 
         var receivedId = await CreateServiceOrderAsync(client, customerId, vehicleId);
 
@@ -246,7 +246,7 @@ public sealed class ServiceOrderFlowTests : IntegrationTestBase
     {
         var response = await client.PostAsJsonAsync("/api/customers", new
         {
-            name = "Test Customer",
+            name = "Cliente Teste",
             documentValue = document,
             personType = PersonType.INDIVIDUAL,
             email,
@@ -278,12 +278,12 @@ public sealed class ServiceOrderFlowTests : IntegrationTestBase
     }
 
     private static async Task<Guid> CreateServiceAsync(
-        HttpClient client, string name = "Oil Change")
+        HttpClient client, string name = "Troca de oleo")
     {
         var response = await client.PostAsJsonAsync("/api/services", new
         {
             name,
-            description = "Test service",
+            description = "Servico padrao",
             basePriceInCents = ServicePriceInCents,
             estimatedMinutes = 60
         });
@@ -295,13 +295,13 @@ public sealed class ServiceOrderFlowTests : IntegrationTestBase
     }
 
     private static async Task<Guid> CreatePartAsync(
-        HttpClient client, string code = "OIL-001", string name = "Engine Oil")
+        HttpClient client, string code = "FLT-001", string name = "Filtro de oleo")
     {
         var response = await client.PostAsJsonAsync("/api/parts", new
         {
             code,
             name,
-            description = "Test part",
+            description = "Peca de reposicao",
             unitPriceInCents = PartPriceInCents,
             initialStock = PartInitialStock
         });
@@ -318,8 +318,7 @@ public sealed class ServiceOrderFlowTests : IntegrationTestBase
         var response = await client.PostAsJsonAsync("/api/service-orders", new
         {
             customerId,
-            vehicleId,
-            description = "Test service order"
+            vehicleId
         });
 
         response.StatusCode.Should().Be(HttpStatusCode.Created, await response.Content.ReadAsStringAsync());
