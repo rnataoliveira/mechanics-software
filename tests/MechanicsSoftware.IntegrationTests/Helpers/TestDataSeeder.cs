@@ -4,7 +4,6 @@ using MechanicsSoftware.Infrastructure.Security;
 using MechanicsSoftware.Domain.Entities;
 using MechanicsSoftware.Domain.ValueObjects;
 using MechanicsSoftware.Domain.Enums;
-using MechanicsSoftware.Domain.Exceptions;
 
 namespace MechanicsSoftware.IntegrationTests.Helpers;
 

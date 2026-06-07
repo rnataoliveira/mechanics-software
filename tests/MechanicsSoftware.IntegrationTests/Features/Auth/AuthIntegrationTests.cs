@@ -2,19 +2,24 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
 using MechanicsSoftware.API.Transport.Auth;
-using MechanicsSoftware.Application.UseCases.Auth.Handlers;
 using MechanicsSoftware.IntegrationTests.Base;
+using MechanicsSoftware.IntegrationTests.Fixtures;
 using MechanicsSoftware.IntegrationTests.Helpers;
 using MechanicsSoftware.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MechanicsSoftware.IntegrationTests.Features.Auth;
 
+[Collection("IntegrationTests")]
 public class AuthIntegrationTests : IntegrationTestBase
 {
     private const string ValidEmail = "admin@mechanics.com";
     private const string ValidPassword = "SecurePassword123!";
     private const string InvalidPassword = "WrongPassword";
+
+    public AuthIntegrationTests(WebApplicationFactoryFixture factory) : base(factory)
+    {
+    }
 
     public override async Task InitializeAsync()
     {

@@ -3,17 +3,34 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MechanicsSoftware.Infrastructure.Persistence;
-using Npgsql;
+using Testcontainers.PostgreSql;
 
 namespace MechanicsSoftware.IntegrationTests.Fixtures;
 
-public sealed class WebApplicationFactoryFixture : WebApplicationFactory<Program>
+public sealed class WebApplicationFactoryFixture : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private static string CreateConnectionString()
-        => $"Server=localhost;Port=5435;Database=mechanics_software_test;User Id=postgres;Password=postgres;";
+    private readonly PostgreSqlContainer _container =
+        new PostgreSqlBuilder()
+            .WithImage("postgres:17-alpine")
+            .WithDatabase("mechanics_software_test")
+            .WithUsername("postgres")
+            .WithPassword("postgres")
+            .Build();
 
-    private readonly string _connectionString = CreateConnectionString();
     private const string _jwtSecret = "test-secret-key-for-testing-only-min-32-chars-required-here";
+
+    public async Task InitializeAsync()
+    {
+        await _container.StartAsync();
+        _ = Server;
+    }
+
+    public new async Task DisposeAsync()
+    {
+        await base.DisposeAsync();
+        await _container.StopAsync();
+        await _container.DisposeAsync();
+    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -25,7 +42,7 @@ public sealed class WebApplicationFactoryFixture : WebApplicationFactory<Program
                 services.Remove(descriptor);
 
             services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(_connectionString));
+                options.UseNpgsql(_container.GetConnectionString()));
         });
 
         builder.UseEnvironment("Test");
@@ -41,5 +58,29 @@ public sealed class WebApplicationFactoryFixture : WebApplicationFactory<Program
 
         await context.Database.EnsureDeletedAsync();
         await context.Database.MigrateAsync();
+    }
+
+    /// <summary>
+    /// Truncates all domain tables while preserving the users/admin seed.
+    /// Call this in IAsyncLifetime.InitializeAsync() to isolate tests that share this factory.
+    /// </summary>
+    public async Task ResetDomainDataAsync()
+    {
+        await using var scope = Services.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        await context.Database.ExecuteSqlRawAsync("""
+            TRUNCATE TABLE
+                stock_movements,
+                part_items,
+                service_items,
+                budgets,
+                service_orders,
+                vehicles,
+                customers,
+                services,
+                parts
+            CASCADE
+            """);
     }
 }
