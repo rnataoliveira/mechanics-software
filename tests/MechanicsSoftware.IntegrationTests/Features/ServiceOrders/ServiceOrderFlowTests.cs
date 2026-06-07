@@ -94,7 +94,7 @@ public sealed class ServiceOrderFlowTests : IntegrationTestBase
 
         await DeliverAsync(client, orderId);
 
-        using var publicClient = _factory.CreateClient();
+        using var publicClient = Factory.CreateClient();
         var publicResponse = await publicClient.GetAsync($"/api/service-orders/{orderId}/status");
         publicResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -425,7 +425,7 @@ public sealed class ServiceOrderFlowTests : IntegrationTestBase
     private async Task AssertMovementExistsAsync(
         Guid partId, StockMovementType type, int quantity, Guid reference)
     {
-        await using var scope = _factory.Services.CreateAsyncScope();
+        await using var scope = Factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         var part = await db.Parts.FindAsync(partId);

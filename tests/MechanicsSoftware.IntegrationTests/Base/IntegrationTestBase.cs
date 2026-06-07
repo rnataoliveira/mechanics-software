@@ -9,11 +9,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MechanicsSoftware.IntegrationTests.Base;
 
-[SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable", Justification = "Class implements IAsyncLifetime which handles async disposal via xUnit")]
 public abstract class IntegrationTestBase : IAsyncLifetime
 {
-    protected readonly WebApplicationFactoryFixture _factory;
-    protected readonly HttpClient _client;
+    private readonly WebApplicationFactoryFixture _factory;
+    private readonly HttpClient _client;
     private string? _authToken;
 
     protected WebApplicationFactoryFixture Factory => _factory;

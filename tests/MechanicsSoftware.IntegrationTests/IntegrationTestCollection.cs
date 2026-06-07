@@ -3,6 +3,6 @@ using MechanicsSoftware.IntegrationTests.Fixtures;
 namespace MechanicsSoftware.IntegrationTests;
 
 [CollectionDefinition("IntegrationTests")]
-public class IntegrationTestCollection : ICollectionFixture<WebApplicationFactoryFixture>
+public class IntegrationTestCollectionDefinition : ICollectionFixture<WebApplicationFactoryFixture>
 {
 }
