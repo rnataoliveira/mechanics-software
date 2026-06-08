@@ -9,7 +9,9 @@ on:
 jobs:
   build-and-push:
     name: Build & Push Docker image to GHCR
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -46,6 +48,7 @@ jobs:
   migrate:
     name: Apply EF Core migrations (Init Container)
     needs: [build-and-push]
+    if: ${{ github.event.workflow_run.head_repository.full_name == github.repository }}
     runs-on: ubuntu-latest
     # Migrations are applied by an initContainer in deployment-api.yaml before the API starts.
     # This job configures kubectl and patches the deployment image so the initContainer
@@ -82,6 +85,7 @@ jobs:
   deploy:
     name: Apply K8s manifests
     needs: [build-and-push, migrate]
+    if: ${{ github.event.workflow_run.head_repository.full_name == github.repository }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
