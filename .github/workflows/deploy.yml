@@ -20,10 +20,8 @@ jobs:
       sha_tag: ${{ steps.sha.outputs.short }}
 
     steps:
-      - name: Checkout source at triggering commit
+      - name: Checkout source
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Compute short SHA
         id: sha
@@ -51,17 +49,11 @@ jobs:
     if: ${{ github.event.workflow_run.head_repository.full_name == github.repository }}
     runs-on: ubuntu-latest
     # Migrations are applied by an initContainer in deployment-api.yaml before the API starts.
-    # This job configures kubectl and patches the deployment image so the initContainer
-    # picks up the correct version on the upcoming rollout.
+    # This job patches the deployment image so the initContainer picks up the correct version.
     permissions:
       contents: read
 
     steps:
-      - name: Checkout source at triggering commit
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-
       - name: Set up kubectl
         uses: azure/setup-kubectl@v4
 
@@ -91,10 +83,8 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout source at triggering commit
+      - name: Checkout source
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v4
