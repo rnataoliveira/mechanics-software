@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
 using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Domain.ValueObjects;
 
 namespace MechanicsSoftware.Infrastructure.Notifications;
 
@@ -44,7 +45,7 @@ public sealed class SmtpEmailNotifier : IEmailNotifier
         string toEmail,
         string customerName,
         Guid serviceOrderId,
-        string newStatus,
+        ServiceOrderStatus.Status newStatus,
         CancellationToken cancellationToken = default)
     {
         var subject = $"Atualização da sua Ordem de Serviço #{serviceOrderId}";
@@ -68,17 +69,24 @@ public sealed class SmtpEmailNotifier : IEmailNotifier
         await client.SendMailAsync(message, cancellationToken);
     }
 
-    private static string BuildBody(string customerName, Guid serviceOrderId, string newStatus) =>
-        $"""
+    private static string BuildBody(
+        string customerName,
+        Guid serviceOrderId,
+        ServiceOrderStatus.Status newStatus)
+    {
+        var statusLabel = new ServiceOrderStatus(newStatus).ToString();
+
+        return $"""
         Olá, {customerName}!
 
         Sua Ordem de Serviço #{serviceOrderId} teve o status atualizado.
 
-        Novo status: {newStatus}
+        Novo status: {statusLabel}
 
         Caso tenha dúvidas, entre em contato conosco.
 
         Atenciosamente,
         Equipe de Atendimento
         """;
+    }
 }
