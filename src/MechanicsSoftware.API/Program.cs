@@ -27,6 +27,7 @@ builder.Services.AddControllers(options =>
 });
 
 builder.Services.AddAuthorization();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -53,6 +54,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHealthChecks("/health").AllowAnonymous();
 app.MapControllers();
 
 app.Lifetime.ApplicationStarted.Register(() =>

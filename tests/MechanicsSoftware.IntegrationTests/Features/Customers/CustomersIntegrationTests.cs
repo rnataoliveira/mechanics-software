@@ -2,17 +2,21 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
 using MechanicsSoftware.API.Transport.Customers;
-using MechanicsSoftware.Application.UseCases.Customers.Handlers;
-using MechanicsSoftware.Application.UseCases.Customers.Queries;
 using MechanicsSoftware.IntegrationTests.Base;
+using MechanicsSoftware.IntegrationTests.Fixtures;
 using MechanicsSoftware.IntegrationTests.Helpers;
 using MechanicsSoftware.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MechanicsSoftware.IntegrationTests.Features.Customers;
 
+[Collection("IntegrationTests")]
 public class CustomersIntegrationTests : IntegrationTestBase
 {
+    public CustomersIntegrationTests(WebApplicationFactoryFixture factory) : base(factory)
+    {
+    }
+
     public override async Task InitializeAsync()
     {
         await Factory.ResetDatabaseAsync();
