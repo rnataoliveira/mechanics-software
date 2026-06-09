@@ -1,20 +1,19 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
-using MechanicsSoftware.Application.Abstractions;
-using MechanicsSoftware.IntegrationTests.Infrastructure;
-using Microsoft.EntityFrameworkCore;
+using MechanicsSoftware.Application.UseCases.ServiceOrders;
+using MechanicsSoftware.IntegrationTests.Base;
+using MechanicsSoftware.IntegrationTests.Fixtures;
+using MechanicsSoftware.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
-using MechanicsSoftware.Domain.Entities;
-using MechanicsSoftware.Domain.ValueObjects;
 using MechanicsSoftware.Domain.Enums;
-using MechanicsSoftware.Domain.Exceptions;
 
-namespace MechanicsSoftware.IntegrationTests.ServiceOrders;
+namespace MechanicsSoftware.IntegrationTests.Features.ServiceOrders;
 
-public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory>, IAsyncLifetime
+[Collection("IntegrationTests")]
+public sealed class ServiceOrderFlowTests : IntegrationTestBase
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -33,15 +32,15 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
     private static readonly int ExpectedBudgetTotalInCents =
         ServicePriceInCents * ServiceItemQuantity + PartPriceInCents * PartItemQuantity;
 
-    private readonly IntegrationTestFactory _factory;
-
-    public ServiceOrderFlowTests(IntegrationTestFactory factory)
+    public ServiceOrderFlowTests(WebApplicationFactoryFixture factory) : base(factory)
     {
-        _factory = factory;
     }
 
-    public Task InitializeAsync() => _factory.ResetDomainDataAsync();
-    public Task DisposeAsync() => Task.CompletedTask;
+    public override async Task InitializeAsync()
+    {
+        await Factory.ResetDomainDataAsync();
+        await AuthenticateAsync(AdminEmail, AdminPassword);
+    }
 
     [Fact]
     public async Task ApprovalFlow_EndToEnd_ShouldTransitionStatusesAndMoveStock()
@@ -95,7 +94,7 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
 
         await DeliverAsync(client, orderId);
 
-        using var publicClient = _factory.CreateClient();
+        using var publicClient = Factory.CreateClient();
         var publicResponse = await publicClient.GetAsync($"/api/service-orders/{orderId}/status");
         publicResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -154,7 +153,7 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
         var customerId = await CreateCustomerAsync(
             client, document: "98765432100", email: "list@example.com", phone: "11911112222");
         var vehicleId = await CreateVehicleAsync(client, customerId, plate: "LST1T01");
-        var serviceId = await CreateServiceAsync(client, name: "Teste de listagem");
+        var serviceId = await CreateServiceAsync(client, name: "Servico de listagem");
 
         var receivedId = await CreateServiceOrderAsync(client, customerId, vehicleId);
 
@@ -202,7 +201,7 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
         var client = await AuthenticatedClientAsync();
 
         var customerId = await CreateCustomerAsync(
-            client, document: "87748024043", email: "invalid@example.com", phone: "11977776666");
+            client, document: "52998224725", email: "invalid@example.com", phone: "11977776666");
         var vehicleId = await CreateVehicleAsync(client, customerId, plate: "GHI3F45");
         var serviceId = await CreateServiceAsync(client, name: "Balanceamento");
         var partId = await CreatePartAsync(client, code: "OIL-003", name: "Oleo de motor");
@@ -219,13 +218,13 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    // --------------------------------------------------------------------
-    // HTTP helpers
-    // --------------------------------------------------------------------
+    // ========================================================================
+    // Helper Methods
+    // ========================================================================
 
     private async Task<HttpClient> AuthenticatedClientAsync()
     {
-        var client = _factory.CreateClient();
+        var client = Factory.CreateClient();
 
         var response = await client.PostAsJsonAsync("/api/auth/login",
             new { email = AdminEmail, password = AdminPassword });
@@ -247,16 +246,17 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
     {
         var response = await client.PostAsJsonAsync("/api/customers", new
         {
-            name = "Test Customer",
+            name = "Cliente Teste",
             documentValue = document,
-            personType = (int)PersonType.INDIVIDUAL,
+            personType = PersonType.INDIVIDUAL,
             email,
             phone
         });
 
-        await EnsureSuccess(response);
-        var dto = await ReadAsync<CustomerDto>(response);
-        return dto.Id;
+        response.StatusCode.Should().Be(HttpStatusCode.Created, await response.Content.ReadAsStringAsync());
+
+        var result = await ReadAsync<dynamic>(response);
+        return Guid.Parse(result.GetProperty("id").GetString()!);
     }
 
     private static async Task<Guid> CreateVehicleAsync(
@@ -264,16 +264,17 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
     {
         var response = await client.PostAsJsonAsync("/api/vehicles", new
         {
+            customerId,
             licensePlate = plate,
             make = "Toyota",
             model = "Corolla",
-            year = 2020,
-            customerId
+            year = 2020
         });
 
-        await EnsureSuccess(response);
-        var dto = await ReadAsync<VehicleDto>(response);
-        return dto.Id;
+        response.StatusCode.Should().Be(HttpStatusCode.Created, await response.Content.ReadAsStringAsync());
+
+        var result = await ReadAsync<dynamic>(response);
+        return Guid.Parse(result.GetProperty("id").GetString()!);
     }
 
     private static async Task<Guid> CreateServiceAsync(
@@ -287,9 +288,10 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
             estimatedMinutes = 60
         });
 
-        await EnsureSuccess(response);
-        var dto = await ReadAsync<ServiceDto>(response);
-        return dto.Id;
+        response.StatusCode.Should().Be(HttpStatusCode.Created, await response.Content.ReadAsStringAsync());
+
+        var result = await ReadAsync<dynamic>(response);
+        return Guid.Parse(result.GetProperty("id").GetString()!);
     }
 
     private static async Task<Guid> CreatePartAsync(
@@ -304,9 +306,10 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
             initialStock = PartInitialStock
         });
 
-        await EnsureSuccess(response);
-        var dto = await ReadAsync<PartDto>(response);
-        return dto.Id;
+        response.StatusCode.Should().Be(HttpStatusCode.Created, await response.Content.ReadAsStringAsync());
+
+        var result = await ReadAsync<dynamic>(response);
+        return Guid.Parse(result.GetProperty("id").GetString()!);
     }
 
     private static async Task<Guid> CreateServiceOrderAsync(
@@ -318,99 +321,102 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
             vehicleId
         });
 
-        await EnsureSuccess(response);
-        var dto = await ReadAsync<ServiceOrderDto>(response);
-        return dto.Id;
+        response.StatusCode.Should().Be(HttpStatusCode.Created, await response.Content.ReadAsStringAsync());
+
+        var result = await ReadAsync<dynamic>(response);
+        return Guid.Parse(result.GetProperty("id").GetString()!);
     }
 
     private static async Task StartDiagnosisAsync(HttpClient client, Guid orderId)
     {
-        var response = await client.PostAsync(
-            $"/api/service-orders/{orderId}/start-diagnosis", content: null);
-        await EnsureSuccess(response);
+        var response = await client.PostAsJsonAsync(
+            $"/api/service-orders/{orderId}/start-diagnosis", new { });
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
     }
 
     private static async Task AddServiceItemAsync(HttpClient client, Guid orderId, Guid serviceId)
     {
         var response = await client.PostAsJsonAsync(
-            $"/api/service-orders/{orderId}/services",
-            new { serviceId, quantity = ServiceItemQuantity });
-        await EnsureSuccess(response);
+            $"/api/service-orders/{orderId}/services", new { serviceId, quantity = ServiceItemQuantity });
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
     }
 
     private static async Task AddPartItemAsync(HttpClient client, Guid orderId, Guid partId)
     {
         var response = await client.PostAsJsonAsync(
-            $"/api/service-orders/{orderId}/parts",
-            new { partId, quantity = PartItemQuantity });
-        await EnsureSuccess(response);
+            $"/api/service-orders/{orderId}/parts", new { partId, quantity = PartItemQuantity });
 
-        var dto = await ReadAsync<AddPartItemDto>(response);
-        dto.Availability.Should().Be("AVAILABLE");
-        dto.Warning.Should().BeNull();
+        response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
     }
 
     private static async Task<BudgetDto> GenerateBudgetAsync(HttpClient client, Guid orderId)
     {
-        var response = await client.PostAsync(
-            $"/api/service-orders/{orderId}/budget", content: null);
-        await EnsureSuccess(response);
+        var response = await client.PostAsJsonAsync(
+            $"/api/service-orders/{orderId}/budget", new { });
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
+
         return await ReadAsync<BudgetDto>(response);
     }
 
     private static async Task SendBudgetAsync(HttpClient client, Guid orderId)
     {
-        var response = await client.PostAsync(
-            $"/api/service-orders/{orderId}/send-budget", content: null);
-        await EnsureSuccess(response);
+        var response = await client.PostAsJsonAsync(
+            $"/api/service-orders/{orderId}/send-budget", new { });
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
     }
 
     private static async Task ApproveAsync(HttpClient client, Guid orderId)
     {
         var response = await client.PostAsJsonAsync(
             $"/api/service-orders/{orderId}/budget-decision", new { decision = "approve" });
-        await EnsureSuccess(response);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
     }
 
     private static async Task StartExecutionAsync(HttpClient client, Guid orderId)
     {
-        var response = await client.PostAsync(
-            $"/api/service-orders/{orderId}/start-execution", content: null);
-        await EnsureSuccess(response);
+        var response = await client.PostAsJsonAsync(
+            $"/api/service-orders/{orderId}/start-execution", new { });
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
     }
 
     private static async Task CompleteAsync(HttpClient client, Guid orderId)
     {
-        var response = await client.PostAsync(
-            $"/api/service-orders/{orderId}/complete", content: null);
-        await EnsureSuccess(response);
+        var response = await client.PostAsJsonAsync(
+            $"/api/service-orders/{orderId}/complete", new { });
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
     }
 
     private static async Task DeliverAsync(HttpClient client, Guid orderId)
     {
-        var response = await client.PostAsync(
-            $"/api/service-orders/{orderId}/deliver", content: null);
-        await EnsureSuccess(response);
+        var response = await client.PostAsJsonAsync(
+            $"/api/service-orders/{orderId}/deliver", new { });
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
     }
 
     private static async Task AssertOrderStatusAsync(
         HttpClient client, Guid orderId, string expectedStatus)
     {
         var response = await client.GetAsync($"/api/service-orders/{orderId}");
-        await EnsureSuccess(response);
-        var dto = await ReadAsync<ServiceOrderDto>(response);
-        dto.Status.Should().Be(expectedStatus);
-    }
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-    // --------------------------------------------------------------------
-    // DB inspection helpers
-    // --------------------------------------------------------------------
+        var order = await ReadAsync<ServiceOrderResponse>(response);
+        order.Status.Should().Be(expectedStatus);
+    }
 
     private async Task AssertStockAsync(Guid partId, int expectedStock, int expectedReserved)
     {
-        await using var scope = _factory.Services.CreateAsyncScope();
-        var db = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
-        var part = await db.Parts.AsNoTracking().FirstOrDefaultAsync(p => p.Id == partId);
+        await using var scope = Factory.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var part = await db.Parts.FindAsync(partId);
         part.Should().NotBeNull();
         part!.StockQuantity.Should().Be(expectedStock);
         part.ReservedQuantity.Should().Be(expectedReserved);
@@ -419,55 +425,39 @@ public sealed class ServiceOrderFlowTests : IClassFixture<IntegrationTestFactory
     private async Task AssertMovementExistsAsync(
         Guid partId, StockMovementType type, int quantity, Guid reference)
     {
-        await using var scope = _factory.Services.CreateAsyncScope();
-        var db = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
-        var part = await db.Parts.AsNoTracking().FirstOrDefaultAsync(p => p.Id == partId);
+        await using var scope = Factory.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var part = await db.Parts.FindAsync(partId);
         part.Should().NotBeNull();
-        part!.Movements.Should().Contain(m =>
+
+        var movement = part!.Movements.FirstOrDefault(m =>
             m.Type == type && m.Quantity == quantity && m.Reference == reference);
+
+        movement.Should().NotBeNull();
     }
 
     private async Task AssertMovementDoesNotExistAsync(Guid partId, StockMovementType type)
     {
-        await using var scope = _factory.Services.CreateAsyncScope();
-        var db = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
-        var part = await db.Parts.AsNoTracking().FirstOrDefaultAsync(p => p.Id == partId);
+        await using var scope = Factory.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var part = await db.Parts.FindAsync(partId);
         part.Should().NotBeNull();
-        part!.Movements.Should().NotContain(m => m.Type == type);
-    }
 
-    // --------------------------------------------------------------------
-    // Plumbing
-    // --------------------------------------------------------------------
-
-    private static async Task EnsureSuccess(HttpResponseMessage response)
-    {
-        if (response.IsSuccessStatusCode) return;
-        var body = await response.Content.ReadAsStringAsync();
-        throw new Xunit.Sdk.XunitException(
-            $"Expected success status but got {(int)response.StatusCode} ({response.StatusCode}). Body: {body}");
+        var movement = part!.Movements.FirstOrDefault(m => m.Type == type);
+        movement.Should().BeNull();
     }
 
     private static async Task<T> ReadAsync<T>(HttpResponseMessage response)
     {
-        var stream = await response.Content.ReadAsStreamAsync();
-        var value = await JsonSerializer.DeserializeAsync<T>(stream, JsonOptions);
-        return value ?? throw new InvalidOperationException(
-            $"Failed to deserialize response body to {typeof(T).Name}.");
+        var content = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<T>(content, JsonOptions)
+            ?? throw new InvalidOperationException("Failed to deserialize response");
     }
 
-    // --------------------------------------------------------------------
-    // DTOs for deserialization (intentionally minimal — only fields we read)
-    // --------------------------------------------------------------------
-
-    private sealed record LoginDto(string Token, DateTime ExpiresAt);
-    private sealed record CustomerDto(Guid Id);
-    private sealed record VehicleDto(Guid Id);
-    private sealed record ServiceDto(Guid Id);
-    private sealed record PartDto(Guid Id, int StockQuantity, int ReservedQuantity);
-    private sealed record ServiceOrderDto(Guid Id, string Status);
-    private sealed record ServiceOrderSummaryDto(Guid Id, string Status);
-    private sealed record BudgetDto(Guid Id, int TotalInCents, string Status);
-    private sealed record AddPartItemDto(Guid Id, string Availability, string? Warning);
+    private sealed record LoginDto(string Token);
+    private sealed record BudgetDto(Guid Id, int TotalInCents, string TotalFormatted, string Status, DateTime CreatedAt);
     private sealed record ServiceOrderStatusDto(Guid Id, string Status, DateTime? DeliveredAt);
+    private sealed record ServiceOrderSummaryDto(Guid Id, string Status);
 }

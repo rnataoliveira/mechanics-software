@@ -2,9 +2,8 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
 using MechanicsSoftware.API.Transport.Inventory;
-using MechanicsSoftware.Application.UseCases.Inventory.Handlers;
-using MechanicsSoftware.Application.UseCases.Inventory.Queries;
 using MechanicsSoftware.IntegrationTests.Base;
+using MechanicsSoftware.IntegrationTests.Fixtures;
 using MechanicsSoftware.IntegrationTests.Helpers;
 using MechanicsSoftware.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -12,8 +11,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MechanicsSoftware.IntegrationTests.Features.Inventory;
 
+[Collection("IntegrationTests")]
 public class InventoryIntegrationTests : IntegrationTestBase
 {
+    public InventoryIntegrationTests(WebApplicationFactoryFixture factory) : base(factory)
+    {
+    }
+
     public override async Task InitializeAsync()
     {
         await Factory.ResetDatabaseAsync();
