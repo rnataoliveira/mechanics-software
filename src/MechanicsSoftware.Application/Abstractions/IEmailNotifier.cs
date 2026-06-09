@@ -1,4 +1,5 @@
 namespace MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Domain.ValueObjects;
 
 public interface IEmailNotifier
 {
@@ -6,6 +7,6 @@ public interface IEmailNotifier
         string toEmail,
         string customerName,
         Guid serviceOrderId,
-        string newStatus,
+        ServiceOrderStatus.Status newStatus,
         CancellationToken cancellationToken = default);
 }
