@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mechanics-config
+  namespace: mechanics-software
+  labels:
+    app: mechanics-software
+data:
+  ASPNETCORE_ENVIRONMENT: "Production"
+  ASPNETCORE_URLS: "http://+:8080" # nosonar — TLS terminated at ingress; plain HTTP is correct for intra-cluster traffic
