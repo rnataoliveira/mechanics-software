@@ -63,7 +63,7 @@ public sealed class SmtpEmailNotifier : IEmailNotifier
         {
             Subject = subject,
             Body = body,
-            IsBodyHtml = false
+            IsBodyHtml = true
         };
 
         await client.SendMailAsync(message, cancellationToken);
@@ -77,16 +77,38 @@ public sealed class SmtpEmailNotifier : IEmailNotifier
         var statusLabel = new ServiceOrderStatus(newStatus).ToString();
 
         return $"""
-        Olá, {customerName}!
-
-        Sua Ordem de Serviço #{serviceOrderId} teve o status atualizado.
-
-        Novo status: {statusLabel}
-
-        Caso tenha dúvidas, entre em contato conosco.
-
-        Atenciosamente,
-        Equipe de Atendimento
-        """;
+            <!DOCTYPE html>
+            <html lang="pt-BR">
+            <head><meta charset="UTF-8" /></head>
+            <body style="font-family:Arial,sans-serif;background:#f4f4f4;padding:32px;">
+              <table width="600" cellpadding="0" cellspacing="0"
+                     style="background:#ffffff;border-radius:8px;padding:32px;margin:auto;">
+                <tr>
+                  <td>
+                    <h2 style="color:#1a1a1a;margin-top:0;">
+                      Atualização da sua Ordem de Serviço
+                    </h2>
+                    <p style="color:#333;">Olá, <strong>{customerName}</strong>!</p>
+                    <p style="color:#333;">
+                      Sua Ordem de Serviço <strong>#{serviceOrderId}</strong>
+                      teve o status atualizado.
+                    </p>
+                    <p style="background:#f0f4ff;border-left:4px solid #4f6ef7;
+                               padding:12px 16px;border-radius:4px;color:#1a1a1a;">
+                      Novo status: <strong>{statusLabel}</strong>
+                    </p>
+                    <p style="color:#555;font-size:14px;">
+                      Caso tenha dúvidas, entre em contato conosco.
+                    </p>
+                    <hr style="border:none;border-top:1px solid #eee;margin:24px 0;" />
+                    <p style="color:#999;font-size:12px;margin:0;">
+                      Equipe de Atendimento
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </body>
+            </html>
+            """;
     }
 }

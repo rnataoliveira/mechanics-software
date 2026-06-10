@@ -36,7 +36,7 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped<IJwtProvider, JwtProvider>();
         services.AddScoped<DatabaseSeeder>();
-        services.AddScoped<IEmailNotifier, SmtpEmailNotifier>();
+        services.AddSingleton<IEmailNotifier, SmtpEmailNotifier>();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
