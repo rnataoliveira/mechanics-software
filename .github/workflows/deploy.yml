@@ -6,6 +6,10 @@ on:
     types: [completed]
     branches: [main]
 
+env:
+  AWS_REGION: us-east-1
+  EKS_CLUSTER_NAME: mechanics-software
+
 jobs:
   build-and-push:
     name: Build & Push Docker image to GHCR
@@ -54,27 +58,27 @@ jobs:
       contents: read
 
     steps:
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede # v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Configure kubeconfig
-        env:
-          KUBECONFIG_B64: ${{ secrets.KUBECONFIG }}
-        run: echo "$KUBECONFIG_B64" | base64 -d > ${{ runner.temp }}/kubeconfig.yaml
+      - name: Update kubeconfig for EKS
+        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
 
       - name: Patch API deployment image
         run: |
           kubectl set image deployment/mechanics-software-api \
             api=ghcr.io/${{ github.repository }}:sha-${{ needs.build-and-push.outputs.sha_tag }} \
-            --namespace mechanics-software \
-            --kubeconfig ${{ runner.temp }}/kubeconfig.yaml
+            --namespace mechanics-software
 
       - name: Wait for migration initContainer to complete
         run: |
           kubectl rollout status deployment/mechanics-software-api \
             --namespace mechanics-software \
-            --timeout=180s \
-            --kubeconfig ${{ runner.temp }}/kubeconfig.yaml
+            --timeout=180s
 
   deploy:
     name: Apply K8s manifests
@@ -88,13 +92,26 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v6
 
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede # v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Configure kubeconfig
+      - name: Update kubeconfig for EKS
+        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+
+      - name: Render secrets manifest
         env:
-          KUBECONFIG_B64: ${{ secrets.KUBECONFIG }}
-        run: echo "$KUBECONFIG_B64" | base64 -d > ${{ runner.temp }}/kubeconfig.yaml
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+        run: envsubst < k8s/secret.yaml > /tmp/secret.rendered.yaml && cp /tmp/secret.rendered.yaml k8s/secret.yaml
 
       - name: Pin image tag in deployment manifest
         run: |
@@ -102,13 +119,10 @@ jobs:
             k8s/deployment-api.yaml
 
       - name: Apply all K8s manifests
-        run: |
-          kubectl apply -f k8s/ \
-            --kubeconfig ${{ runner.temp }}/kubeconfig.yaml
+        run: kubectl apply -f k8s/
 
       - name: Wait for rollout to complete
         run: |
           kubectl rollout status deployment/mechanics-software-api \
             --namespace mechanics-software \
-            --timeout=120s \
-            --kubeconfig ${{ runner.temp }}/kubeconfig.yaml
+            --timeout=120s
