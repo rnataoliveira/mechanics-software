@@ -34,7 +34,7 @@ public class RejectServiceOrderUseCaseTests
         db.ServiceOrders.Add(order);
         await db.SaveChangesAsync();
 
-        var result = await new RejectServiceOrderHandler(db).ExecuteAsync(order.Id);
+        var result = await new RejectServiceOrderHandler(db, HandlerStubs.EmailNotifier(), HandlerStubs.Logger<RejectServiceOrderHandler>()).ExecuteAsync(order.Id);
 
         result.Status.Should().Be("CANCELLED");
         result.Budget!.Status.Should().Be("REJECTED");
@@ -66,7 +66,7 @@ public class RejectServiceOrderUseCaseTests
         db.Setup(d => d.Parts).Returns(mockParts.Object);
         db.Setup(d => d.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
 
-        await new RejectServiceOrderHandler(db.Object).ExecuteAsync(orderWithPart.Id);
+        await new RejectServiceOrderHandler(db.Object, HandlerStubs.EmailNotifier(), HandlerStubs.Logger<RejectServiceOrderHandler>()).ExecuteAsync(orderWithPart.Id);
 
         part.AvailableQuantity.Should().Be(10); // reservation released: reserved 0, stock 10
     }
@@ -76,7 +76,7 @@ public class RejectServiceOrderUseCaseTests
     {
         await using var db = InMemoryDbContextHelper.Create();
 
-        var act = async () => await new RejectServiceOrderHandler(db).ExecuteAsync(Guid.NewGuid());
+        var act = async () => await new RejectServiceOrderHandler(db, HandlerStubs.EmailNotifier(), HandlerStubs.Logger<RejectServiceOrderHandler>()).ExecuteAsync(Guid.NewGuid());
 
         await act.Should().ThrowAsync<NotFoundException>();
     }
@@ -89,7 +89,7 @@ public class RejectServiceOrderUseCaseTests
         db.ServiceOrders.Add(order);
         await db.SaveChangesAsync();
 
-        var act = async () => await new RejectServiceOrderHandler(db).ExecuteAsync(order.Id);
+        var act = async () => await new RejectServiceOrderHandler(db, HandlerStubs.EmailNotifier(), HandlerStubs.Logger<RejectServiceOrderHandler>()).ExecuteAsync(order.Id);
 
         await act.Should().ThrowAsync<DomainException>();
     }

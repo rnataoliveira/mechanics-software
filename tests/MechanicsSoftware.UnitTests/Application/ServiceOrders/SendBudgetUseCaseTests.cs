@@ -31,7 +31,7 @@ public class SendBudgetUseCaseTests
         db.ServiceOrders.Add(order);
         await db.SaveChangesAsync();
 
-        var result = await new SendBudgetHandler(db).ExecuteAsync(order.Id);
+        var result = await new SendBudgetHandler(db, HandlerStubs.EmailNotifier(), HandlerStubs.Logger<SendBudgetHandler>()).ExecuteAsync(order.Id);
 
         result.Status.Should().Be("AWAITING_APPROVAL");
     }
@@ -41,7 +41,7 @@ public class SendBudgetUseCaseTests
     {
         await using var db = InMemoryDbContextHelper.Create();
 
-        var act = async () => await new SendBudgetHandler(db).ExecuteAsync(Guid.NewGuid());
+        var act = async () => await new SendBudgetHandler(db, HandlerStubs.EmailNotifier(), HandlerStubs.Logger<SendBudgetHandler>()).ExecuteAsync(Guid.NewGuid());
 
         await act.Should().ThrowAsync<NotFoundException>();
     }
@@ -55,7 +55,7 @@ public class SendBudgetUseCaseTests
         db.ServiceOrders.Add(order);
         await db.SaveChangesAsync();
 
-        var act = async () => await new SendBudgetHandler(db).ExecuteAsync(order.Id);
+        var act = async () => await new SendBudgetHandler(db, HandlerStubs.EmailNotifier(), HandlerStubs.Logger<SendBudgetHandler>()).ExecuteAsync(order.Id);
 
         await act.Should().ThrowAsync<DomainException>();
     }

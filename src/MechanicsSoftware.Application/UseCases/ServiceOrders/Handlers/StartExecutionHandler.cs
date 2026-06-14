@@ -15,16 +15,16 @@ public sealed class StartExecutionHandler(IAppDbContext db, IEmailNotifier email
 
         order.StartExecution();
         
-        var costumer = await db.Customers.FindAsync([order.CustomerId], cancellationToken)
-            ?? throw new NotFoundException(nameof(Customer), order.CustomerId);
-
         await db.SaveChangesAsync(cancellationToken);
 
         try
         {
+            var customer = await db.Customers.FindAsync([order.CustomerId], cancellationToken)
+                ?? throw new NotFoundException(nameof(Customer), order.CustomerId);
+
             await emailNotifier.SendStatusChangedAsync(
-                toEmail: costumer.Email.Value,
-                customerName: costumer.Name,
+                toEmail: customer.Email.Value,
+                customerName: customer.Name,
                 serviceOrderId: order.Id,
                 newStatus: order.Status.Value,
                 cancellationToken: cancellationToken);

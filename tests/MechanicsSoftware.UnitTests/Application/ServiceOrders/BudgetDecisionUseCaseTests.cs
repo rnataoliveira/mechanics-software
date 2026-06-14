@@ -20,7 +20,9 @@ public class BudgetDecisionHandlerTests
 
     private static BudgetDecisionHandler BuildHandler(
         MechanicsSoftware.Infrastructure.Persistence.AppDbContext db) =>
-        new(new ApproveServiceOrderHandler(db), new RejectServiceOrderHandler(db));
+        new(
+            new ApproveServiceOrderHandler(db, HandlerStubs.EmailNotifier(), HandlerStubs.Logger<ApproveServiceOrderHandler>()),
+            new RejectServiceOrderHandler(db, HandlerStubs.EmailNotifier(), HandlerStubs.Logger<RejectServiceOrderHandler>()));
 
     [Fact]
     public async Task ExecuteAsync_ApproveDecision_TransitionsToInExecution()
