@@ -1,9 +1,14 @@
-output "kubeconfig_path" {
-  description = "Path to the generated kubeconfig file"
-  value       = module.kubernetes.kubeconfig_path
+output "cluster_name" {
+  description = "EKS cluster name"
+  value       = module.kubernetes.cluster_name
 }
 
-output "db_host" {
-  description = "Database service host within the cluster"
-  value       = module.database.db_host
+output "cluster_region" {
+  description = "AWS region"
+  value       = var.aws_region
+}
+
+output "kubeconfig_command" {
+  description = "Command to update local kubeconfig"
+  value       = "aws eks update-kubeconfig --name ${module.kubernetes.cluster_name} --region ${var.aws_region}"
 }

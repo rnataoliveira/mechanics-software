@@ -1,14 +1,14 @@
 using System.Net;
 using FluentAssertions;
-using MechanicsSoftware.IntegrationTests.Infrastructure;
+using MechanicsSoftware.IntegrationTests.Fixtures;
 
 namespace MechanicsSoftware.IntegrationTests.Features.Health;
 
-public sealed class HealthEndpointTests : IClassFixture<IntegrationTestFactory>
+public sealed class HealthEndpointTests : IClassFixture<WebApplicationFactoryFixture>
 {
-    private readonly IntegrationTestFactory _factory;
+    private readonly WebApplicationFactoryFixture _factory;
 
-    public HealthEndpointTests(IntegrationTestFactory factory)
+    public HealthEndpointTests(WebApplicationFactoryFixture factory)
     {
         _factory = factory;
     }
