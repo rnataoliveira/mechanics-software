@@ -31,7 +31,7 @@ public sealed class StartExecutionHandler(IAppDbContext db, IEmailNotifier email
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to send status e-mail for ServiceOrder {ServiceOrderId}.", order.Id);
+            logger.FailedToSendStatusEmail(ex, order.Id);
         }
 
         return ServiceOrderResponse.From(order);

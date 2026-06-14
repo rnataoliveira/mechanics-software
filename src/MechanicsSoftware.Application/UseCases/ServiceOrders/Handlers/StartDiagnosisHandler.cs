@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MechanicsSoftware.Application.UseCases.ServiceOrders.Handlers;
 
-public sealed class StartDiagnosisHandler(IAppDbContext db, IEmailNotifier emailNotifier, ILogger<StartExecutionHandler> logger)
+public sealed class StartDiagnosisHandler(IAppDbContext db, IEmailNotifier emailNotifier, ILogger<StartDiagnosisHandler> logger)
 {
     public async Task<ServiceOrderResponse> ExecuteAsync(
         Guid serviceOrderId, CancellationToken cancellationToken = default)
@@ -30,7 +30,7 @@ public sealed class StartDiagnosisHandler(IAppDbContext db, IEmailNotifier email
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to send status e-mail for ServiceOrder {ServiceOrderId}.", order.Id);
+            logger.FailedToSendStatusEmail(ex, order.Id);
         }
 
         return ServiceOrderResponse.From(order);

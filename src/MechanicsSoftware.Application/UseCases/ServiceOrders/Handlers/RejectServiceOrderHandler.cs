@@ -6,7 +6,7 @@ using MechanicsSoftware.Domain.Enums;
 
 namespace MechanicsSoftware.Application.UseCases.ServiceOrders.Handlers;
 
-public sealed class RejectServiceOrderHandler(IAppDbContext db, IEmailNotifier emailNotifier, ILogger<StartExecutionHandler> logger)
+public sealed class RejectServiceOrderHandler(IAppDbContext db, IEmailNotifier emailNotifier, ILogger<RejectServiceOrderHandler> logger)
 {
     public async Task<ServiceOrderResponse> ExecuteAsync(
         Guid serviceOrderId, CancellationToken cancellationToken = default)
@@ -42,7 +42,7 @@ public sealed class RejectServiceOrderHandler(IAppDbContext db, IEmailNotifier e
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to send status e-mail for ServiceOrder {ServiceOrderId}.", order.Id);
+            logger.FailedToSendStatusEmail(ex, order.Id);
         }
 
         return ServiceOrderResponse.From(order);
