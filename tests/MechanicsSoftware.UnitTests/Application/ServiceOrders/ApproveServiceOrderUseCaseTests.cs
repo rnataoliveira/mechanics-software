@@ -32,7 +32,7 @@ public class ApproveServiceOrderUseCaseTests
         db.ServiceOrders.Add(order);
         await db.SaveChangesAsync();
 
-        var result = await new ApproveServiceOrderHandler(db).ExecuteAsync(order.Id);
+        var result = await new ApproveServiceOrderHandler(db, HandlerStubs.EmailNotifier(), HandlerStubs.Logger<ApproveServiceOrderHandler>()).ExecuteAsync(order.Id);
 
         result.Status.Should().Be("IN_EXECUTION");
         result.Budget!.Status.Should().Be("APPROVED");
@@ -43,7 +43,7 @@ public class ApproveServiceOrderUseCaseTests
     {
         await using var db = InMemoryDbContextHelper.Create();
 
-        var act = async () => await new ApproveServiceOrderHandler(db).ExecuteAsync(Guid.NewGuid());
+        var act = async () => await new ApproveServiceOrderHandler(db, HandlerStubs.EmailNotifier(), HandlerStubs.Logger<ApproveServiceOrderHandler>()).ExecuteAsync(Guid.NewGuid());
 
         await act.Should().ThrowAsync<NotFoundException>();
     }
@@ -56,7 +56,7 @@ public class ApproveServiceOrderUseCaseTests
         db.ServiceOrders.Add(order);
         await db.SaveChangesAsync();
 
-        var act = async () => await new ApproveServiceOrderHandler(db).ExecuteAsync(order.Id);
+        var act = async () => await new ApproveServiceOrderHandler(db, HandlerStubs.EmailNotifier(), HandlerStubs.Logger<ApproveServiceOrderHandler>()).ExecuteAsync(order.Id);
 
         await act.Should().ThrowAsync<DomainException>();
     }

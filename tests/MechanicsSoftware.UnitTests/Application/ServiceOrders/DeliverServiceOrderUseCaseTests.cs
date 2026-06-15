@@ -34,7 +34,7 @@ public class DeliverServiceOrderUseCaseTests
         db.ServiceOrders.Add(order);
         await db.SaveChangesAsync();
 
-        var result = await new DeliverServiceOrderHandler(db).ExecuteAsync(order.Id);
+        var result = await new DeliverServiceOrderHandler(db, HandlerStubs.EmailNotifier(), HandlerStubs.Logger<DeliverServiceOrderHandler>()).ExecuteAsync(order.Id);
 
         result.Status.Should().Be("DELIVERED");
     }
@@ -44,7 +44,7 @@ public class DeliverServiceOrderUseCaseTests
     {
         await using var db = InMemoryDbContextHelper.Create();
 
-        var act = async () => await new DeliverServiceOrderHandler(db).ExecuteAsync(Guid.NewGuid());
+        var act = async () => await new DeliverServiceOrderHandler(db, HandlerStubs.EmailNotifier(), HandlerStubs.Logger<DeliverServiceOrderHandler>()).ExecuteAsync(Guid.NewGuid());
 
         await act.Should().ThrowAsync<NotFoundException>();
     }
@@ -57,7 +57,7 @@ public class DeliverServiceOrderUseCaseTests
         db.ServiceOrders.Add(order);
         await db.SaveChangesAsync();
 
-        var act = async () => await new DeliverServiceOrderHandler(db).ExecuteAsync(order.Id);
+        var act = async () => await new DeliverServiceOrderHandler(db, HandlerStubs.EmailNotifier(), HandlerStubs.Logger<DeliverServiceOrderHandler>()).ExecuteAsync(order.Id);
 
         await act.Should().ThrowAsync<DomainException>();
     }

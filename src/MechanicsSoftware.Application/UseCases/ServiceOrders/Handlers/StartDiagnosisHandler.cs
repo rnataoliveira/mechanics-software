@@ -1,8 +1,9 @@
 using MechanicsSoftware.Application.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace MechanicsSoftware.Application.UseCases.ServiceOrders.Handlers;
 
-public sealed class StartDiagnosisHandler(IAppDbContext db)
+public sealed class StartDiagnosisHandler(IAppDbContext db, IEmailNotifier emailNotifier, ILogger<StartDiagnosisHandler> logger)
 {
     public async Task<ServiceOrderResponse> ExecuteAsync(
         Guid serviceOrderId, CancellationToken cancellationToken = default)
@@ -12,6 +13,8 @@ public sealed class StartDiagnosisHandler(IAppDbContext db)
         order.StartDiagnosis();
 
         await db.SaveChangesAsync(cancellationToken);
+
+        await emailNotifier.TrySendStatusEmailAsync(db, logger, order, cancellationToken);
 
         return ServiceOrderResponse.From(order);
     }

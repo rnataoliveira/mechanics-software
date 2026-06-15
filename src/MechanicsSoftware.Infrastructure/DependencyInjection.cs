@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using MechanicsSoftware.Application.Abstractions;
+using MechanicsSoftware.Infrastructure.Notifications;
 using MechanicsSoftware.Infrastructure.Persistence;
 using MechanicsSoftware.Infrastructure.Persistence.SQL;
 using MechanicsSoftware.Infrastructure.Security;
@@ -35,6 +36,7 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped<IJwtProvider, JwtProvider>();
         services.AddScoped<DatabaseSeeder>();
+        services.AddSingleton<IEmailNotifier, SmtpEmailNotifier>();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

@@ -2,10 +2,11 @@ using MechanicsSoftware.Application.Abstractions;
 using MechanicsSoftware.Application.Exceptions;
 using MechanicsSoftware.Domain.Entities;
 using MechanicsSoftware.Domain.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace MechanicsSoftware.Application.UseCases.ServiceOrders.Handlers;
 
-public sealed class RejectServiceOrderHandler(IAppDbContext db)
+public sealed class RejectServiceOrderHandler(IAppDbContext db, IEmailNotifier emailNotifier, ILogger<RejectServiceOrderHandler> logger)
 {
     public async Task<ServiceOrderResponse> ExecuteAsync(
         Guid serviceOrderId, CancellationToken cancellationToken = default)
@@ -26,6 +27,8 @@ public sealed class RejectServiceOrderHandler(IAppDbContext db)
         }
 
         await db.SaveChangesAsync(cancellationToken);
+
+        await emailNotifier.TrySendStatusEmailAsync(db, logger, order, cancellationToken);
 
         return ServiceOrderResponse.From(order);
     }
