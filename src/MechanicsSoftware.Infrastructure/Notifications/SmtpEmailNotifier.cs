@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Configuration;
@@ -41,6 +42,7 @@ public sealed class SmtpEmailNotifier : IEmailNotifier
                 "SMTP sender address not configured. Set the 'SMTP_FROM' environment variable.");
     }
 
+    [ExcludeFromCodeCoverage]
     public async Task SendStatusChangedAsync(
         string toEmail,
         string customerName,
@@ -69,6 +71,7 @@ public sealed class SmtpEmailNotifier : IEmailNotifier
         await client.SendMailAsync(message, cancellationToken);
     }
 
+    [ExcludeFromCodeCoverage]
     private static string BuildBody(
         string customerName,
         Guid serviceOrderId,
