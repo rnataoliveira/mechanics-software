@@ -49,6 +49,11 @@ public sealed class WebApplicationFactoryFixture : WebApplicationFactory<Program
 
         Environment.SetEnvironmentVariable("JWT_SECRET", _jwtSecret);
         Environment.SetEnvironmentVariable("JWT_EXPIRATION_MINUTES", "60");
+        Environment.SetEnvironmentVariable("SMTP_HOST", "localhost");
+        Environment.SetEnvironmentVariable("SMTP_PORT", "1025");
+        Environment.SetEnvironmentVariable("SMTP_USER", "test@example.com");
+        Environment.SetEnvironmentVariable("SMTP_PASS", "test-password");
+        Environment.SetEnvironmentVariable("SMTP_FROM", "noreply@mechanics-software.test");
     }
 
     public async Task ResetDatabaseAsync()
