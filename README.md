@@ -1,13 +1,14 @@
 # Mechanics Software
 
-Backend system for a mechanic shop — built as the Phase 1 Tech Challenge for FIAP POS Tech (15SOAT).
+Backend system for a mechanic shop — built as the Tech Challenge for FIAP POS Tech (15SOAT), covering Phase 1 and Phase 2.
 
 ## Overview
 
-A RESTful API that manages the full lifecycle of service orders, customers, vehicles, parts, and inventory for a medium-sized auto repair shop.
+A RESTful API that manages the full lifecycle of service orders, customers, vehicles, parts, and inventory for a medium-sized auto repair shop. On every service order status change, the customer receives an automatic email notification.
 
-**Architecture:** Vertical Slice Architecture + DDD Domain
-**Stack:** C# 12 · ASP.NET Core 8 · PostgreSQL 16 · Entity Framework Core 9
+**Architecture:** Clean Architecture + DDD Domain  
+**Stack:** C# 12 · ASP.NET Core 8 · PostgreSQL 16 · Entity Framework Core 8  
+**Infra:** Docker · Kubernetes (AWS EKS) · Terraform  
 **Docs:** [`/docs`](./docs)
 
 ---
@@ -86,16 +87,38 @@ All protected endpoints will now work.
 
 ---
 
-### Environment variables
+## Environment Variables
 
 | Variable | Required | Description | Default |
 |---|---|---|---|
-| `JWT_SECRET` | **Yes** (production) | Secret key for JWT signing (min 32 chars) | pre-configured in `appsettings.Development.json` for local dev |
+| `JWT_SECRET` | **Yes** (production) | Secret key for JWT signing (min 32 chars) | pre-configured in `appsettings.Development.json` |
 | `DATABASE_URL` | No | PostgreSQL connection string | see `appsettings.Development.json` |
-| `JWT_EXPIRATION_MINUTES` | No | Token expiration time in minutes | `60` |
+| `JWT_EXPIRATION_MINUTES` | No | Token expiration in minutes | `60` |
 | `BCRYPT_SALT_ROUNDS` | No | BCrypt cost factor | `12` |
 | `SEED_ADMIN_EMAIL` | No | Default admin email | `admin@mechanics.local` |
 | `SEED_ADMIN_PASSWORD` | No | Default admin password | `Admin@123` |
+| `SMTP_HOST` | **Yes** (production) | SMTP server hostname | — |
+| `SMTP_PORT` | **Yes** (production) | SMTP server port (e.g. `587`) | — |
+| `SMTP_USER` | **Yes** (production) | SMTP username | — |
+| `SMTP_PASS` | **Yes** (production) | SMTP password | — |
+| `SMTP_FROM` | **Yes** (production) | Sender address for notification emails | — |
+
+---
+
+## Email Notifications
+
+Every service order status change triggers an automatic email to the customer. The email is sent by `SmtpEmailNotifier` (Infrastructure layer), which implements the `IEmailNotifier` abstraction defined in the Application layer.
+
+Notifications are sent on the following transitions:
+
+| Transition | Handler |
+|---|---|
+| RECEIVED → IN_DIAGNOSIS | `StartDiagnosisHandler` |
+| IN_DIAGNOSIS → AWAITING_APPROVAL | `SendBudgetHandler` |
+| AWAITING_APPROVAL → IN_EXECUTION | `ApproveServiceOrderHandler` |
+| AWAITING_APPROVAL → CANCELLED | `RejectServiceOrderHandler` |
+| IN_EXECUTION → COMPLETED | `CompleteServiceOrderHandler` |
+| COMPLETED → DELIVERED | `DeliverServiceOrderHandler` |
 
 ---
 
@@ -138,6 +161,7 @@ dotnet dotnet-ef migrations remove \
 |---|---|---|
 | `POST` | `/api/auth/login` | Authenticate and receive JWT |
 | `GET` | `/api/service-orders/{id}/status` | Check service order status (for customers) |
+| `GET` | `/health` | Liveness/readiness probe |
 
 ### Protected endpoints (JWT required)
 
@@ -167,17 +191,90 @@ RECEIVED → IN_DIAGNOSIS → AWAITING_APPROVAL → IN_EXECUTION → COMPLETED �
 
 ```
 src/
-  MechanicsSoftware.Domain/        # Entities, value objects, business rules
-  MechanicsSoftware.Application/   # Use cases organized by feature (VSA)
-  MechanicsSoftware.Infrastructure/ # EF Core, JWT, BCrypt
-  MechanicsSoftware.API/           # Controllers, middleware, Swagger
+  MechanicsSoftware.Domain/          # Entities, value objects, domain rules (innermost layer)
+  MechanicsSoftware.Application/     # Use cases, command/query handlers, abstractions (IEmailNotifier, IAppDbContext)
+  MechanicsSoftware.Infrastructure/  # EF Core, JWT, BCrypt, SmtpEmailNotifier
+  MechanicsSoftware.API/             # Controllers, middleware, Swagger, DI composition root
 
 tests/
-  MechanicsSoftware.UnitTests/
-  MechanicsSoftware.IntegrationTests/
+  MechanicsSoftware.UnitTests/       # Domain + Application + Infrastructure unit tests
+  MechanicsSoftware.IntegrationTests/ # Full HTTP integration tests (WebApplicationFactory)
+
+k8s/                                 # Kubernetes manifests (AWS EKS)
+infra/                               # Terraform IaC (VPC + EKS cluster)
 ```
 
 See [`docs/architecture/overview.md`](./docs/architecture/overview.md) for full details.
+
+---
+
+## Kubernetes
+
+Manifests live in `k8s/` and target an AWS EKS cluster provisioned by Terraform.
+
+| File | Purpose |
+|---|---|
+| `namespace.yaml` | Dedicated namespace |
+| `configmap.yaml` | Non-secret configuration |
+| `secret.yaml` | JWT secret, DB credentials, SMTP credentials |
+| `deployment-api.yaml` | API deployment (runs EF migrations via initContainer) |
+| `deployment-db.yaml` | PostgreSQL deployment |
+| `service-api.yaml` | LoadBalancer service for the API |
+| `service-db.yaml` | ClusterIP service for PostgreSQL |
+| `pvc.yaml` | Persistent volume claim for PostgreSQL data |
+| `hpa.yaml` | Horizontal Pod Autoscaler |
+
+### Apply manually
+
+```bash
+kubectl apply -f k8s/
+```
+
+---
+
+## Terraform
+
+Infrastructure is defined in `infra/` using the `terraform-aws-modules/eks/aws` and `terraform-aws-modules/vpc/aws` modules.
+
+```bash
+cd infra
+terraform init
+terraform plan
+terraform apply
+```
+
+See [`infra/README.md`](./infra/README.md) for variable descriptions and prerequisites.
+
+---
+
+## CI/CD Pipeline
+
+Two GitHub Actions workflows run on every push/PR to `main`:
+
+| Workflow | File | What it does |
+|---|---|---|
+| Coverage Report | `.github/workflows/coverage.yml` | Builds, runs unit tests, enforces 80% line coverage, publishes HTML report to GitHub Pages |
+| Deploy | `.github/workflows/deploy.yml` | Builds & pushes Docker image to GHCR, runs EF Core migrations via initContainer, applies K8s manifests to EKS |
+
+Coverage report: [rnataoliveira.github.io/mechanics-software](https://rnataoliveira.github.io/mechanics-software/)
+
+---
+
+## Running Tests
+
+```bash
+# Unit tests
+dotnet test tests/MechanicsSoftware.UnitTests
+
+# Unit tests with coverage report
+dotnet test tests/MechanicsSoftware.UnitTests \
+  --collect:"XPlat Code Coverage" \
+  --settings coverlet.runsettings \
+  --results-directory ./coverage-results
+
+# Integration tests (requires Docker — starts PostgreSQL automatically)
+dotnet test tests/MechanicsSoftware.IntegrationTests
+```
 
 ---
 
@@ -194,23 +291,8 @@ See [`docs/architecture/overview.md`](./docs/architecture/overview.md) for full 
 | ADR-002 Architecture | [`docs/decisions/ADR-002-architecture.md`](./docs/decisions/ADR-002-architecture.md) |
 | ADR-003 Database | [`docs/decisions/ADR-003-database.md`](./docs/decisions/ADR-003-database.md) |
 | ADR-004 Application Layer | [`docs/decisions/ADR-004-application-layer-conventions.md`](./docs/decisions/ADR-004-application-layer-conventions.md) |
-
----
-
-## Running Tests
-
-```bash
-# Unit tests
-dotnet test tests/MechanicsSoftware.UnitTests
-
-# Unit tests with coverage report
-dotnet test tests/MechanicsSoftware.UnitTests \
-  --collect:"XPlat Code Coverage" \
-  --settings coverlet.runsettings \
-  --results-directory ./coverage-results
-```
-
-Coverage report (HTML): [rnataoliveira.github.io/mechanics-software](https://rnataoliveira.github.io/mechanics-software/)
+| ADR-005 Clean Architecture Migration | [`docs/decisions/ADR-005-clean-architecture-migration.md`](./docs/decisions/ADR-005-clean-architecture-migration.md) |
+| ADR-006 Database Migration Strategy | [`docs/decisions/ADR-006-database-migration-strategy.md`](./docs/decisions/ADR-006-database-migration-strategy.md) |
 
 ---
 
