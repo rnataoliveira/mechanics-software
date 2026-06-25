@@ -14,7 +14,7 @@ COPY src/ src/
 RUN dotnet publish src/MechanicsSoftware.API/MechanicsSoftware.API.csproj \
     -c Release -o /app/publish --no-restore
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy-chiseled AS runtime
 WORKDIR /app
 EXPOSE 8080
 COPY --from=build /app/publish .
