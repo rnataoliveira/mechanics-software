@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<title>Deliverables — Tech Challenge Phase 1</title>
+<title>Deliverables — Tech Challenge FIAP POS Tech 15SOAT</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -10,7 +10,7 @@
     font-size: 13px;
     line-height: 1.6;
     color: #1a1a1a;
-    max-width: 800px;
+    max-width: 860px;
     margin: 0 auto;
     padding: 40px 40px;
   }
@@ -30,14 +30,19 @@
   pre { background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 5px;
         padding: 12px 14px; font-size: 11.5px; white-space: pre-wrap; margin: 10px 0; }
   a { color: #0969da; }
-  .badge-ok  { display:inline-block; background:#2ea44f; color:#fff;
-               padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600; }
+  .badge-ok      { display:inline-block; background:#2ea44f; color:#fff;
+                   padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600; }
   .badge-pending { display:inline-block; background:#bf8700; color:#fff;
-               padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600; }
-  .badge-high { display:inline-block; background:#d73a49; color:#fff;
-               padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600; }
-  .section-header { background:#0d1117; color:#fff; padding:6px 10px;
-                    border-radius:4px; margin-bottom: 10px; font-weight:700; font-size:13px; }
+                   padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600; }
+  .badge-high    { display:inline-block; background:#d73a49; color:#fff;
+                   padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600; }
+  .phase-banner {
+    background: #0d1117; color: #fff;
+    padding: 8px 14px; border-radius: 6px;
+    margin: 24px 0 14px; font-weight: 700; font-size: 14px;
+    letter-spacing: 0.03em;
+  }
+  .phase-banner.fase2 { background: #0969da; }
   @media print {
     body { padding: 20px 30px; }
     a { color: #0969da; text-decoration: none; }
@@ -46,13 +51,10 @@
 </head>
 <body>
 
-<h1>Deliverables — Tech Challenge Phase 1</h1>
-<p class="subtitle">FIAP POS Tech &nbsp;·&nbsp; 15SOAT &nbsp;·&nbsp; Fase 1</p>
+<h1>Deliverables — Tech Challenge FIAP POS Tech 15SOAT</h1>
+<p class="subtitle">Grupo TorqueOS</p>
 
 <hr>
-
-<h2>Group</h2>
-<p><strong>Name:</strong> TorqueOS</p>
 
 <h2>Participants</h2>
 <table>
@@ -68,9 +70,13 @@
 
 <hr>
 
-<h2>Links</h2>
+<!-- ======================== FASE 2 ======================== -->
+
+<div class="phase-banner fase2">Fase 2</div>
+
+<h2>Fase 2 — Links</h2>
 <table>
-  <thead><tr><th>Deliverable</th><th>Link</th><th>Status</th></tr></thead>
+  <thead><tr><th>Deliverable</th><th>Link / Location</th><th>Status</th></tr></thead>
   <tbody>
     <tr>
       <td>Repository</td>
@@ -78,13 +84,18 @@
       <td><span class="badge-ok">ready</span></td>
     </tr>
     <tr>
-      <td>DDD Documentation</td>
-      <td><a href="https://miro.com/app/board/uXjVGyCZXBU=/">miro.com/app/board/uXjVGyCZXBU=/</a></td>
+      <td>Demo Video — Fase 2</td>
+      <td>—</td>
+      <td><span class="badge-pending">pending</span></td>
+    </tr>
+    <tr>
+      <td>Postman Collection</td>
+      <td><code>MechanicsSoftware.postman_collection.json</code> (repo root)</td>
       <td><span class="badge-ok">ready</span></td>
     </tr>
     <tr>
-      <td>Demo Video</td>
-      <td><a href="https://youtu.be/vqERT_zrLpo">YouTube</a> · <a href="https://drive.google.com/drive/folders/1oj1IXAMRfgA8g7ux_z_ZEq06ieYLf0PZ?usp=sharing">Google Drive (fallback)</a></td>
+      <td>Swagger UI</td>
+      <td><a href="https://rnataoliveira.github.io/mechanics-software/">rnataoliveira.github.io/mechanics-software/</a> · <code>/swagger</code> when running</td>
       <td><span class="badge-ok">ready</span></td>
     </tr>
     <tr>
@@ -99,22 +110,139 @@
     </tr>
     <tr>
       <td>Static Analysis (SonarCloud)</td>
-      <td><a href="https://sonarcloud.io/summary/new_code?id=rnataoliveira_mechanics-software">sonarcloud.io/summary/new_code?id=rnataoliveira_mechanics-software</a></td>
+      <td><a href="https://sonarcloud.io/summary/new_code?id=rnataoliveira_mechanics-software">sonarcloud.io — rnataoliveira_mechanics-software</a></td>
       <td><span class="badge-ok">ready</span></td>
     </tr>
   </tbody>
 </table>
 
+<h2>Fase 2 — Architecture Refactor</h2>
+<p>
+  The project was migrated from Vertical Slice Architecture to
+  <strong>Clean Architecture + DDD Domain</strong>.
+  Layers: Domain (innermost) → Application (use cases, abstractions) → Infrastructure (EF Core, SMTP, JWT) → API (controllers, Swagger).
+</p>
+<p>See <a href="docs/decisions/ADR-005-clean-architecture-migration.md">ADR-005</a> for the decision record.</p>
+
+<h2>Fase 2 — Email Notifications</h2>
+<p>
+  Every service order status transition triggers an automatic email to the customer.
+  The <code>IEmailNotifier</code> abstraction (Application layer) is implemented by
+  <code>SmtpEmailNotifier</code> (Infrastructure layer) and injected into all 7 status-change handlers.
+</p>
+<table>
+  <thead><tr><th>Transition</th><th>Handler</th></tr></thead>
+  <tbody>
+    <tr><td>RECEIVED → IN_DIAGNOSIS</td><td><code>StartDiagnosisHandler</code></td></tr>
+    <tr><td>IN_DIAGNOSIS → AWAITING_APPROVAL</td><td><code>SendBudgetHandler</code></td></tr>
+    <tr><td>AWAITING_APPROVAL → IN_EXECUTION</td><td><code>ApproveServiceOrderHandler</code></td></tr>
+    <tr><td>AWAITING_APPROVAL → CANCELLED</td><td><code>RejectServiceOrderHandler</code></td></tr>
+    <tr><td>IN_EXECUTION → COMPLETED</td><td><code>CompleteServiceOrderHandler</code></td></tr>
+    <tr><td>COMPLETED → DELIVERED</td><td><code>DeliverServiceOrderHandler</code></td></tr>
+  </tbody>
+</table>
+
+<h2>Fase 2 — New Endpoints</h2>
+<table>
+  <thead><tr><th>Endpoint</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>GET /api/service-orders</code> (enhanced)</td><td>List active service orders with priority ordering and filters (F2-01)</td></tr>
+    <tr><td><code>POST /api/service-orders/{id}/budget-decision</code></td><td>Unified approve/reject budget in a single call (F2-02)</td></tr>
+    <tr><td><code>GET /health</code></td><td>Liveness/readiness probe for Kubernetes</td></tr>
+    <tr><td><code>GET /api/service-orders/metrics/average-execution-time</code></td><td>Average execution time metric</td></tr>
+  </tbody>
+</table>
+
+<h2>Fase 2 — Kubernetes (AWS EKS)</h2>
+<p>Manifests in <code>k8s/</code>, targeting an AWS EKS cluster provisioned by Terraform.</p>
+<table>
+  <thead><tr><th>File</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>namespace.yaml</code></td><td>Dedicated namespace</td></tr>
+    <tr><td><code>configmap.yaml</code></td><td>Non-secret configuration</td></tr>
+    <tr><td><code>secret.yaml</code></td><td>JWT, DB credentials, SMTP credentials</td></tr>
+    <tr><td><code>deployment-api.yaml</code></td><td>API deployment (EF migrations via initContainer)</td></tr>
+    <tr><td><code>deployment-db.yaml</code></td><td>PostgreSQL deployment</td></tr>
+    <tr><td><code>service-api.yaml</code></td><td>LoadBalancer service for the API</td></tr>
+    <tr><td><code>service-db.yaml</code></td><td>ClusterIP service for PostgreSQL</td></tr>
+    <tr><td><code>pvc.yaml</code></td><td>Persistent volume claim for PostgreSQL data</td></tr>
+    <tr><td><code>hpa.yaml</code></td><td>Horizontal Pod Autoscaler</td></tr>
+  </tbody>
+</table>
+
+<h2>Fase 2 — Terraform IaC</h2>
+<p>
+  Infrastructure defined in <code>infra/</code> using
+  <code>terraform-aws-modules/eks/aws</code> and <code>terraform-aws-modules/vpc/aws</code>.
+  Provisions VPC, subnets, and EKS cluster on AWS.
+</p>
+
+<h2>Fase 2 — CI/CD Pipeline</h2>
+<table>
+  <thead><tr><th>Workflow</th><th>File</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Coverage Report</td>
+      <td><code>.github/workflows/coverage.yml</code></td>
+      <td>Build → unit tests → 80% line coverage threshold → HTML report → GitHub Pages</td>
+    </tr>
+    <tr>
+      <td>Deploy</td>
+      <td><code>.github/workflows/deploy.yml</code></td>
+      <td>Build &amp; push Docker image to GHCR → EF Core migrations (initContainer) → <code>kubectl apply</code> to EKS</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Fase 2 — Tests</h2>
+<p>
+  Unit tests: Domain, Application (all use cases), Infrastructure (SmtpEmailNotifier, email extensions).
+  Integration tests: Auth, Customers, Inventory, Service Order full lifecycle, Health endpoint.
+  CI enforces <strong>80% line coverage</strong> on every pull request.
+</p>
+
 <hr>
 
-<h2>DDD Documentation</h2>
+<!-- ======================== FASE 1 ======================== -->
+
+<div class="phase-banner">Fase 1</div>
+
+<h2>Fase 1 — Links</h2>
+<table>
+  <thead><tr><th>Deliverable</th><th>Link</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Repository</td>
+      <td><a href="https://github.com/rnataoliveira/mechanics-software">github.com/rnataoliveira/mechanics-software</a></td>
+      <td><span class="badge-ok">ready</span></td>
+    </tr>
+    <tr>
+      <td>DDD Documentation</td>
+      <td><a href="https://miro.com/app/board/uXjVGyCZXBU=/">miro.com/app/board/uXjVGyCZXBU=/</a></td>
+      <td><span class="badge-ok">ready</span></td>
+    </tr>
+    <tr>
+      <td>Demo Video — Fase 1</td>
+      <td><a href="https://youtu.be/vqERT_zrLpo">YouTube</a> · <a href="https://drive.google.com/drive/folders/1oj1IXAMRfgA8g7ux_z_ZEq06ieYLf0PZ?usp=sharing">Google Drive (fallback)</a></td>
+      <td><span class="badge-ok">ready</span></td>
+    </tr>
+    <tr>
+      <td>Coverage Report</td>
+      <td><a href="https://rnataoliveira.github.io/mechanics-software/">rnataoliveira.github.io/mechanics-software/</a></td>
+      <td><span class="badge-ok">ready</span></td>
+    </tr>
+    <tr>
+      <td>Static Analysis (SonarCloud)</td>
+      <td><a href="https://sonarcloud.io/summary/new_code?id=rnataoliveira_mechanics-software">sonarcloud.io — rnataoliveira_mechanics-software</a></td>
+      <td><span class="badge-ok">ready</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Fase 1 — DDD Documentation</h2>
 <p><strong>Miro board:</strong> <a href="https://miro.com/app/board/uXjVGyCZXBU=/">https://miro.com/app/board/uXjVGyCZXBU=/</a></p>
 <p>Includes: Event Storming (Service Order and Inventory flows), Aggregates and Entities, Bounded Contexts, Domain Storytelling, Ubiquitous Language.</p>
-
-<hr>
-
-<h2>Video</h2>
-<p><strong>Link:</strong> <a href="https://youtu.be/vqERT_zrLpo">https://youtu.be/vqERT_zrLpo</a> (fallback: <a href="https://drive.google.com/drive/folders/1oj1IXAMRfgA8g7ux_z_ZEq06ieYLf0PZ?usp=sharing">Google Drive</a>)</p>
+<p>Also available in-repo under <code>docs/</code>.</p>
 
 </body>
 </html>
