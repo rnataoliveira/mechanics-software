@@ -16,8 +16,6 @@ spec:
         app: mechanics-software-api
     spec:
       automountServiceAccountToken: false
-      imagePullSecrets:
-        - name: ghcr-secret
       containers:
         - name: api
           image: ghcr.io/rnataoliveira/mechanics-software:latest # NOSONAR
