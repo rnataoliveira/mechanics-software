@@ -13,6 +13,57 @@ A RESTful API that manages the full lifecycle of service orders, customers, vehi
 
 ---
 
+## Fase 2
+
+Fase 2 expands Fase 1 with **Clean Architecture**, **automated email notifications**, **Kubernetes on AWS EKS**, **Terraform IaC**, and a **GitHub Actions CI/CD pipeline** — turning the original monolith into a production-ready, scalable system.
+
+### Architecture
+
+```
+GitHub Actions (CI/CD)
+        │
+        ├─ coverage.yml ──→ unit tests · 80% coverage gate · GitHub Pages report
+        │
+        └─ deploy.yml ──→ docker build · push GHCR · EF migrations · kubectl apply
+                                                              │
+                                                              ▼
+                                              AWS EKS Cluster  (Terraform-provisioned VPC + EKS)
+                                    ┌─────────────────────────────────────────────┐
+                                    │  Namespace: mechanics-software              │
+                                    │                                             │
+                                    │  ┌─────────────────────┐                   │
+                                    │  │  API Deployment     │◄── HPA            │
+                                    │  │  ASP.NET Core 8     │    (auto-scale)   │
+                                    │  │  N replicas         │                   │
+                                    │  └──────────┬──────────┘                   │
+                                    │             │ ClusterIP                    │
+                                    │             ▼                              │
+                                    │  ┌─────────────────────┐                   │
+                                    │  │  PostgreSQL 16      │◄── PVC            │
+                                    │  └─────────────────────┘    (persistent)   │
+                                    │                                             │
+                                    │  LoadBalancer ──────────────────► Internet │
+                                    └─────────────────────────────────────────────┘
+```
+
+### Deploy flow
+
+```
+git push → main
+    │
+    ├── coverage.yml  →  dotnet test  →  enforce 80% line coverage  →  publish HTML report
+    │
+    └── deploy.yml    →  docker build  →  push to GHCR
+                              │
+                              └─→  kubectl apply (initContainer runs EF migrations first)
+```
+
+### Demo video
+
+[Watch on YouTube](https://youtu.be/vqERT_zrLpo)
+
+---
+
 ## Getting Started
 
 ### Prerequisites
