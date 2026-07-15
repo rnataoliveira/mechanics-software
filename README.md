@@ -226,6 +226,100 @@ dotnet dotnet-ef migrations remove \
 
 Full documentation and request/response schemas available at `/swagger` when running.
 
+### Usage examples
+
+#### 1. Authenticate
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@mechanics.local",
+  "password": "Admin@123"
+}
+```
+
+```json
+{ "token": "<JWT>" }
+```
+
+Use the token as `Authorization: Bearer <JWT>` on all protected requests.
+
+#### 2. Create a customer
+
+```http
+POST /api/customers
+Authorization: Bearer <JWT>
+Content-Type: application/json
+
+{
+  "name": "João da Silva",
+  "documentValue": "123.456.789-09",
+  "personType": "INDIVIDUAL",
+  "email": "joao@example.com",
+  "phone": "(11) 99999-0001"
+}
+```
+
+```json
+{ "id": "3fa85f64-...", "name": "João da Silva", ... }
+```
+
+#### 3. Open a service order
+
+```http
+POST /api/service-orders
+Authorization: Bearer <JWT>
+Content-Type: application/json
+
+{
+  "customerId": "<customer-id>",
+  "vehicleId": "<vehicle-id>"
+}
+```
+
+```json
+{ "id": "<order-id>", "status": "RECEIVED", ... }
+```
+
+#### 4. Progress through the lifecycle
+
+```http
+# Move to diagnosis
+POST /api/service-orders/{id}/start-diagnosis
+
+# Add a service and a part
+POST /api/service-orders/{id}/services
+{ "serviceId": "<id>", "quantity": 1 }
+
+POST /api/service-orders/{id}/parts
+{ "partId": "<id>", "quantity": 2 }
+
+# Generate and send budget to customer (triggers email)
+POST /api/service-orders/{id}/budget
+POST /api/service-orders/{id}/send-budget
+
+# Customer approves or rejects
+POST /api/service-orders/{id}/budget-decision
+{ "decision": "approve" }   # or "reject"
+
+# Complete and deliver
+POST /api/service-orders/{id}/start-execution
+POST /api/service-orders/{id}/complete
+POST /api/service-orders/{id}/deliver
+```
+
+#### 5. Check status (public — no auth required)
+
+```http
+GET /api/service-orders/{id}/status
+```
+
+```json
+{ "status": "IN_EXECUTION" }
+```
+
 ---
 
 ## Service Order Lifecycle
